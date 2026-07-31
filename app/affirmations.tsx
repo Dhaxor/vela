@@ -77,7 +77,11 @@ export default function AffirmationLibraryScreen() {
       </ScrollView>
 
       {unlocked ? (
-        <ScrollView contentContainerStyle={s.list} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          style={s.listScroll}
+          contentContainerStyle={s.list}
+          showsVerticalScrollIndicator={false}
+        >
           {pool.map((a) => (
             <View key={a.id} style={s.card}>
               <Text style={s.line}>{a.text}</Text>
@@ -122,8 +126,16 @@ const s = StyleSheet.create({
   },
   back: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
   headerTitle: { ...type.title, color: colors.text, flex: 1, textAlign: "center" },
-  tabs: { flexGrow: 0 },
-  tabsContent: { paddingHorizontal: space.lg, gap: space.sm, paddingBottom: space.md },
+  // The tab strip must own a fixed height and the list must own flex: 1 —
+  // without both, react-native-web lets the list size itself over the strip
+  // and paint on top of it while scrolling.
+  tabs: { flexGrow: 0, height: 56 },
+  tabsContent: {
+    paddingHorizontal: space.lg,
+    gap: space.sm,
+    alignItems: "center",
+  },
+  listScroll: { flex: 1 },
   tab: {
     flexDirection: "row",
     alignItems: "center",
@@ -139,7 +151,12 @@ const s = StyleSheet.create({
   tabOn: { borderColor: colors.accentBorder, backgroundColor: colors.accentSoft },
   tabText: { ...type.caption, color: colors.textSecondary },
   tabTextOn: { color: colors.accent, fontWeight: "600" },
-  list: { paddingHorizontal: space.lg, paddingBottom: space.xxl, gap: space.sm },
+  list: {
+    paddingHorizontal: space.lg,
+    paddingTop: space.sm,
+    paddingBottom: space.xxl,
+    gap: space.sm,
+  },
   card: {
     flexDirection: "row",
     alignItems: "center",
