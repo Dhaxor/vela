@@ -12,12 +12,14 @@ import {
   Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import * as Haptics from "expo-haptics";
 import { X } from "lucide-react-native";
 import { FOCUS_AREAS, FocusId } from "@/lib/focus";
 import { useUser } from "@/contexts/UserContext";
 import { useStories } from "@/contexts/StoryContext";
+import { usePlus } from "@/contexts/PlusContext";
+import { canCreateIntent } from "@/lib/purchase";
 import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
 
 const FEELINGS = ["grateful", "peaceful", "alive", "proud", "free", "loved"] as const;
@@ -25,7 +27,8 @@ const FEELINGS = ["grateful", "peaceful", "alive", "proud", "free", "loved"] as 
 export default function NewStoryScreen() {
   const router = useRouter();
   const { profile } = useUser();
-  const { createIntent } = useStories();
+  const { createIntent, intents } = useStories();
+  const { isPlus } = usePlus();
 
   const preferred = profile?.focusAreas ?? [];
   // The user's chosen areas come first — personalization by user stage.
@@ -44,6 +47,12 @@ export default function NewStoryScreen() {
   const [busy, setBusy] = useState(false);
 
   const canWeave = focus !== null && desire.trim().length >= 3 && feeling !== null;
+
+  // The free tier holds one living intent; every door to a second one leads
+  // through the paywall — which says out loud what stays free.
+  if (!canCreateIntent(intents.length, isPlus)) {
+    return <Redirect href="/paywall" />;
+  }
 
   const weave = async () => {
     if (!canWeave || busy) return;

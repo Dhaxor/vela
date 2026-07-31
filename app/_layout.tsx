@@ -6,6 +6,8 @@ import { UserProvider, useUser } from "@/contexts/UserContext";
 import { StoryProvider } from "@/contexts/StoryContext";
 import { RitualProvider } from "@/contexts/RitualContext";
 import { JournalProvider } from "@/contexts/JournalContext";
+import { PlusProvider } from "@/contexts/PlusContext";
+import { BoardProvider } from "@/contexts/BoardContext";
 import { colors } from "@/constants/theme";
 
 function RootNavigator() {
@@ -41,8 +43,12 @@ export default function RootLayout() {
       <StoryProvider>
         <RitualProvider>
           <JournalProvider>
-            <StatusBar style="light" />
-            <RootNavigator />
+            <PlusProvider>
+              <BoardProvider>
+                <StatusBar style="light" />
+                <RootNavigator />
+              </BoardProvider>
+            </PlusProvider>
           </JournalProvider>
         </RitualProvider>
       </StoryProvider>

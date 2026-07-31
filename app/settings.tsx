@@ -10,15 +10,35 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { Alert } from "react-native";
+import { ChevronLeft, Sparkles, RotateCcw } from "lucide-react-native";
 import Constants from "expo-constants";
 import { useUser } from "@/contexts/UserContext";
+import { usePlus } from "@/contexts/PlusContext";
 import { FOCUS_AREAS } from "@/lib/focus";
 import { colors, space, radius, type } from "@/constants/theme";
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { profile, updateProfile } = useUser();
+  const { isPlus, restore } = usePlus();
+
+  const runRestore = async () => {
+    const result = await restore();
+    if (result === "purchased") {
+      Alert.alert("Welcome back", "Vela Plus is restored on this device.");
+    } else if (result === "unavailable") {
+      Alert.alert(
+        "Not available yet",
+        "Restore becomes available with the App Store release."
+      );
+    } else {
+      Alert.alert(
+        "Nothing to restore",
+        "No previous Vela Plus purchase was found for this Apple Account."
+      );
+    }
+  };
 
   const toggleFocus = (id: (typeof FOCUS_AREAS)[number]["id"]) => {
     if (!profile) return;
@@ -61,6 +81,33 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             );
           })}
+        </View>
+
+        <Text style={s.section}>Vela Plus</Text>
+        <View style={s.card}>
+          {isPlus ? (
+            <View style={s.plusRow}>
+              <Sparkles size={18} color={colors.accent} />
+              <Text style={s.plusText}>Plus is active on this device.</Text>
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={s.plusRow}
+              onPress={() => router.push("/paywall")}
+              testID="settings-upgrade"
+            >
+              <Sparkles size={18} color={colors.accent} />
+              <Text style={s.plusText}>Unlock Vela Plus</Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity
+            style={[s.plusRow, s.plusRowBorder]}
+            onPress={() => void runRestore()}
+            testID="settings-restore"
+          >
+            <RotateCcw size={18} color={colors.textMuted} />
+            <Text style={s.restoreText}>Restore purchases</Text>
+          </TouchableOpacity>
         </View>
 
         <Text style={s.section}>About</Text>
@@ -129,6 +176,16 @@ const s = StyleSheet.create({
     borderColor: colors.hairline,
     padding: space.base,
   },
+  plusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.md,
+    paddingVertical: space.md,
+    minHeight: 44,
+  },
+  plusRowBorder: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  plusText: { ...type.body, fontWeight: "600", color: colors.text },
+  restoreText: { ...type.body, color: colors.textSecondary },
   aboutLine: { ...type.body, fontWeight: "600", color: colors.text },
   aboutBody: { ...type.caption, color: colors.textMuted, marginTop: space.xs },
 });

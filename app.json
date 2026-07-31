@@ -14,7 +14,10 @@
       "config": {
         "usesNonExemptEncryption": false
       },
-      "icon": "./assets/icon.png"
+      "icon": "./assets/icon.png",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Vela lets you pin photos from your library to your vision board. Photos stay on this device."
+      }
     },
     "android": {
       "adaptiveIcon": {
