@@ -3,6 +3,7 @@ import { View } from "react-native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { UserProvider, useUser } from "@/contexts/UserContext";
+import { StoryProvider } from "@/contexts/StoryContext";
 import { colors } from "@/constants/theme";
 
 function RootNavigator() {
@@ -35,8 +36,10 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <UserProvider>
-      <StatusBar style="light" />
-      <RootNavigator />
+      <StoryProvider>
+        <StatusBar style="light" />
+        <RootNavigator />
+      </StoryProvider>
     </UserProvider>
   );
 }

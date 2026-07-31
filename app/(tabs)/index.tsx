@@ -61,7 +61,7 @@ export default function TodayScreen() {
         <TouchableOpacity
           style={s.heroCard}
           activeOpacity={0.9}
-          onPress={() => router.push("/stories")}
+          onPress={() => router.push("/story/new")}
           testID="ritual-story"
         >
           <View style={s.cardIcon}>
