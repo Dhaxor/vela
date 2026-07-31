@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Vela",
+    "slug": "vela-manifest",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#0B0A18",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.vela.manifest",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "icon": "./assets/icon.png"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0B0A18",
+        "foregroundImage": "./assets/adaptive-icon.png"
+      },
+      "package": "app.vela.manifest"
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "scheme": "vela",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 180,
+          "resizeMode": "contain",
+          "backgroundColor": "#0B0A18"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "primaryColor": "#E9B44C",
+    "extra": {
+      "router": {}
+    },
+    "owner": "dhaxor"
+  }
+}
