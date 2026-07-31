@@ -20,6 +20,8 @@ export interface Profile {
   name: string;
   focusAreas: FocusId[];
   ritual: RitualTime;
+  /** How the wanting feels right now — captured at onboarding, optional. */
+  mood?: string;
   createdAt: string; // ISO
 }
 
@@ -47,6 +49,7 @@ function parseProfile(raw: string | null): Profile | null {
       name: p.name.trim().slice(0, 40),
       focusAreas,
       ritual,
+      ...(typeof p.mood === "string" && p.mood ? { mood: p.mood.slice(0, 40) } : {}),
       createdAt:
         typeof p.createdAt === "string" ? p.createdAt : new Date().toISOString(),
     };

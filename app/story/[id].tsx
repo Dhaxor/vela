@@ -16,8 +16,10 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 import { ChevronLeft, Play, Square, RefreshCw } from "lucide-react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useStories } from "@/contexts/StoryContext";
 import { useRitual } from "@/contexts/RitualContext";
+import { usePlus } from "@/contexts/PlusContext";
 import { focusById } from "@/lib/focus";
 import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
 
@@ -26,8 +28,28 @@ export default function StoryReaderScreen() {
   const { id, reveal } = useLocalSearchParams<{ id: string; reveal?: string }>();
   const { stories, intents, regenerate } = useStories();
   const { markDone } = useRitual();
+  const { isPlus } = usePlus();
   const [speaking, setSpeaking] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [nudge, setNudge] = useState(false);
+
+  // The soft Plus moment — once, after the FIRST story has landed, inline
+  // and dismissible. Value first; the ask second. The inverse of the slam.
+  useEffect(() => {
+    void (async () => {
+      try {
+        const seen = await AsyncStorage.getItem("vela.softplus.v1");
+        if (!seen && !isPlus && intents.length === 1) setNudge(true);
+      } catch {
+        // storage unavailable — skip the nudge entirely
+      }
+    })();
+  }, [isPlus, intents.length]);
+
+  const dismissNudge = () => {
+    setNudge(false);
+    void AsyncStorage.setItem("vela.softplus.v1", "1").catch(() => {});
+  };
 
   const story = stories.find((s) => s.id === id);
 
@@ -145,6 +167,35 @@ export default function StoryReaderScreen() {
         >
           You showed up today. That's how it's built.
         </Animated.Text>
+
+        {nudge && (
+          <Animated.View
+            entering={FadeInDown.delay(1200).duration(800)}
+            style={s.nudge}
+            testID="soft-plus"
+          >
+            <Text style={s.nudgeTitle}>This story is yours. Unlimited listens, free, forever.</Text>
+            <Text style={s.nudgeBody}>
+              When you're ready to hold more than one dream at a time, Vela
+              Plus opens the rest.
+            </Text>
+            <View style={s.nudgeRow}>
+              <TouchableOpacity onPress={dismissNudge} style={s.nudgeLater} testID="soft-plus-later">
+                <Text style={s.nudgeLaterText}>Maybe later</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  dismissNudge();
+                  router.push("/paywall");
+                }}
+                style={s.nudgeCta}
+                testID="soft-plus-see"
+              >
+                <Text style={s.nudgeCtaText}>See Plus</Text>
+              </TouchableOpacity>
+            </View>
+          </Animated.View>
+        )}
       </ScrollView>
 
       <View style={s.dock}>
@@ -239,6 +290,34 @@ const s = StyleSheet.create({
     color: colors.textFaint,
     marginTop: space.sm,
   },
+  nudge: {
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+    borderRadius: radius.lg,
+    padding: space.base,
+    marginTop: space.lg,
+  },
+  nudgeTitle: { ...type.body, fontWeight: "600", color: colors.text },
+  nudgeBody: { ...type.caption, color: colors.textSecondary, marginTop: space.xs, lineHeight: 19 },
+  nudgeRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: space.base,
+    marginTop: space.md,
+  },
+  nudgeLater: { minHeight: 44, justifyContent: "center", paddingHorizontal: space.sm },
+  nudgeLaterText: { ...type.caption, color: colors.textMuted },
+  nudgeCta: {
+    backgroundColor: colors.accent,
+    borderRadius: radius.pill,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.lg,
+    minHeight: 40,
+    justifyContent: "center",
+  },
+  nudgeCtaText: { ...type.caption, fontWeight: "600", color: colors.onAccent },
   missing: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.md },
   missingText: { ...type.body, color: colors.textSecondary },
   missingLink: { ...type.body, color: colors.accent, fontWeight: "600" },

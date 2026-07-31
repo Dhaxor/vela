@@ -51,7 +51,12 @@ export default function NewStoryScreen() {
 
   // The free tier holds one living intent; every door to a second one leads
   // through the paywall — which says out loud what stays free.
-  if (!canCreateIntent(intents.length, isPlus)) {
+  //
+  // The busy guard matters: creating the FIRST story bumps intents.length
+  // mid-render, and without it this Redirect races (and beats) the
+  // navigation to the new story — a paywall slam on first use, the exact
+  // thing this app exists to not do.
+  if (!busy && !canCreateIntent(intents.length, isPlus)) {
     return <Redirect href="/paywall" />;
   }
 
