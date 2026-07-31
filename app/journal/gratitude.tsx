@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import * as Haptics from "expo-haptics";
 import { X } from "lucide-react-native";
 import { useJournal } from "@/contexts/JournalContext";
@@ -40,7 +41,7 @@ export default function GratitudeScreen() {
       .join("\n");
     await addEntry("gratitude", stems.map((x) => x.text).join(" | "), text);
     await markDone("script");
-    router.back();
+    safeBack(router);
   };
 
   return (
@@ -52,7 +53,7 @@ export default function GratitudeScreen() {
         <View style={s.header}>
           <Text style={s.headerTitle}>Three good things</Text>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => safeBack(router)}
             style={s.close}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             testID="gratitude-close"

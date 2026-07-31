@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import { Alert } from "react-native";
 import { ChevronLeft, Sparkles, RotateCcw } from "lucide-react-native";
 import Constants from "expo-constants";
@@ -54,7 +55,7 @@ export default function SettingsScreen() {
     <SafeAreaView style={s.screen}>
       <View style={s.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeBack(router)}
           style={s.back}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           testID="settings-back"

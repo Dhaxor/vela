@@ -4,6 +4,7 @@ import React, { useMemo, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import * as Haptics from "expo-haptics";
 import { X, Check, Quote } from "lucide-react-native";
 import { useUser } from "@/contexts/UserContext";
@@ -27,7 +28,7 @@ export default function AffirmationScreen() {
 
   const carry = async () => {
     if (carried) {
-      router.back();
+      safeBack(router);
       return;
     }
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -39,7 +40,7 @@ export default function AffirmationScreen() {
     <SafeAreaView style={s.screen}>
       <View style={s.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeBack(router)}
           style={s.close}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           testID="affirmation-close"

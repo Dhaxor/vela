@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
@@ -54,7 +55,7 @@ export default function StoryReaderScreen() {
       <SafeAreaView style={s.screen}>
         <View style={s.missing}>
           <Text style={s.missingText}>This story has drifted off.</Text>
-          <TouchableOpacity onPress={() => router.back()} testID="story-back-missing">
+          <TouchableOpacity onPress={() => safeBack(router)} testID="story-back-missing">
             <Text style={s.missingLink}>Go back</Text>
           </TouchableOpacity>
         </View>
@@ -95,7 +96,7 @@ export default function StoryReaderScreen() {
     <SafeAreaView style={s.screen}>
       <View style={s.header}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeBack(router)}
           style={s.iconBtn}
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
           testID="story-back"

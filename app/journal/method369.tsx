@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import * as Haptics from "expo-haptics";
 import { X, Sunrise, Sun, MoonStar, Check } from "lucide-react-native";
 import { useJournal } from "@/contexts/JournalContext";
@@ -172,7 +173,7 @@ function Header({ router }: { router: ReturnType<typeof useRouter> }) {
     <View style={s.header}>
       <Text style={s.headerTitle}>3 · 6 · 9</Text>
       <TouchableOpacity
-        onPress={() => router.back()}
+        onPress={() => safeBack(router)}
         style={s.close}
         hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         testID="m369-close"

@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Redirect, useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import * as Haptics from "expo-haptics";
 import { X } from "lucide-react-native";
 import { FOCUS_AREAS, FocusId } from "@/lib/focus";
@@ -74,7 +75,7 @@ export default function NewStoryScreen() {
       >
         <View style={s.header}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => safeBack(router)}
             style={s.close}
             hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             testID="new-story-close"

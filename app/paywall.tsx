@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { safeBack } from "@/lib/nav";
 import * as Haptics from "expo-haptics";
 import { X, Check, Sparkles, Infinity as InfinityIcon } from "lucide-react-native";
 import { usePlus } from "@/contexts/PlusContext";
@@ -50,7 +51,7 @@ export default function PaywallScreen() {
       const result = await fn();
       if (result === "purchased") {
         void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        router.back();
+        safeBack(router);
       } else if (result === "unavailable") {
         Alert.alert(
           "Not available yet",
@@ -70,7 +71,7 @@ export default function PaywallScreen() {
       <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
         <TouchableOpacity
           style={s.close}
-          onPress={() => router.back()}
+          onPress={() => safeBack(router)}
           testID="paywall-close"
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
