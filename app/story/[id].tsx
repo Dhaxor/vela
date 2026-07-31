@@ -16,6 +16,7 @@ import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
 import { ChevronLeft, Play, Square, RefreshCw } from "lucide-react-native";
 import { useStories } from "@/contexts/StoryContext";
+import { useRitual } from "@/contexts/RitualContext";
 import { focusById } from "@/lib/focus";
 import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
 
@@ -23,10 +24,17 @@ export default function StoryReaderScreen() {
   const router = useRouter();
   const { id, reveal } = useLocalSearchParams<{ id: string; reveal?: string }>();
   const { stories, intents, regenerate } = useStories();
+  const { markDone } = useRitual();
   const [speaking, setSpeaking] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const story = stories.find((s) => s.id === id);
+
+  // Opening a story is the practice — the streak asks for presence, not chores.
+  useEffect(() => {
+    if (story) void markDone("story");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [story?.id]);
   const intent = useMemo(
     () => intents.find((i) => i.id === story?.intentId),
     [intents, story?.intentId]

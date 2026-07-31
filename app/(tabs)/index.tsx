@@ -11,8 +11,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
-import { Settings, ScrollText, Quote, PenLine, ChevronRight } from "lucide-react-native";
+import {
+  Settings,
+  ScrollText,
+  Quote,
+  PenLine,
+  ChevronRight,
+  Flame,
+  Check,
+} from "lucide-react-native";
 import { useUser } from "@/contexts/UserContext";
+import { useRitual } from "@/contexts/RitualContext";
 import { focusById } from "@/lib/focus";
 import { colors, space, radius, type, serif, cardShadow } from "@/constants/theme";
 
@@ -25,6 +34,7 @@ function daypart(d: Date): "morning" | "afternoon" | "evening" {
 
 export default function TodayScreen() {
   const { profile } = useUser();
+  const { streak, doneToday } = useRitual();
   const router = useRouter();
   const part = daypart(new Date());
   const name = profile?.name ?? "";
@@ -53,6 +63,15 @@ export default function TodayScreen() {
           </TouchableOpacity>
         </View>
 
+        {streak > 0 && (
+          <View style={s.streakChip} testID="streak-chip">
+            <Flame color={colors.accent} size={16} />
+            <Text style={s.streakText}>
+              {streak} {streak === 1 ? "day" : "days"} of showing up
+            </Text>
+          </View>
+        )}
+
         {/* The evening/morning line the day hangs from. */}
         <Text style={s.ritualTitle}>
           {part === "evening" ? "Tonight's ritual" : "Today's ritual"}
@@ -64,8 +83,16 @@ export default function TodayScreen() {
           onPress={() => router.push("/story/new")}
           testID="ritual-story"
         >
-          <View style={s.cardIcon}>
-            <ScrollText color={colors.accent} size={20} />
+          <View style={s.heroTopRow}>
+            <View style={s.cardIcon}>
+              <ScrollText color={colors.accent} size={20} />
+            </View>
+            {doneToday.includes("story") && (
+              <View style={s.doneBadge}>
+                <Check color={colors.success} size={14} />
+                <Text style={s.doneText}>done</Text>
+              </View>
+            )}
           </View>
           <Text style={s.heroTitle}>Step into your story</Text>
           <Text style={s.heroBody}>
@@ -81,11 +108,16 @@ export default function TodayScreen() {
           <TouchableOpacity
             style={s.smallCard}
             activeOpacity={0.9}
-            onPress={() => router.push("/stories")}
+            onPress={() => router.push("/affirmation")}
             testID="ritual-affirmation"
           >
-            <View style={s.cardIcon}>
-              <Quote color={colors.aurora} size={18} />
+            <View style={s.heroTopRow}>
+              <View style={s.cardIcon}>
+                <Quote color={colors.aurora} size={18} />
+              </View>
+              {doneToday.includes("affirmation") && (
+                <Check color={colors.success} size={16} />
+              )}
             </View>
             <Text style={s.smallTitle}>Affirmation</Text>
             <Text style={s.smallBody}>One line to carry.</Text>
@@ -143,6 +175,35 @@ const s = StyleSheet.create({
     letterSpacing: 1.2,
     marginBottom: space.md,
   },
+  streakChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: space.sm,
+    backgroundColor: colors.accentSoft,
+    borderWidth: 1,
+    borderColor: colors.accentBorder,
+    borderRadius: radius.pill,
+    paddingVertical: space.sm,
+    paddingHorizontal: space.base,
+    marginBottom: space.lg,
+  },
+  streakText: { ...type.caption, color: colors.accent, fontWeight: "600" },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+  },
+  doneBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.xs,
+    backgroundColor: colors.successSoft,
+    borderRadius: radius.pill,
+    paddingVertical: space.xs,
+    paddingHorizontal: space.sm,
+  },
+  doneText: { ...type.caption, color: colors.success, fontWeight: "600" },
   heroCard: {
     backgroundColor: colors.card,
     borderRadius: radius.xl,

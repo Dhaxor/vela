@@ -4,6 +4,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { StoryProvider } from "@/contexts/StoryContext";
+import { RitualProvider } from "@/contexts/RitualContext";
 import { colors } from "@/constants/theme";
 
 function RootNavigator() {
@@ -37,8 +38,10 @@ export default function RootLayout() {
   return (
     <UserProvider>
       <StoryProvider>
-        <StatusBar style="light" />
-        <RootNavigator />
+        <RitualProvider>
+          <StatusBar style="light" />
+          <RootNavigator />
+        </RitualProvider>
       </StoryProvider>
     </UserProvider>
   );
