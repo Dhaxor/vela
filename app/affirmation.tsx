@@ -56,6 +56,13 @@ export default function AffirmationScreen() {
         <Text style={s.line} testID="affirmation-text">
           {affirmation.text}
         </Text>
+        <TouchableOpacity
+          onPress={() => router.push("/affirmations")}
+          style={s.browse}
+          testID="affirmation-browse"
+        >
+          <Text style={s.browseText}>Browse the whole library</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={s.dock}>
@@ -122,6 +129,8 @@ const s = StyleSheet.create({
     color: colors.text,
     textAlign: "center",
   },
+  browse: { marginTop: space.lg, minHeight: 44, justifyContent: "center" },
+  browseText: { ...type.caption, color: colors.aurora },
   dock: {
     paddingHorizontal: space.lg,
     paddingBottom: space.base,

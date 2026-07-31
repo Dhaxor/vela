@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { Alert } from "react-native";
 import { Sparkles, Plus, ChevronRight } from "lucide-react-native";
 import { useStories } from "@/contexts/StoryContext";
 import { focusById } from "@/lib/focus";
@@ -25,7 +26,18 @@ import {
 
 export default function StoriesScreen() {
   const router = useRouter();
-  const { intents, storyForIntent } = useStories();
+  const { intents, storyForIntent, removeIntent } = useStories();
+
+  const confirmRelease = (intentId: string, desire: string) => {
+    Alert.alert("Release this story?", `“${desire}” and its renderings will be gone.`, [
+      { text: "Keep", style: "cancel" },
+      {
+        text: "Release",
+        style: "destructive",
+        onPress: () => void removeIntent(intentId),
+      },
+    ]);
+  };
 
   if (intents.length === 0) {
     return (
@@ -79,6 +91,7 @@ export default function StoriesScreen() {
               onPress={() =>
                 router.push({ pathname: "/story/[id]", params: { id: story.id } })
               }
+              onLongPress={() => confirmRelease(intent.id, intent.desire)}
               testID={`story-card-${intent.id}`}
             >
               <Text style={s.cardTag}>{area?.label ?? ""}</Text>
