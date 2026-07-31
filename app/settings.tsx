@@ -83,6 +83,45 @@ export default function SettingsScreen() {
           })}
         </View>
 
+        <Text style={s.section}>Reminders</Text>
+        <View style={s.card}>
+          <TouchableOpacity
+            style={s.plusRow}
+            onPress={() =>
+              void (async () => {
+                const { remindersFor, applyReminders } = await import(
+                  "@/lib/notifications"
+                );
+                const ok = await applyReminders(
+                  remindersFor(profile?.ritual ?? "both")
+                );
+                Alert.alert(
+                  ok ? "Reminders set" : "Reminders unavailable",
+                  ok
+                    ? "Vela will nudge you gently at your ritual time."
+                    : "Notifications are off for Vela in system settings, or unavailable here."
+                );
+              })()
+            }
+            testID="settings-reminders-on"
+          >
+            <Text style={s.plusText}>Remind me at my ritual time</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[s.plusRow, s.plusRowBorder]}
+            onPress={() =>
+              void (async () => {
+                const { clearReminders } = await import("@/lib/notifications");
+                await clearReminders();
+                Alert.alert("Reminders off", "No more nudges until you ask.");
+              })()
+            }
+            testID="settings-reminders-off"
+          >
+            <Text style={s.restoreText}>Turn reminders off</Text>
+          </TouchableOpacity>
+        </View>
+
         <Text style={s.section}>Vela Plus</Text>
         <View style={s.card}>
           {isPlus ? (
