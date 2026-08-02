@@ -1,0 +1,80 @@
+name: iOS E2E walkthrough
+
+# Drives the real simulator binary through the full first-user journey and
+# captures the 6.7" App Store screenshot set (iPhone 15 Pro Max = 1290x2796,
+# the APP_IPHONE_67 slot). Results publish to the e2e-results branch.
+#
+# macos-14 on purpose: its simulator catalog still carries iPhone 15 Pro Max.
+# The app's min iOS is 16.4, so the older runtime is fine — this job never
+# uploads to Apple, so the Xcode 26 rule does not apply here.
+
+on:
+  push:
+    branches: [e2e-run]
+
+permissions:
+  contents: write
+
+env:
+  BUNDLE_ID: app.vela.manifest
+  APP_URL: "REPLACED_BEFORE_RUN"
+
+jobs:
+  walkthrough:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: E2E run (fully traced)
+        continue-on-error: true
+        run: |
+          mkdir -p app shots
+          exec > >(tee shots/debug.log) 2>&1
+          set -x
+          curl -L -o app/app.tar.gz "$APP_URL"
+          tar -xzf app/app.tar.gz -C app
+          APP=$(find app -maxdepth 3 -name "*.app" -type d | head -1)
+          test -n "$APP"
+          LINE=$(xcrun simctl list devices available | grep -i 'iPhone 15 Pro Max' | head -1)
+          [ -z "$LINE" ] && LINE=$(xcrun simctl list devices available | grep -i 'iPhone' | head -1)
+          UDID=$(echo "$LINE" | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}')
+          test -n "$UDID"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          xcrun simctl status_bar "$UDID" override \
+            --time "9:41" \
+            --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 \
+            --batteryState charged --batteryLevel 100 || true
+          xcrun simctl install "$UDID" "$APP"
+          npm install -g appium@latest
+          appium driver install xcuitest
+          (cd e2e && npm install)
+          appium --port 4723 --base-path / > appium.log 2>&1 &
+          for i in $(seq 1 30); do curl -s http://127.0.0.1:4723/status && break; sleep 2; done
+          (cd e2e && UDID="$UDID" BUNDLE_ID="$BUNDLE_ID" SHOTS_DIR=../shots node walkthrough.mjs) || echo "walkthrough exited $?"
+          tail -n 60 appium.log || true
+
+      - name: Publish results to e2e-results branch
+        if: always()
+        run: |
+          mkdir -p /tmp/results
+          cp shots/*.png /tmp/results/ 2>/dev/null || true
+          cp shots/*.log /tmp/results/ 2>/dev/null || true
+          cp appium.log /tmp/results/appium.log 2>/dev/null || true
+          echo "iOS E2E run $(date -u)" > /tmp/results/RUN.txt
+          git config user.email "ci@vela"; git config user.name "ios-e2e"
+          git checkout --orphan e2e-results
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          git clean -fdx >/dev/null 2>&1 || true
+          cp /tmp/results/* .
+          git add -A
+          git commit -m "iOS e2e results [skip ci]" || echo "nothing to commit"
+          git push -f origin e2e-results
