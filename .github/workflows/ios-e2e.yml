@@ -17,7 +17,7 @@ permissions:
 
 env:
   BUNDLE_ID: app.vela.manifest
-  APP_URL: "REPLACED_BEFORE_RUN"
+  APP_URL: "https://expo.dev/artifacts/eas/HMn1xcfvHzqWngpy5WZOm1j8U_mmce_-SnwVE1zk1u8.tar.gz"
 
 jobs:
   walkthrough:
