@@ -25,7 +25,7 @@
   "submit": {
     "production": {
       "ios": {
-        "ascAppId": "REPLACE_AFTER_APP_RECORD_EXISTS",
+        "ascAppId": "6797328581",
         "ascApiKeyPath": "../rork-scripture-mate/expo/credentials/AuthKey.p8",
         "ascApiKeyId": "27A6X9P27C",
         "ascApiKeyIssuerId": "884ed5da-6ca7-44a8-8935-44e24dea4649"

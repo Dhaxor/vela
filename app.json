@@ -48,7 +48,10 @@
     },
     "primaryColor": "#E9B44C",
     "extra": {
-      "router": {}
+      "router": {},
+      "eas": {
+        "projectId": "d08799df-34c4-47e2-87bf-e7768f4981f0"
+      }
     },
     "owner": "dhaxor"
   }
