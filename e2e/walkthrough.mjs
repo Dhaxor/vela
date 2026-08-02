@@ -190,6 +190,15 @@ async function main() {
   await sleep(1200);
 
   // --- 7. Paywall (subscription review screenshot) ---
+  // Closing the 369 sheet lands on the Journal tab; the story hero lives on
+  // Today, so switch tabs first.
+  await tap(
+    driver,
+    '-ios predicate string:type == "XCUIElementTypeButton" AND (name == "Today" OR label BEGINSWITH "Today")',
+    "Today tab",
+    8000,
+  );
+  await sleep(1500);
   // Second story attempt gates to the paywall.
   await tap(driver, "~ritual-story", "story hero (gated)", 8000);
   await sleep(2500);
