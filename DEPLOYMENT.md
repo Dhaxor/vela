@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| App | Vela: Manifest Your Life (working bundle `app.vela.manifest`) |
+| App | Vela: Manifestation Stories (working bundle `app.vela.manifest`) |
 | Build health | 54 tests passing, `tsc --noEmit` clean, expo-doctor 20/20 |
 | Features | Stories engine, affirmations+streaks, journal (script/369/gratitude), vision board, Plus paywall — all browser-verified |
 | Monetization | `app.vela.manifest.plus.monthly` / `.yearly` / `.lifetime` — $4.99/mo, $29.99/yr, $69.99 lifetime (undercuts the $60–90/yr market) |
@@ -14,7 +14,7 @@
 ## Launch sequence
 
 1. **USER: create the app record** in App Store Connect (New App → iOS →
-   name "Vela: Manifest Your Life" → bundle `app.vela.manifest` → SKU vela1).
+   name "Vela: Manifestation Stories" → bundle `app.vela.manifest` → SKU vela1).
    App records cannot be created via the public API. Tell me the Apple ID.
 2. **USER: `npx eas-cli init`** in `vela/` once (links the EAS project), then
    one interactive `npx eas-cli build --platform ios --profile production`
