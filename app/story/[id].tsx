@@ -15,7 +15,7 @@ import { safeBack } from "@/lib/nav";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import * as Speech from "expo-speech";
 import * as Haptics from "expo-haptics";
-import { ChevronLeft, Play, Square, RefreshCw } from "lucide-react-native";
+import { ArrowRight, ChevronLeft, Footprints, Play, Square, RefreshCw } from "lucide-react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useStories } from "@/contexts/StoryContext";
 import { useRitual } from "@/contexts/RitualContext";
@@ -26,7 +26,7 @@ import { colors, space, radius, type, serif, accentGlow } from "@/constants/them
 export default function StoryReaderScreen() {
   const router = useRouter();
   const { id, reveal } = useLocalSearchParams<{ id: string; reveal?: string }>();
-  const { stories, intents, regenerate } = useStories();
+  const { stories, intents, actionForIntent, regenerate } = useStories();
   const { markDone } = useRitual();
   const { isPlus } = usePlus();
   const [speaking, setSpeaking] = useState(false);
@@ -63,6 +63,7 @@ export default function StoryReaderScreen() {
     [intents, story?.intentId]
   );
   const area = intent ? focusById(intent.focus) : undefined;
+  const action = intent ? actionForIntent(intent.id) : undefined;
   const animate = reveal === "1";
 
   // Never let narration outlive the screen.
@@ -168,6 +169,33 @@ export default function StoryReaderScreen() {
           You showed up today. That's how it's built.
         </Animated.Text>
 
+        {intent && action && action.state !== "completed" && (
+          <Animated.View
+            entering={animate ? FadeInDown.delay(900).duration(700) : undefined}
+            style={s.bridge}
+            testID="story-action-bridge"
+          >
+            <View style={s.bridgeLabelRow}>
+              <Footprints color={colors.aurora} size={18} />
+              <Text style={s.bridgeLabel}>BRIDGE TO REALITY</Text>
+            </View>
+            <Text style={s.bridgeText}>{action.text}</Text>
+            <TouchableOpacity
+              style={s.bridgeCta}
+              onPress={() =>
+                router.push({
+                  pathname: "/evidence/[intentId]" as never,
+                  params: { intentId: intent.id },
+                })
+              }
+              testID="story-record-proof"
+            >
+              <Text style={s.bridgeCtaText}>Make it observable</Text>
+              <ArrowRight color={colors.accent} size={18} />
+            </TouchableOpacity>
+          </Animated.View>
+        )}
+
         {nudge && (
           <Animated.View
             entering={FadeInDown.delay(1200).duration(800)}
@@ -266,6 +294,19 @@ const s = StyleSheet.create({
     letterSpacing: 0.6,
     marginTop: space.sm,
   },
+  bridge: {
+    backgroundColor: colors.auroraSoft,
+    borderWidth: 1,
+    borderColor: colors.auroraBorder,
+    borderRadius: radius.lg,
+    padding: space.lg,
+    marginTop: space.xl,
+  },
+  bridgeLabelRow: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  bridgeLabel: { ...type.caption, color: colors.aurora, letterSpacing: 1.2 },
+  bridgeText: { ...type.body, color: colors.text, marginTop: space.md },
+  bridgeCta: { flexDirection: "row", alignItems: "center", gap: space.sm, marginTop: space.lg },
+  bridgeCtaText: { ...type.body, color: colors.accent, fontWeight: "600" },
   dock: {
     position: "absolute",
     left: space.lg,

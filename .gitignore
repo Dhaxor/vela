@@ -1,5 +1,7 @@
 node_modules/
 .expo/
+.expo-export-unique-check/
+store/tmp-step.jpg
 dist/
 web-build/
 ios/

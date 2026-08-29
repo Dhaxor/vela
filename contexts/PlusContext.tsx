@@ -10,7 +10,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Platform } from "react-native";
+import { AppState, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   ALL_SKUS,
@@ -77,9 +77,9 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const grant = useCallback(() => {
-    setIsPlus(true);
-    void AsyncStorage.setItem(PLUS_KEY, "1").catch(() => {});
+  const setEntitlement = useCallback((owned: boolean) => {
+    setIsPlus(owned);
+    void AsyncStorage.setItem(PLUS_KEY, owned ? "1" : "0").catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -88,12 +88,30 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     let cancelled = false;
 
     const sub = store.purchaseUpdatedListener(async (p) => {
+      if (!ownsPlus([p])) return;
       try {
         await store.finishTransaction({ purchase: p, isConsumable: false });
       } catch {
         // finishing is best-effort; the entitlement still stands
       }
-      if (!cancelled) grant();
+      if (!cancelled) setEntitlement(true);
+    });
+
+    const refreshEntitlement = async () => {
+      try {
+        await store.initConnection();
+        const owned = await store.getAvailablePurchases({
+          onlyIncludeActiveItemsIOS: true,
+        });
+        if (!cancelled) setEntitlement(ownsPlus(owned as never));
+      } catch {
+        // Keep the last verified value when the App Store is temporarily offline.
+      }
+    };
+
+    void refreshEntitlement();
+    const appStateSub = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshEntitlement();
     });
 
     void (async () => {
@@ -123,9 +141,10 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       cancelled = true;
+      appStateSub.remove();
       sub?.remove?.();
     };
-  }, [grant]);
+  }, [setEntitlement]);
 
   const purchase = useCallback(async (plan: PlanId): Promise<PurchaseResult> => {
     const store = iap();
@@ -156,16 +175,19 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     if (!store) return "unavailable";
     try {
       await store.initConnection();
-      const owned = await store.getAvailablePurchases();
+      const owned = await store.getAvailablePurchases({
+        onlyIncludeActiveItemsIOS: true,
+      });
       if (ownsPlus(owned as never)) {
-        grant();
+        setEntitlement(true);
         return "purchased";
       }
+      setEntitlement(false);
       return "failed";
     } catch {
       return "failed";
     }
-  }, [grant]);
+  }, [setEntitlement]);
 
   const value = useMemo<PlusValue>(
     () => ({
@@ -175,11 +197,10 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
       purchase,
       restore,
       setPlusForTesting: (v: boolean) => {
-        setIsPlus(v);
-        void AsyncStorage.setItem(PLUS_KEY, v ? "1" : "0").catch(() => {});
+        setEntitlement(v);
       },
     }),
-    [ready, isPlus, prices, purchase, restore]
+    [ready, isPlus, prices, purchase, restore, setEntitlement]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

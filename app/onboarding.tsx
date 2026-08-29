@@ -34,8 +34,7 @@ import {
   Stars,
   Sparkles,
   ScrollText,
-  Quote,
-  PenLine,
+  Footprints,
 } from "lucide-react-native";
 import { FOCUS_AREAS, FocusId } from "@/lib/focus";
 import { RitualTime, useUser } from "@/contexts/UserContext";
@@ -71,9 +70,9 @@ const RITUALS: { id: RitualTime; label: string; body: string; Icon: typeof Sunri
 ];
 
 const PRACTICE = [
-  { Icon: ScrollText, tint: colors.accent, title: "Step into a story", body: "A day inside your achieved life, written from your own words." },
-  { Icon: Quote, tint: colors.aurora, title: "Carry one line", body: "A daily affirmation for the areas you chose." },
-  { Icon: PenLine, tint: colors.success, title: "Write it as done", body: "Scripting, the 369 method, and gratitude." },
+  { Icon: ScrollText, tint: colors.accent, title: "Enter a future memory", body: "A sensory chapter built from the future you named." },
+  { Icon: Footprints, tint: colors.aurora, title: "Cross one bridge", body: "One small, observable action brings the chapter into today." },
+  { Icon: Sparkles, tint: colors.success, title: "Leave proof", body: "What happened becomes part of the chapter Vela writes next." },
 ] as const;
 
 const TOTAL_STEPS = 6;
@@ -123,7 +122,7 @@ export default function OnboardingScreen() {
   };
 
   const ctaLabel =
-    step === 0 ? "Begin" : step === TOTAL_STEPS - 1 ? "Write my first story" : "Continue";
+    step === 0 ? "Begin" : step === TOTAL_STEPS - 1 ? "Create my future-memory arc" : "Continue";
 
   return (
     <SafeAreaView style={s.screen}>
@@ -149,11 +148,10 @@ export default function OnboardingScreen() {
               </View>
               <Text style={s.brand}>Vela</Text>
               <Text style={s.welcomeLine}>
-                The life you keep imagining{"\n"}is a place. Let's visit it daily
-                {"\n"}until you live there.
+                Imagine the future.{"\n"}Act once in its direction.{"\n"}Let reality rewrite the story.
               </Text>
               <Text style={s.welcomeSub}>
-                Two quiet minutes a day. No account. Nothing leaves your phone.
+                An evolving private memory—not another feed of quotes.
               </Text>
             </Animated.View>
           )}
@@ -271,7 +269,7 @@ export default function OnboardingScreen() {
           {step === 5 && (
             <Animated.View entering={FadeInDown.duration(400)}>
               <Text style={s.h1}>Your practice,{"\n"}{name.trim() || "friend"}.</Text>
-              <Text style={s.lead}>Small, daily, and yours. Here's the shape of it.</Text>
+              <Text style={s.lead}>A simple loop from imagination to observable proof.</Text>
               {PRACTICE.map(({ Icon, tint, title, body }, i) => (
                 <Animated.View
                   key={title}

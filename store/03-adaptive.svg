@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#102A2D" />
+      <stop offset=".5" stop-color="#0B0A18" />
+      <stop offset="1" stop-color="#2C1B3D" />
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#73D7C8" />
+      <stop offset="1" stop-color="#E9B44C" />
+    </linearGradient>
+    <clipPath id="screen">
+      <rect x="145" y="720" width="1000" height="1810" rx="76" />
+    </clipPath>
+    <filter id="shadow">
+      <feDropShadow
+        dy="38"
+        stdDeviation="44"
+        flood-color="#000"
+        flood-opacity=".55"
+      />
+    </filter>
+  </defs>
+  <rect width="1290" height="2796" fill="url(#bg)" />
+  <circle cx="1100" cy="420" r="360" fill="#73D7C8" opacity=".08" />
+  <text
+    x="100"
+    y="120"
+    font-family="Arial"
+    font-size="28"
+    font-weight="800"
+    letter-spacing="6"
+    fill="#73D7C8"
+  >
+    A STORY THAT REMEMBERS
+  </text>
+  <text
+    x="100"
+    y="268"
+    font-family="Georgia"
+    font-size="90"
+    font-weight="700"
+    fill="#F7F2FF"
+  >
+    <tspan x="100">Real life rewrites</tspan>
+    <tspan x="100" dy="106">the next chapter.</tspan>
+  </text>
+  <text x="104" y="560" font-family="Arial" font-size="34" fill="#CBC5DA">
+    Your proof is woven back into tomorrow’s future memory.
+  </text>
+  <g filter="url(#shadow)">
+    <rect
+      x="122"
+      y="695"
+      width="1046"
+      height="1860"
+      rx="96"
+      fill="#070611"
+      stroke="url(#edge)"
+      stroke-width="4"
+    />
+    <g clip-path="url(#screen)">
+      <image
+        href="05-adaptive-home.jpg"
+        x="145"
+        y="720"
+        width="1000"
+        height="2165"
+        preserveAspectRatio="xMidYMin slice"
+      />
+    </g>
+  </g>
+  <rect x="100" y="2630" width="670" height="70" rx="35" fill="#73D7C8" />
+  <text
+    x="140"
+    y="2676"
+    font-family="Arial"
+    font-size="22"
+    font-weight="800"
+    fill="#102022"
+  >
+    CHAPTER → ACTION → EVIDENCE → EVOLVE
+  </text>
+</svg>

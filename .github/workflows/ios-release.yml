@@ -16,6 +16,9 @@ name: iOS production build (free runner)
 #   - one interactive `eas build` to mint signing for app.vela.manifest
 
 on:
+  push:
+    branches:
+      - review-rebuild
   workflow_dispatch:
     inputs:
       submit:

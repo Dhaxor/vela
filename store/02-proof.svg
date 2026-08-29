@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="2796">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#211632" />
+      <stop offset=".52" stop-color="#0B0A18" />
+      <stop offset="1" stop-color="#182A2B" />
+    </linearGradient>
+    <clipPath id="screen">
+      <rect x="145" y="720" width="1000" height="1810" rx="76" />
+    </clipPath>
+    <filter id="shadow">
+      <feDropShadow
+        dy="38"
+        stdDeviation="44"
+        flood-color="#000"
+        flood-opacity=".55"
+      />
+    </filter>
+  </defs>
+  <rect width="1290" height="2796" fill="url(#bg)" />
+  <path
+    d="M100 620 C370 520 560 700 800 550 S1160 420 1280 520"
+    fill="none"
+    stroke="#E9B44C"
+    stroke-opacity=".18"
+    stroke-width="3"
+  />
+  <text
+    x="100"
+    y="120"
+    font-family="Arial"
+    font-size="28"
+    font-weight="800"
+    letter-spacing="6"
+    fill="#B784F7"
+  >
+    PROOF, NOT PRESSURE
+  </text>
+  <text
+    x="100"
+    y="268"
+    font-family="Georgia"
+    font-size="92"
+    font-weight="700"
+    fill="#F7F2FF"
+  >
+    <tspan x="100">Turn intention</tspan>
+    <tspan x="100" dy="108">into visible proof.</tspan>
+  </text>
+  <text x="104" y="560" font-family="Arial" font-size="34" fill="#CBC5DA">
+    Record what you did, moved, or learned—in one honest sentence.
+  </text>
+  <g filter="url(#shadow)">
+    <rect
+      x="122"
+      y="695"
+      width="1046"
+      height="1860"
+      rx="96"
+      fill="#070611"
+      stroke="#B784F7"
+      stroke-opacity=".75"
+      stroke-width="4"
+    />
+    <g clip-path="url(#screen)">
+      <image
+        href="03-proof-capture.jpg"
+        x="145"
+        y="720"
+        width="1000"
+        height="2165"
+        preserveAspectRatio="xMidYMin slice"
+      />
+    </g>
+  </g>
+  <rect x="100" y="2630" width="620" height="70" rx="35" fill="#B784F7" />
+  <text
+    x="140"
+    y="2676"
+    font-family="Arial"
+    font-size="22"
+    font-weight="800"
+    fill="#150E22"
+  >
+    NO SCORES · NO SHAME · JUST PROOF
+  </text>
+</svg>

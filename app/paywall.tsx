@@ -8,6 +8,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -127,6 +128,33 @@ export default function PaywallScreen() {
             );
           })}
         </View>
+
+        <Text style={s.renewalText}>
+          Monthly and yearly plans renew automatically unless cancelled at
+          least 24 hours before the current period ends. Payment is charged to
+          your Apple Account. Lifetime is a one-time purchase.
+        </Text>
+        <View style={s.legalLinks}>
+          <TouchableOpacity
+            onPress={() =>
+              void Linking.openURL(
+                "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
+              )
+            }
+            testID="paywall-terms"
+            style={s.legalTap}
+          >
+            <Text style={s.legalText}>Terms of Use</Text>
+          </TouchableOpacity>
+          <Text style={s.legalDot}>•</Text>
+          <TouchableOpacity
+            onPress={() => void Linking.openURL("https://dhaxor.github.io/vela/privacy")}
+            testID="paywall-privacy"
+            style={s.legalTap}
+          >
+            <Text style={s.legalText}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       <View style={s.dock}>
@@ -237,6 +265,27 @@ const s = StyleSheet.create({
     marginTop: space.xs,
     fontWeight: "600",
   },
+  renewalText: {
+    ...type.caption,
+    color: colors.textMuted,
+    textAlign: "center",
+    lineHeight: 19,
+    marginTop: space.lg,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: space.sm,
+    marginTop: space.sm,
+  },
+  legalTap: {
+    minHeight: 44,
+    justifyContent: "center",
+    paddingHorizontal: space.xs,
+  },
+  legalText: { ...type.caption, color: colors.accent },
+  legalDot: { ...type.caption, color: colors.textFaint },
   dock: {
     position: "absolute",
     left: space.lg,

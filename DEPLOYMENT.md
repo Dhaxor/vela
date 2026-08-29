@@ -1,17 +1,19 @@
 # Shipping Vela
 
-## Status (2026-07-31)
+## Status (2026-08-27)
 
 | | |
 |---|---|
 | App | Vela: Manifestation Stories (working bundle `app.vela.manifest`) |
-| Build health | 54 tests passing, `tsc --noEmit` clean, expo-doctor 20/20 |
+| Build health | Corrected build 2 queued; 53 tests passing and `tsc --noEmit` clean |
 | Features | Stories engine, affirmations+streaks, journal (script/369/gratitude), vision board, Plus paywall — all browser-verified |
 | Monetization | `app.vela.manifest.plus.monthly` / `.yearly` / `.lifetime` — $4.99/mo, $29.99/yr, $69.99 lifetime (undercuts the $60–90/yr market) |
-| Listing | `store/localizations/en-US.strings` drafted, `scripts/check_metadata.py` green, subscription disclosure + EULA link included |
+| Listing | Live metadata and six screenshots are complete; review contact corrected; subscription disclosure + EULA included |
 | CI | `.github/workflows/ios-release.yml` (macos-26, local build, all hard-won rules baked in) |
 
 ## Launch sequence
+
+The live, current checklist is [`store/SUBMISSION_CHECKLIST.md`](store/SUBMISSION_CHECKLIST.md).
 
 1. **USER: create the app record** in App Store Connect (New App → iOS →
    name "Vela: Manifestation Stories" → bundle `app.vela.manifest` → SKU vela1).

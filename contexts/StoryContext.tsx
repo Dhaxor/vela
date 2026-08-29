@@ -13,6 +13,13 @@ import React, {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { FocusId } from "@/lib/focus";
 import { composeStory, StoryParagraph } from "@/lib/story/engine";
+import {
+  deriveFutureAction,
+  evidenceBridge,
+  sanitizeEvidence,
+  type EvidenceKind,
+  type FutureAction,
+} from "@/lib/futureMemory";
 import { useUser } from "./UserContext";
 
 const STORE_KEY = "vela.stories.v1";
@@ -28,6 +35,8 @@ export interface Intent {
   createdAt: string;
   /** Fragment/title ids consumed by past renderings — the repetition guard. */
   usedIds: string[];
+  /** Increments when evidence is folded into a new future-memory chapter. */
+  chapter: number;
 }
 
 export interface StoredStory {
@@ -41,19 +50,28 @@ export interface StoredStory {
 interface Persisted {
   intents: Intent[];
   stories: StoredStory[];
+  actions: FutureAction[];
 }
 
 interface StoryValue {
   ready: boolean;
   intents: Intent[];
   stories: StoredStory[];
+  actions: FutureAction[];
   storyForIntent: (intentId: string) => StoredStory | undefined;
+  actionForIntent: (intentId: string) => FutureAction | undefined;
   createIntent: (input: {
     focus: FocusId;
     desire: string;
     feeling: string;
   }) => Promise<StoredStory>;
   regenerate: (intentId: string) => Promise<StoredStory | undefined>;
+  saveEvidence: (input: {
+    intentId: string;
+    kind: EvidenceKind;
+    evidence: string;
+  }) => Promise<FutureAction | undefined>;
+  reshapeAction: (intentId: string, text: string) => Promise<void>;
   removeIntent: (intentId: string) => Promise<void>;
 }
 
@@ -63,22 +81,53 @@ const newId = () =>
   `${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
 
 function parse(raw: string | null): Persisted {
-  if (!raw) return { intents: [], stories: [] };
+  if (!raw) return { intents: [], stories: [], actions: [] };
   try {
     const p = JSON.parse(raw) as Partial<Persisted>;
+    const intents = Array.isArray(p.intents)
+      ? (p.intents as Intent[]).map((intent) => ({
+          ...intent,
+          chapter:
+            typeof intent.chapter === "number" && intent.chapter > 0
+              ? intent.chapter
+              : 1,
+        }))
+      : [];
+    const stories = Array.isArray(p.stories) ? (p.stories as StoredStory[]) : [];
+    const actions = Array.isArray(p.actions) ? [...(p.actions as FutureAction[])] : [];
+    // Existing users keep their story data and receive the new action bridge
+    // automatically. Migration is additive and never resets an intent.
+    for (const intent of intents) {
+      if (actions.some((action) => action.intentId === intent.id)) continue;
+      const story = stories.find((item) => item.intentId === intent.id);
+      if (!story) continue;
+      actions.push({
+        id: newId(),
+        intentId: intent.id,
+        storyId: story.id,
+        text: deriveFutureAction({
+          focus: intent.focus,
+          desire: intent.desire,
+          chapter: intent.chapter,
+        }),
+        state: "open",
+        createdAt: story.createdAt,
+      });
+    }
     return {
-      intents: Array.isArray(p.intents) ? (p.intents as Intent[]) : [],
-      stories: Array.isArray(p.stories) ? (p.stories as StoredStory[]) : [],
+      intents,
+      stories,
+      actions,
     };
   } catch {
-    return { intents: [], stories: [] };
+    return { intents: [], stories: [], actions: [] };
   }
 }
 
 export function StoryProvider({ children }: { children: React.ReactNode }) {
   const { profile } = useUser();
   const [ready, setReady] = useState(false);
-  const [data, setData] = useState<Persisted>({ intents: [], stories: [] });
+  const [data, setData] = useState<Persisted>({ intents: [], stories: [], actions: [] });
 
   useEffect(() => {
     let stale = false;
@@ -107,7 +156,11 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const render = useCallback(
-    (intent: Intent): { story: StoredStory; usedIds: string[] } => {
+    (
+      intent: Intent,
+      chapter: number,
+      latestEvidence?: string
+    ): { story: StoredStory; action: FutureAction; usedIds: string[] } => {
       const composed = composeStory({
         name: profile?.name ?? "",
         focus: intent.focus,
@@ -116,13 +169,34 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
         seed: (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0,
         avoid: new Set(intent.usedIds),
       });
+      const storyId = newId();
+      const bridge = evidenceBridge(latestEvidence);
+      const paragraphs = bridge
+        ? [
+            ...composed.paragraphs,
+            { fragmentId: `proof-${chapter}`, text: bridge },
+          ]
+        : composed.paragraphs;
+      const createdAt = new Date().toISOString();
       return {
         story: {
-          id: newId(),
+          id: storyId,
           intentId: intent.id,
           title: composed.title,
-          paragraphs: composed.paragraphs,
-          createdAt: new Date().toISOString(),
+          paragraphs,
+          createdAt,
+        },
+        action: {
+          id: newId(),
+          intentId: intent.id,
+          storyId,
+          text: deriveFutureAction({
+            focus: intent.focus,
+            desire: intent.desire,
+            chapter,
+          }),
+          state: "open",
+          createdAt,
         },
         usedIds: composed.usedIds,
       };
@@ -139,13 +213,15 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
         feeling: input.feeling,
         createdAt: new Date().toISOString(),
         usedIds: [],
+        chapter: 1,
       };
-      const { story, usedIds } = render(intent);
+      const { story, action, usedIds } = render(intent, 1);
       intent.usedIds = usedIds;
       await persist({
         intents: [intent, ...data.intents],
         // One living story per intent: the newest rendering replaces the old.
         stories: [story, ...data.stories.filter((s) => s.intentId !== intent.id)],
+        actions: [action, ...data.actions],
       });
       return story;
     },
@@ -156,18 +232,68 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     async (intentId: string) => {
       const intent = data.intents.find((i) => i.id === intentId);
       if (!intent) return undefined;
-      const { story, usedIds } = render(intent);
+      const chapter = (intent.chapter ?? 1) + 1;
+      const latestEvidence = data.actions.find(
+        (action) => action.intentId === intentId && action.evidence
+      )?.evidence;
+      const { story, action, usedIds } = render(intent, chapter, latestEvidence);
       const nextIntent: Intent = {
         ...intent,
         usedIds: [...intent.usedIds, ...usedIds],
+        chapter,
       };
       await persist({
         intents: data.intents.map((i) => (i.id === intentId ? nextIntent : i)),
         stories: [story, ...data.stories.filter((s) => s.intentId !== intentId)],
+        actions: [action, ...data.actions],
       });
       return story;
     },
     [data, persist, render]
+  );
+
+  const saveEvidence = useCallback(
+    async (input: { intentId: string; kind: EvidenceKind; evidence: string }) => {
+      const current = data.actions.find(
+        (action) => action.intentId === input.intentId && action.state !== "completed"
+      );
+      const evidence = sanitizeEvidence(input.evidence);
+      if (!current || !evidence) return undefined;
+      const completed: FutureAction = {
+        ...current,
+        state: "completed",
+        evidence,
+        evidenceKind: input.kind,
+        completedAt: new Date().toISOString(),
+      };
+      await persist({
+        ...data,
+        actions: data.actions.map((action) =>
+          action.id === current.id ? completed : action
+        ),
+      });
+      return completed;
+    },
+    [data, persist]
+  );
+
+  const reshapeAction = useCallback(
+    async (intentId: string, text: string) => {
+      const current = data.actions.find(
+        (action) => action.intentId === intentId && action.state !== "completed"
+      );
+      const clean = text.trim().replace(/\s+/gu, " ").slice(0, 180);
+      if (!current || !clean) return;
+      await persist({
+        ...data,
+        actions: data.actions.map((action) =>
+          action.id === current.id
+            ? { ...action, text: clean, state: "reshaped" }
+            : action
+        ),
+      });
+    },
+    [data, persist]
   );
 
   const removeIntent = useCallback(
@@ -175,6 +301,7 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
       await persist({
         intents: data.intents.filter((i) => i.id !== intentId),
         stories: data.stories.filter((s) => s.intentId !== intentId),
+        actions: data.actions.filter((a) => a.intentId !== intentId),
       });
     },
     [data, persist]
@@ -185,17 +312,39 @@ export function StoryProvider({ children }: { children: React.ReactNode }) {
     [data.stories]
   );
 
+  const actionForIntent = useCallback(
+    (intentId: string) =>
+      data.actions.find(
+        (action) => action.intentId === intentId && action.state !== "completed"
+      ) ?? data.actions.find((action) => action.intentId === intentId),
+    [data.actions]
+  );
+
   const value = useMemo<StoryValue>(
     () => ({
       ready,
       intents: data.intents,
       stories: data.stories,
+      actions: data.actions,
       storyForIntent,
+      actionForIntent,
       createIntent,
       regenerate,
+      saveEvidence,
+      reshapeAction,
       removeIntent,
     }),
-    [ready, data, storyForIntent, createIntent, regenerate, removeIntent]
+    [
+      ready,
+      data,
+      storyForIntent,
+      actionForIntent,
+      createIntent,
+      regenerate,
+      saveEvidence,
+      reshapeAction,
+      removeIntent,
+    ]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
