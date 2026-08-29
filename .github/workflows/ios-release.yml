@@ -31,7 +31,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 90
     env:
-      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EXPO_TOKEN: ${{ secrets.VELA_EXPO_TOKEN }}
       EAS_SKIP_AUTO_FINGERPRINT: "1"
       EAS_BUILD_NO_EXPO_GO_WARNING: "true"
     steps:
