@@ -48,7 +48,9 @@ def main() -> int:
                 problems.append(f"{key}: {n} > {limit}")
 
     kw = {k.strip().lower() for k in vals.get("keywords", "").split(",") if k.strip()}
-    titled = f"{vals.get('name', '')} {vals.get('subtitle', '')}".lower()
+    # Apple indexes whole words, so compare words, not substrings: "manifest" is a
+    # separate search term from the name's "Manifestation" and is not wasted.
+    titled = set(re.findall(r"[\w']+", f"{vals.get('name', '')} {vals.get('subtitle', '')}".lower()))
     wasted = sorted(k for k in kw if k and k in titled)
     if wasted:
         problems.append("keywords duplicate the name/subtitle: " + ", ".join(wasted))
