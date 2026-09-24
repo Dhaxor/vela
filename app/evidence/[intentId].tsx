@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -20,6 +20,7 @@ import {
   proofEnding,
   type EvidenceKind,
 } from "@/lib/futureMemory";
+import { maybeRequestStoreReview, REVIEW_PROMPT_DELAY_MS } from "@/lib/reviewPrompt";
 import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
 
 const KINDS: Array<{
@@ -45,6 +46,15 @@ export default function EvidenceScreen() {
     () => proofConstellation(actions.filter((item) => item.intentId === intentId)),
     [actions, intentId]
   );
+  const reviewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Leaving before the delay elapses cancels the ask; the next proof retries.
+  useEffect(
+    () => () => {
+      if (reviewTimer.current) clearTimeout(reviewTimer.current);
+    },
+    []
+  );
 
   const save = async () => {
     if (!note.trim() || ending) return;
@@ -52,6 +62,13 @@ export default function EvidenceScreen() {
     if (!result) return;
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setEnding(proofEnding(kind));
+    // The rating ask rides this success moment, after the card has landed.
+    // lib/reviewPrompt gates it: second proof, a return visit, once ever.
+    const allProofs = [...actions.filter((item) => item.id !== result.id), result];
+    reviewTimer.current = setTimeout(() => {
+      reviewTimer.current = null;
+      void maybeRequestStoreReview(allProofs);
+    }, REVIEW_PROMPT_DELAY_MS);
   };
 
   if (!action) {
