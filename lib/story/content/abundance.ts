@@ -9,6 +9,8 @@
 // after every arrival line of its stage.
 // Chapter I: a default script, plus scripts for a home or a move, and for debt
 // and savings. Script text carries no flags: the script's `motifs` gate it.
+// Motif-tuned scripts have no motif slot, because the motif's own lines would
+// repeat the scene they paint.
 // Grammar: a verb after {desire.np} is past tense or modal ('healthy finances' is plural).
 // STYLE HEADER (binding for every content file; full guide: docs/CONTRACTS.md §7–§8)
 // - Original prose only. Second person, present tense. Never 'I' in narration.
@@ -40,17 +42,17 @@ export const ABUNDANCE: FocusContent = {
     // I · The First Glimpse
     1: {
       arrival: [
-        fr("ab1-ar1", "You reach for your phone out of habit and stop halfway. There is nothing in it you need to brace for. You put it back down, face up, which feels strangely brave. The quiet where the worry used to live is still new enough to notice. It is real: {desire.done}."),
+        fr("ab1-ar1", "You reach for your phone out of habit and stop halfway. There is nothing in it you need to brace for. You put it back down, face up, which feels strangely brave. The quiet where the worry used to live is still new enough to notice. That is what it sounds like when {desire.done}."),
         fr("ab1-ar2", "You open the fridge, and it is full, properly full, with things you chose instead of things that were cheapest. You stand in the cold light for a second longer than you need to. It is only food, and it makes you absurdly happy. This is a part of {desire.np} nobody photographs."),
-        fr("ab1-ar3", "On the way back from the corner shop you buy the good bread, the loaf you used to look at and walk past. You skip the sum in your head. You carry it home still warm, like a small, ridiculous trophy. Halfway up the street you remember that {desire.done}, and you grin at nobody."),
-        fr("ab1-ar4", "For the first time in years, you wake up without doing sums in your head. No juggling which bill can wait. No quiet panic about the end of the month. There is only the ceiling, the light, and a fact you are still getting used to: {desire.done}."),
-        fr("ab1-ar5", "You wake up in your own place, and the first thing you see is a crack in the ceiling that belongs to you. You could fix it. You could leave it. Either way, it is yours to decide. You lie there grinning at a crack in the plaster, because {desire.done}.", HOME),
+        fr("ab1-ar3", "On the way back from the corner shop you buy the good bread, the loaf you used to look at and walk past. You skip the sum in your head. You carry it home still warm, like a small, ridiculous trophy. Halfway up the street you remember that {desire.done}, and you laugh at nothing in particular."),
+        fr("ab1-ar4", "The radiator ticks as it warms up, and you let it. Last winter you would have been up in a coat, doing the maths on every degree. This morning the room is simply warm. You stretch under the covers and remember why: {desire.done}."),
+        fr("ab1-ar5", "You wake up in your own place, and the first thing you see is a crack in the ceiling that belongs to you. You could fix it. You could leave it. Either way, it is yours to decide. You lie there smiling at it, because {desire.done}.", HOME),
       ],
       living: [
         fr("ab1-li1", "Over breakfast you look at the month ahead, and for once it looks like a map instead of a maze. Bills on their days. A little set aside. A little left over that does not have a job yet. You circle a date on the calendar and write two words next to it: something nice."),
         fr("ab1-li2", "A friend messages to ask if you want to come to a concert next month. You feel the old reflex to say you will see, which always meant no. This time you check the date, check the numbers, and say yes. Typing it feels like stretching a muscle you forgot you had."),
         fr("ab1-li3", "You put a little aside for someone else’s birthday, a present you have been wanting to give for ages. It does not feel like a sacrifice. It feels like the best part of having enough. You picture their face when they open it, and you smile into your cup."),
-        fr("ab1-li4", "A bill comes in and you pay it on your phone in the time it takes a pan to heat. That is the whole event. Nobody claps. You put the phone down and crack an egg, and the morning carries on being exactly as gentle as it was before."),
+        fr("ab1-li4", "A bill comes in and you pay it on your phone in the time it takes a pan to heat. That is the whole event. Nobody claps. You put the phone down and break an egg into the pan. The morning carries on, exactly as gentle as it was before."),
       ],
       titles: [ti("ab1-t1", "Room in the Month"), ti("ab1-t2", "Enough, by Morning"), ti("ab1-t3", "Where the Worry Was")],
     },
@@ -58,14 +60,14 @@ export const ABUNDANCE: FocusContent = {
     // II · The Night Before
     2: {
       arrival: [
-        fr("ab2-ar1", "There is a folder on the table with everything in it: the forms, the copies, a pen that works. Tomorrow is the appointment that makes {desire.np} official on paper. You have checked the folder twice already. You put the kettle on instead of checking it a third time."),
+        fr("ab2-ar1", "There is a folder on the table with everything in it: the forms, the copies, a pen that works. Tomorrow is the appointment, the last bit of paperwork between you and {desire.np}. You have checked the folder twice already. You put the kettle on instead of checking it a third time."),
         fr("ab2-ar2", "Tomorrow you are taking someone you love out for a proper dinner, your treat. It is the place where you once read the menu in the window and walked on. The table is booked. You keep picturing their face when you say you are paying. This dinner is part of what you meant by {desire.np}."),
         fr("ab2-ar3", "Your suitcase is open on the bed, half full. Tomorrow you leave for somewhere you have wanted to see for years. The whole trip is already paid for, with nothing waiting on a card when you get home. You fold a jumper and laugh at nothing. This, too, is part of {desire.np}."),
         fr("ab2-ar4", "Tomorrow you finally book the thing you have put off for years because of money. The page is saved and the dates are circled. Tonight you just sit with the knowledge that you can. Everything that led to {desire.np} is folded into that one small click."),
-        fr("ab2-ar5", "Boxes are stacked in the hall, labelled in thick marker: kitchen, books, fragile. Tomorrow you get the keys. You walk through the old place one last time, saying a quiet goodbye. Your hand trails along the wall. You are already halfway to {desire.np}.", HOME),
+        fr("ab2-ar5", "Tomorrow your friends see the place for the first time. You have moved the sofa three times and changed your mind about the rug twice. Flowers wait in a jug in the sink. You stand in the doorway, pleased and nervous in equal measure, because {desire.done}.", HOME),
       ],
       living: [
-        fr("ab2-li1", "You run through tomorrow once, the way you would run through a recipe: what to bring, where to be, what to say. You know the steps. There was a time you would have lain awake doing worst-case sums. Tonight you write the plan on a sticky note and press it to the door."),
+        fr("ab2-li1", "You run through tomorrow once, like a recipe you know by heart: what to bring, where to be, what to say. You know the steps. There was a time you would have lain awake doing worst-case sums. Tonight you write the plan on a sticky note and press it to the door."),
         fr("ab2-li2", "Someone calls to wish you luck for tomorrow. You hear yourself talking about money without shame for the first time, plainly, numbers and all. They tell you they are proud of you. You had no idea how much you needed someone to say it until they did."),
         fr("ab2-li3", "You set aside a little for tomorrow evening, a celebration fund. You decide in advance exactly what it is for: a good meal, something fizzy, and a tip that makes someone’s night. Planning the generosity is half the fun. You go to bed already smiling about the tip."),
         fr("ab2-li4", "Before bed you write down what tomorrow will make possible. Sleeping through the night. Saying yes more easily. Being able to help when someone you love is struggling. You read the list back twice, then fold it into your wallet, where you will find it again one day."),
@@ -76,11 +78,11 @@ export const ABUNDANCE: FocusContent = {
     // III · The Hard Day
     3: {
       arrival: [
-        fr("ab3-ar1", "The washing machine dies mid-cycle, leaving a drum of soaked clothes and a puddle creeping across the floor. You stand in it in your socks and swear quietly. The repair, when you get a price, is more than you hoped. It stings, even though {desire.done}."),
-        fr("ab3-ar2", "A bill arrives for twice what you expected. You read it three times, sure there must be a mistake. There is no mistake. Your stomach drops the old familiar way, and for a minute you are back in the life before {desire.np}, counting and recounting."),
+        fr("ab3-ar1", "The boiler gives up on the coldest morning of the month, with a clunk and then nothing at all. You stand in the kitchen in two jumpers, swearing quietly at a pipe. The repair, when you get a price, is more than you hoped. It stings, even though {desire.done}."),
+        fr("ab3-ar2", "A bill arrives for twice what you expected. You check it against the last one, sure there must be a mistake. There is no mistake. Your stomach drops the old familiar way, and for a minute you are back in the life before {desire.np}, counting and recounting."),
         fr("ab3-ar3", "Someone you love asks to borrow money, and the amount makes you swallow. You want to help. You also remember exactly how hard it was to build what you have. Both feelings sit in your chest at once, and neither is wrong. Nobody mentioned this part when you wrote {desire.quote}."),
         fr("ab3-ar4", "Your phone slips from your pocket and lands face down on the pavement. You know before you turn it over. The screen is a web of cracks, and the repair will take a real bite out of the month. You stand there holding it, feeling sick, and very far from {desire.np}."),
-        fr("ab3-ar5", "A client pays late, then later still, and the gap lands right where the month is tightest. You check your account twice, as if checking could change it. The old fear is fast and familiar. You remind yourself that {desire.done}, and that one late payment is a problem with a solution.", BUSINESS),
+        fr("ab3-ar5", "A client pays late, then later still, and the gap lands right where the month is tightest. You refresh your account, as if refreshing could change it. The old fear is fast and familiar. You remind yourself that {desire.done}, and that one late payment is a problem with a solution.", BUSINESS),
       ],
       living: [
         fr("ab3-li1", "You make a cup of tea and sit down with the real number instead of the one your fear invented. It is bad. It is also finite. You have a cushion for days exactly like this, and you use it. The whole thing takes four minutes, and then it is just a cost."),
@@ -112,11 +114,12 @@ export const ABUNDANCE: FocusContent = {
     // V · The Threshold
     5: {
       arrival: [
-        fr("ab5-ar1", "The email arrives while you are halfway through a sandwich. The subject line says one word: confirmed. You open it and read it and read it again, until the words blur. You put the sandwich down very carefully, as if it might break. It is done, and {desire.done}."),
+        fr("ab5-ar1", "The email arrives while you are halfway through a sandwich. The subject line says one word: confirmed. You open it and read it and read it again, until the words blur. You put the sandwich down very carefully, as if it might break. Somewhere behind your ribs, the news arrives properly: {desire.done}."),
         fr("ab5-ar2", "You press the button and watch the little wheel spin. Three seconds. Four. Then the screen changes, and there it is in plain grey letters: the final confirmation. You sit back in your chair and do not move for a long moment. The words you once wrote, {desire.quote}, have become a fact."),
-        fr("ab5-ar3", "Across the desk, someone turns the last page toward you and points to the line. You sign your name. They smile and say congratulations, and you hear yourself laugh, a strange high laugh that does not sound like you. That signature means that {desire.done}."),
-        fr("ab5-ar4", "You check the number once more, then again, then take a screenshot in case it disappears. It has crossed the line you drew for yourself years ago, the one that meant safe. You sit on the edge of the bed with the phone in both hands. It is real: {desire.done}."),
+        fr("ab5-ar3", "Across the desk, someone turns the last page toward you and points to the line. You sign your name. They smile and say congratulations, and you hear yourself laugh, a strange high laugh that does not sound like you. That signature means that {desire.done}.", HOME),
+        fr("ab5-ar4", "You check the number once more, then again, then take a screenshot in case it disappears. It has crossed the line you drew for yourself years ago, the one that meant safe. You sit on the edge of the bed with the phone in both hands. Every line on the screen says the same thing: {desire.done}."),
         fr("ab5-ar5", "The keys are heavier than you expected. Someone drops them into your palm, a whole ring of them, and says they are yours. You close your hand around them so tightly the edges bite. You are standing at your own front door, and {desire.done}.", HOME),
+        fr("ab5-ar6", "You are standing in a queue when the notification comes through. You read it, put the phone in your pocket, then take it out again to be sure. The person in front of you is arguing about a parcel. Nobody here knows that, in this exact minute, {desire.done}."),
       ],
       living: [
         fr("ab5-li1", "For the first minute you tell no one. You sit with it, one hand over your mouth, letting years of worry come loose all at once. Your eyes fill and you let them. Some of it is joy. Some of it is the relief of finally putting something heavy down."),
@@ -133,7 +136,7 @@ export const ABUNDANCE: FocusContent = {
         fr("ab6-ar1", "Money has gone quiet. That is the best way to describe it. It still matters, and you still pay attention, yet it no longer shouts. Most days you hardly think about it at all, which is exactly how you hoped {desire.np} would feel."),
         fr("ab6-ar2", "Today has ordinary spending in it. You buy groceries without a running total. You pay for a train at the busy time without wincing. A little goes into savings on its own, the way it does every month. None of it is exciting. This, too, is what {desire.np} looked like in the end."),
         fr("ab6-ar3", "It is the middle of the month, the part that used to feel like the edge of a cliff. You only notice because you glance at the date on a receipt. Nothing is tight. Nothing needs juggling. You fold the receipt into your pocket and forget it, because {desire.done}."),
-        fr("ab6-ar4", "A friend suggests a weekend away at the last minute, and you say yes before you have finished reading the message. You pack a bag that evening, humming. It still makes you smile, how simple a yes has become in the life where {desire.done}."),
+        fr("ab6-ar4", "A friend suggests a weekend away at the last minute, and you say yes before you have finished reading the message. You pack a bag that evening, humming. It still makes you smile, how simple a yes has become since {desire.done}."),
         fr("ab6-ar5", "The heating comes on and you leave it on. The kitchen is full of your own mugs and a plant that is somehow still alive. A small repair needs doing, and you book someone without a second thought. Ordinary days like this are what you meant by {desire.np}.", HOME),
       ],
       living: [
@@ -150,7 +153,7 @@ export const ABUNDANCE: FocusContent = {
       arrival: [
         fr("ab7-ar1", "Clearing a drawer, you find an old envelope with sums scribbled on the back in biro. Tiny columns, crossings out, a coffee ring on the worst month. You hold it for a long time. The person who wrote these was so scared and so stubborn. They are the reason {desire.done}."),
         fr("ab7-ar2", "Someone asks what changed, and you try to explain. There was no single big win. There were hundreds of small, dull decisions, made again and again until they became who you are. That is what {desire.np} turned out to be: a habit you grew into."),
-        fr("ab7-ar3", "These days you give easily, and it surprises you every time. A round of drinks. A friend’s train fare home. Your time, too, because you have more of it. You think of the words {desire.quote}, and you realise the best part was always going to be this."),
+        fr("ab7-ar3", "These days you give easily, and it surprises you every time. A round of drinks. A friend’s train fare home. Your time, too, because you have more of it. When you wrote {desire.quote}, you had no idea the best part would be this."),
         fr("ab7-ar4", "You sit down with the year’s numbers on a quiet evening and notice what is missing: the fear. You can look at every figure without flinching. It started with money and spread to everything else. Looking straight at things is what {desire.np} gave you, more than anything."),
       ],
       living: [
@@ -174,11 +177,10 @@ export const ABUNDANCE: FocusContent = {
         evening: fr("ab-one-home-op-e", "Let the evening settle, {name}. Where you are going, it is the first morning in a new place. The light is coming in at an angle you have never seen before, and you are about to wake up in it."),
       },
       body: [
-        { kind: "text", fragment: fr("ab-one-home-p1", "You wake up and, for a second, have no idea where you are. The window is in the wrong place. The light is a different colour. Then it comes back all at once, and you laugh out loud into the quiet. There are boxes in the corner with your handwriting on them. It is true: {desire.done}.") },
+        { kind: "text", fragment: fr("ab-one-home-p1", "You wake up and, for a second, have no idea where you are. The window is in the wrong place. The light is a different colour. Then you see the boxes in the corner, labelled in your own handwriting, and you laugh out loud into the quiet, because {desire.done}.") },
         { kind: "weave" },
-        { kind: "text", fragment: fr("ab-one-home-p2", "You wander through the rooms touching things. The cool wall. The window latch. A cupboard that sticks and will need a bit of sandpaper. Even the flaws are thrilling, because they are yours to fix or leave. You find the kettle in a box marked kitchen, urgent, and make the first cup here.") },
-        { kind: "text", fragment: fr("ab-one-home-p3", "You drink it by the window and watch the street wake up. A neighbour you have not met yet is watering a plant on their step. A bus goes past with its lights still on. You learn the sounds of the place one by one, the way you learn a new song.") },
-        { kind: "motif", part: "living" },
+        { kind: "text", fragment: fr("ab-one-home-p2", "You wander through the rooms touching things. The cool wall. The window latch. A cupboard that sticks and will need a bit of sandpaper. You open every drawer just to see what is inside, which is nothing yet. Even the flaws are thrilling, because they are yours to fix or leave. You find the kettle in a box marked kitchen, urgent, and make the first cup here.") },
+        { kind: "text", fragment: fr("ab-one-home-p3", "You drink it by the window and watch the street wake up. A neighbour you have not met yet is watering a plant on their step. A bus goes past with its lights still on. You learn the sounds of the place one by one, the way you learn a new song. Already you know which floorboard creaks, and you step on it on purpose.") },
         { kind: "text", fragment: fr("ab-one-home-p4", "There was a time you wrote {desire.quote} and scrolled through photos of rooms that belonged to strangers. You feel {feeling}, so much that you have to set the cup down. This is what {desire.np} felt like on the first morning: like arriving, and being allowed to stay.") },
       ],
       closing: {
@@ -196,15 +198,14 @@ export const ABUNDANCE: FocusContent = {
         evening: fr("ab-one-clear-op-e", "Close the day, {name}. In the story you are about to enter, it is morning. You have slept through the night without once waking up to do sums, and you are about to notice."),
       },
       body: [
-        { kind: "text", fragment: fr("ab-one-clear-p1", "You wake up rested, which still feels like a trick. For years the first thought of every morning was a number. This morning the first thought is the light on the ceiling, and the second is breakfast. The number comes third, and it comes kindly. You smile at the ceiling, because {desire.done}.") },
+        { kind: "text", fragment: fr("ab-one-clear-p1", "You wake up rested, which still feels like a trick. For years the first thought of every morning was a number. This morning the first thought is the light on the ceiling, and the second is breakfast. The number comes third, and it comes kindly. Outside, someone is whistling the same four notes over and over. You lie there a little longer than you need to, because {desire.done}.") },
         { kind: "weave" },
-        { kind: "text", fragment: fr("ab-one-clear-p2", "You make coffee and open the banking app on purpose, just to look. There it is. The figure that used to make your chest tighten sits calmly on the screen, steady as furniture. You look at it the way you would look at a view. Then you close the app and drink your coffee while it is hot. Hot coffee, it turns out, is one of the perks.") },
-        { kind: "text", fragment: fr("ab-one-clear-p3", "A friend texts to ask if you want dinner at the new place on the corner. A year ago you would have invented a reason to stay in. This morning you just say yes. You even suggest pudding. Then you put a little aside for whoever needs it next, because you finally can.") },
-        { kind: "motif", part: "living" },
+        { kind: "text", fragment: fr("ab-one-clear-p2", "You make coffee and open the banking app on purpose, just to look. There it is. The figure that used to make your chest tighten sits calmly on the screen, steady as furniture. You look at it like a view. Then you close the app and drink your coffee while it is hot. Hot coffee, it turns out, is one of the perks.") },
+        { kind: "text", fragment: fr("ab-one-clear-p3", "A friend texts to ask if you want dinner at the new place on the corner. A year ago you would have invented a reason to stay in. This morning you just say yes. You even suggest pudding, which makes them laugh. Then you put a little aside for whoever needs it next, because you finally can.") },
         { kind: "text", fragment: fr("ab-one-clear-p4", "You think of every small payment, every no to something you wanted, every month you held the line after writing {desire.quote}. It all added up. You feel {feeling}, light in a way you had forgotten was possible. This is what {desire.np} felt like on the first morning: like being let out.") },
       ],
       closing: {
-        morning: fr("ab-one-clear-cl-m", "Come back slowly, {name}. Keep that lightness with you. Below there is a small step toward it, the kind that adds up over months. Choose one, and give it a time today."),
+        morning: fr("ab-one-clear-cl-m", "Come back slowly, {name}. Keep that lightness with you. Below are a few small steps toward it, the kind that add up over months. Choose one, and give it a time today."),
         evening: fr("ab-one-clear-cl-e", "Let the morning go dark, {name}. Nothing needs counting tonight. Choose a step for tomorrow if you like, and then let yourself sleep straight through, the way you did in that story."),
       },
     },
@@ -220,10 +221,10 @@ export const ABUNDANCE: FocusContent = {
       body: [
         { kind: "text", fragment: fr("ab-one-default-p1", "You wake up and lie there for a moment, listening to the street. Somebody is dragging a bin back in. A bird is making the same remark over and over. You notice an absence before you can name it: there is no sum running in your head. Then you remember, with a slow, spreading warmth, that {desire.done}.") },
         { kind: "weave" },
-        { kind: "text", fragment: fr("ab-one-default-p2", "In the kitchen, the kettle clicks off and you realise you have not reached for your banking app. You did not need to. You know roughly what is there, and roughly is enough. You pour the water and watch the steam lift, and the whole thing feels almost indecently calm.") },
-        { kind: "text", fragment: fr("ab-one-default-p3", "On the counter is a letter that came yesterday, the kind you once left unopened for a week. You open it with a butter knife, read it, and add it to the pile. Then you text a friend about the trip in the spring. You tell them you are in, and you do not check anything first. It is a small yes. It feels enormous.") },
+        { kind: "text", fragment: fr("ab-one-default-p2", "In the kitchen, the kettle clicks off and you realise you have not reached for your banking app. You did not need to. You know roughly what is there, and roughly is enough. You pour the water and watch the steam lift, and the whole thing feels almost indecently calm. It is a strange new kind of quiet.") },
+        { kind: "text", fragment: fr("ab-one-default-p3", "On the counter is a letter that came yesterday, the kind you once left unopened for a week. You open it with a butter knife, read it, and add it to the pile. The pile is small these days, and it stays that way. Then you text a friend about the trip in the spring. You tell them you are in, and you do not check anything first. It is a small yes. It feels enormous.") },
         { kind: "motif", part: "living" },
-        { kind: "text", fragment: fr("ab-one-default-p4", "You think of the person who wrote {desire.quote}, doing sums at the table at midnight, trying to make the numbers lie down. You feel {feeling}, steady and warm. This is what you hoped {desire.np} would feel like: room to breathe, and room to say yes.") },
+        { kind: "text", fragment: fr("ab-one-default-p4", "You remember writing {desire.quote}, doing sums at the kitchen table at midnight, trying to make the numbers lie down. You feel {feeling}, steady and warm. This is what you hoped {desire.np} would feel like: room to breathe, and room to say yes.") },
       ],
       closing: {
         morning: fr("ab-one-default-cl-m", "Come back to your morning, {name}. Bring that calm with you, and the yes. Below are a few small steps, each one a piece of the ease you just visited. Pick one for today, and let it be easy."),

@@ -90,6 +90,9 @@ export default function SettingsScreen() {
             style={s.plusRow}
             onPress={() =>
               void (async () => {
+                // The v2 queue reads remindersEnabled; the 1.0 dailies only
+                // cover a user who has no weaving dream yet.
+                await updateProfile({ remindersEnabled: true });
                 const { remindersFor, applyReminders } = await import(
                   "@/lib/notifications"
                 );
@@ -112,6 +115,7 @@ export default function SettingsScreen() {
             style={[s.plusRow, s.plusRowBorder]}
             onPress={() =>
               void (async () => {
+                await updateProfile({ remindersEnabled: false });
                 const { clearReminders } = await import("@/lib/notifications");
                 await clearReminders();
                 Alert.alert("Reminders off", "No more nudges until you ask.");

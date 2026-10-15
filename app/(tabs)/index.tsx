@@ -126,7 +126,7 @@ export default function TodayScreen() {
           <View style={s.sectionHeader}>
             <View>
               <Text style={s.sectionTitle}>Proof constellation</Text>
-              <Text style={s.sectionBody}>{completed ? `${completed} moments have shaped your arc.` : "Your first proof will light this path."}</Text>
+              <Text style={s.sectionBody}>{completed ? `${completed === 1 ? "1 proof has" : `${completed} proofs have`} shaped your arc.` : "Your first proof will light this path."}</Text>
             </View>
             {completed > 0 && <Check color={colors.success} size={20} />}
           </View>

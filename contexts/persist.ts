@@ -35,6 +35,16 @@ export async function allKeys(): Promise<readonly string[]> {
   }
 }
 
+/** One immediate write outside every queue. Only for launch-time safety copies. */
+export async function writeRaw(key: string, value: string): Promise<boolean> {
+  try {
+    await AsyncStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function parseJson(raw: string | null): unknown {
   if (!raw) return null;
   try {

@@ -144,7 +144,7 @@ const HEALTH: readonly Row[] = [
   ["br-he12", "brave", 4, "Share your health goal with someone who will check in on you kindly."],
   ["br-he13", "2min", 5, "Write down how you want to feel at the end of this month, in one line."],
   ["br-he14", "15min", 5, "Try one new kind of movement or class you have been curious about."],
-  ["br-he15", "brave", 5, "Sign up for the event, class or programme that makes {desire.np} official."],
+  ["br-he15", "brave", 5, "Book one class, event or session that stretches you a little, and put the date in your calendar."],
   ["br-he16", "2min", 6, "Put your phone on charge outside the bedroom tonight."],
   ["br-he17", "15min", 6, "Plan the week’s meals or movement in one fifteen-minute sitting."],
   ["br-he18", "brave", 6, "Remove one thing from your week that drains more energy than it gives."],

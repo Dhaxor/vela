@@ -14,13 +14,15 @@ describe("{proof.done}", () => {
     ["I've started the course", "you started the course"],
     ["Today I asked for the raise!", "you asked for the raise"],
     ["Learned that I need more rest", "you learned that you need more rest"],
+    ["Told the team I was ready", "you told the team you were ready"],
+    ["Fixed the constructor in my app", "you fixed the constructor in your app"],
   ];
   for (const [raw, expected] of cases) {
     test(JSON.stringify(raw), () => expect(proofDone(raw)).toBe(expected));
   }
 
   test("notes that are not a deed stay quoted", () => {
-    for (const raw of ["Proof number 1: asked for feedback", "Design review went well", "Two things. First I called.", "That mornings are better"]) {
+    for (const raw of ["Proof number 1: asked for feedback", "Design review went well", "Two things. First I called.", "That mornings are better", "Said I love you first.", "Told my sister you were right", "I write better at night with the phone in another room"]) {
       expect(proofDoneClause(raw)).toBeNull();
       expect(proofDone(raw)).toBe(`you wrote ${proofQuote(raw)}`);
     }

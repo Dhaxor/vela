@@ -107,13 +107,13 @@ export const SHARED_STAGES: SharedStages = {
     reflection: [
       fr("sh2-re1", "You notice the nerves and you let them stay. They are only what caring feels like the night before. Underneath them sits something steadier. Everything {desire.np} needed from you, you have given. You feel {feeling} in a place the nerves cannot reach, and you rest your attention there."),
       fr("sh2-re2", "You run through tomorrow once in your head, start to finish, and then you put it down. Too much rehearsing wears the edges off. You know enough, and you have known it for a while. The person who first wrote {desire.quote} would hardly believe how {feeling} you feel tonight."),
-      fr("sh2-re3", "Readiness turns out to be quieter than you pictured. There is no drumroll. There is only a sense that whatever tomorrow brings, you will meet it as yourself. That is what all the small steps toward {desire.np} were building, all along. You feel {feeling}, and steady with it."),
+      fr("sh2-re3", "Readiness turns out to be quieter than you pictured. There is no drumroll. There is only a sense that whatever tomorrow brings, you will meet it as yourself. That is what all the small steps toward {desire.np} were building, all along. Something in you feels {feeling}, and steady with it."),
       fr("sh2-re4", "There was a time when the night before anything big meant lying awake, rehearsing every way it could go wrong. Tonight your mind wanders somewhere kinder. It keeps returning to everything that led to {desire.np}, every small and unglamorous step. Each time it does, you feel {feeling}."),
       fr("sh2-re5", "Tomorrow you only have to be the person who got this far. That person is enough. It took exactly this person, doubts and all, to get this close to {desire.np}. You feel {feeling}, and a little sleepy, which is exactly right for the night before."),
     ],
     closing: {
       morning: [
-        fr("sh2-cl-m1", "Come back to your morning. You just rehearsed a big day, so today is allowed to be a small one. There is a step waiting below that is exactly the right size. Choose it, and let it be the thing you get ready for today."),
+        fr("sh2-cl-m1", "Return to your own day. You just rehearsed a big day, so today is allowed to be a small one. There is a step waiting below that is exactly the right size. Choose it, and let it be the thing you get ready for today."),
         fr("sh2-cl-m2", "Let the evening scene go, {name}, and open your eyes to this one. Carry the calm of that quiet room into your day. Then pick one step below, the kind the person in that story would already have taken."),
         fr("sh2-cl-m3", "One breath for the night before, and one for today. The readiness you felt in that room is yours to use this morning. Find the step under this page that fits your hours. Then give it a time, so it has somewhere to live in your day."),
         fr("sh2-cl-m4", "This is how big days get built: on ordinary mornings, one piece at a time. Stretch, look around the room you are actually in, and choose one piece to carry today. The choices are just below. Pick the one that feels almost too easy."),
@@ -144,11 +144,11 @@ export const SHARED_STAGES: SharedStages = {
         fr("sh3-op-e2", "If your own day was difficult, {name}, this chapter may feel familiar. Something goes wrong in it too. Let your breath slow and come along anyway. You get to watch someone handle it well, and that someone is you, a little further on."),
         fr("sh3-op-e3", "Let the room go quiet, {name}. This is a story about a day that does not go to plan. There is no need to brace for it. Just notice how it unfolds, and how the person at the centre of it stays steady."),
         fr("sh3-op-e4", "Come and rest for a few minutes, {name}. Tonight’s scene is honest: even in the life you are building, things go wrong. What you do next is the interesting part. It is worth falling asleep to."),
-        fr("sh3-op-e5", "The day is done, {name}, whatever it held. Get comfortable. In the story you are about to enter, an afternoon has just gone sideways. You are about to find out how much you have grown, and it is more than you think."),
+        fr("sh3-op-e5", "The day is done, {name}, whatever it held. Get comfortable. Somewhere ahead of you, an afternoon has just gone sideways. You are about to find out how much you have grown, and it is more than you think."),
       ],
     },
     sensory: [
-      fr("sh3-se1", "Your jaw is tight. You only notice because your teeth ache a little. You unclench, roll your shoulders, and see the tea you made an hour ago going cold beside you. The light in the room has gone flat and grey, the colour of an afternoon that has lost its shape."),
+      fr("sh3-se1", "Your jaw is tight. You only notice because your teeth ache a little. You unclench, roll your shoulders, and see the tea you made an hour ago going cold beside you. The light in the room has gone flat and grey, the colour of a day that has lost its shape."),
       fr("sh3-se2", "Rain starts against the window, quick and hard, then settles into something steadier. You stretch, and your back reminds you how long you have been hunched over. The air through the gap smells of wet stone and cold leaves. It helps more than it should."),
       fr("sh3-se3", "Your heart is going a little fast. You put a hand flat on the table and feel the cool, solid surface under your palm. Five slow breaths. The fridge hums. Somewhere outside a child is laughing at something, and the world carries on."),
       fr("sh3-se4", "You splash cold water on your face and stay there for a second, dripping, looking at nothing. The towel is rough and smells of soap. When you look up, your reflection seems more tired than worried. Tired is something you can work with. Tired only needs a plan and an early night."),
@@ -157,16 +157,16 @@ export const SHARED_STAGES: SharedStages = {
     reflection: [
       fr("sh3-re1", "It is still a bad day. You do not pretend otherwise. What is different is the floor underneath it. Even in the life where {desire.done}, days like this come. This one has edges you can see. You feel tired, and under that, {feeling}. Both of those are true at once."),
       fr("sh3-re2", "This is the part nobody puts in the picture of {desire.np}: the afternoons that go wrong anyway. Here you are, handling one. Imperfectly, and well enough. You notice you feel {feeling}, which is not a word you expected to use on a day like this."),
-      fr("sh3-re3", "You think of the person who wrote {desire.quote} and how a day like this would have flattened them. You are bent a little, and annoyed, and still clear about what to do next. You feel {feeling} about that, quietly, without any fuss."),
+      fr("sh3-re3", "When you first wrote {desire.quote}, a day like this would have flattened you. Today it only bends you. You are annoyed, and tired, and still clear about what to do next. Underneath it all, you feel {feeling}, quietly, without any fuss."),
       fr("sh3-re4", "Hard days used to feel like verdicts, a sign you were never cut out for this. This one feels more like weather. It came in, and it will blow over. You are still on the road toward {desire.np}. You feel {feeling}, a little bruised, and still entirely yourself."),
       fr("sh3-re5", "Steadiness, it turns out, is a skill, and you have been practising it without noticing. Every small step toward {desire.np} trained this exact part of you. You feel the day’s frustration, and you also feel {feeling}. Both are allowed. Neither one gets to run the evening."),
     ],
     closing: {
       morning: [
-        fr("sh3-cl-m1", "Come back to your morning, {name}. If today goes sideways, you have just watched yourself handle worse. Keep that picture close. There is one step below, sized for a real day, including a hard one."),
+        fr("sh3-cl-m1", "Come back to this room, {name}. If today goes sideways, you have just watched yourself handle worse. Keep that picture close. There is one step below, sized for a real day, including a hard one."),
         fr("sh3-cl-m2", "Open your eyes. The hard day in the story ended, the way hard days do. Yours will end too, if it comes. Choose a step below that you could still manage on a bad afternoon, and carry it lightly."),
         fr("sh3-cl-m3", "Take the steadiness with you. It is the most useful thing in this chapter. Your day might be easy or it might not. Either way, the step waiting below is small enough to fit. Pick it, give it a time, and then go."),
-        fr("sh3-cl-m4", "Let the scene go and feel where you are: the seat under you, the air on your skin. Today you get to practise what the person in that story already knows. Start with one step from the choices just below."),
+        fr("sh3-cl-m4", "Let the scene go and feel where you are: the seat under you, the air on your skin. Today you get to practise what you just watched yourself do. Start with one step from the choices just below."),
         fr("sh3-cl-m5", "That is the chapter. The story leaves some of it unfixed, which is honest. What it gives you is the next move, and the knowledge that you can make one. Make one next move today. The options are waiting under this page."),
       ],
       evening: [
@@ -191,7 +191,7 @@ export const SHARED_STAGES: SharedStages = {
       ],
       evening: [
         fr("sh4-op-e1", "Let the evening settle, {name}. Tonight’s chapter has a witness in it: someone who sees what you have been building and says so. Lie back and let yourself be seen for a few minutes. Just listen."),
-        fr("sh4-op-e2", "Get comfortable, {name}. In the scene you are entering, somebody notices the change in you before you have said a word about it. It is a small moment, a sentence or two. It stays with you for days."),
+        fr("sh4-op-e2", "Get comfortable, {name}. In the story ahead, somebody notices the change in you before you have said a word about it. It is a small moment, a sentence or two. It stays with you for days."),
         fr("sh4-op-e3", "The day is over, {name}. Here is a gentler thing to end it with: a story in which someone tells you the truth about how far you have come. Let your breathing slow, and listen. They have been wanting to say it for a while."),
         fr("sh4-op-e4", "Close the day, {name}. For once, someone else has been keeping track of your progress, kindly and without you asking. Tonight they tell you what they have seen. All you have to do is listen, and maybe believe them."),
         fr("sh4-op-e5", "Let go of the day, {name}. This story is set somewhere ordinary, and in it, someone you trust says the thing you did not know you needed to hear. Let your breathing slow so you catch every word of it."),
@@ -206,9 +206,9 @@ export const SHARED_STAGES: SharedStages = {
     ],
     reflection: [
       fr("sh4-re1", "The old reflex is right there, ready to call it luck. You let it pass. Hearing it from someone else makes {desire.np} more solid than any amount of hoping ever did. You feel {feeling}, and you do not explain it away."),
-      fr("sh4-re2", "Change is hard to see from the inside. You live with yourself every day, so the small shifts blur together. It took someone else to hold up the before and after of {desire.np}. You let it in. You feel {feeling}, and a little shy."),
+      fr("sh4-re2", "Change is hard to see from the inside. You live with yourself every day, so the small shifts blur together. It took someone else to hold up the before and after of {desire.np}. You let it in. It makes you feel {feeling}, and a little shy."),
       fr("sh4-re3", "Being recognised lands differently from being praised. Praise passes. This stays. Someone saw the steady, unglamorous work behind {desire.np}, the part you assumed nobody noticed, and named it. You feel {feeling}, all the way down."),
-      fr("sh4-re4", "For a long time you were the only witness to how hard you were trying. You kept going without an audience. And here is someone else who saw it too. The road toward {desire.np} feels lighter for it. You feel {feeling}, and less alone than you have in a while."),
+      fr("sh4-re4", "For a long time you were the only witness to how hard you were trying. You kept going without an audience. And here is someone else who saw it too. The road toward {desire.np} feels lighter for it. You notice how {feeling} you feel, and how much less alone."),
       fr("sh4-re5", "They are describing someone you would once have admired from a distance. It takes a second to understand they mean you. The life where {desire.done} has changed how you carry yourself, and it shows. You feel {feeling}. For once, you decide to agree with them."),
     ],
     closing: {
@@ -255,10 +255,10 @@ export const SHARED_STAGES: SharedStages = {
       fr("sh5-se5", "Heat rushes up your neck and into your face. For a moment your whole body feels unreliable, light and loud at once. You press a hand to your chest and feel how fast everything is moving in there. It is the best kind of chaos you have ever felt."),
     ],
     reflection: [
-      fr("sh5-re1", "The news is simple: {desire.done}. It takes a while for the sentence to reach the part of you that has been waiting. When it gets there, something in your chest lets go. You feel {feeling}, so much of it you have to close your eyes."),
+      fr("sh5-re1", "The news is simple: {desire.done}. It takes a while for the sentence to reach the part of you that has been waiting. When it gets there, something in your chest lets go. You feel {feeling}, so fully that you have to close your eyes."),
       fr("sh5-re2", "You think of every night you wanted this without knowing whether it would come. Every small step. Every not today. All of it was leading to this minute, and to the fact that {desire.done}. You feel {feeling}, and you let yourself cry if you need to."),
-      fr("sh5-re3", "Part of you wants to tell everyone at once. Another part wants one more minute, just for you. You choose the minute. You sit with {desire.quote} becoming real, and you feel {feeling} from somewhere very deep. You do not move. You do not need to."),
-      fr("sh5-re4", "It feels stranger than you imagined, and better, mostly because it feels like you. Nobody handed you a different life. You walked into this one a step at a time, and the words {desire.quote} describe a fact. You feel {feeling}, right down to your hands."),
+      fr("sh5-re3", "Part of you wants to tell everyone at once. Another part wants one more minute, just for you. You choose the minute, and let it become real: {desire.done}. You feel {feeling} from somewhere very deep. You do not move. You do not need to."),
+      fr("sh5-re4", "It feels stranger than you imagined, and better, mostly because it feels like you. Nobody handed you a different life. You walked into this one a step at a time, and the words {desire.quote} describe a fact. You feel it right down to your hands: {feeling}."),
       fr("sh5-re5", "You say it out loud, quietly, to test it. It happened. The words sound strange in the air, so you say them again. A minute ago, you were still walking toward {desire.np}. You feel {feeling}. You are on the other side of it."),
     ],
     closing: {
@@ -266,8 +266,8 @@ export const SHARED_STAGES: SharedStages = {
         fr("sh5-cl-m1", "Come back to today, {name}, and bring that minute with you. It is waiting somewhere ahead, and every step shortens the distance. Pick one below and take it before the day gets too busy."),
         fr("sh5-cl-m2", "Open your eyes. The news has not reached this room yet, and that is fine. You know what it will feel like. Go and do one small thing today that the person in that minute would thank you for."),
         fr("sh5-cl-m3", "Let your heartbeat settle. Notice your hands, steady again. You just felt the end of the road. Today is somewhere in the middle of it, and the middle is where the steps are. Choose one below."),
-        fr("sh5-cl-m4", "Before the day starts, let yourself feel grateful for something that has not happened yet. It feels odd. Do it anyway. Then pick a step from the options below and give it a time."),
-        fr("sh5-cl-m5", "That minute is real enough to remember, which makes it real enough to work toward. Stretch, breathe, and step into your day. The next small move is waiting just below. It will not take long, and it is yours to make."),
+        fr("sh5-cl-m4", "Before the day starts, let yourself feel grateful for something that has not happened yet. It feels odd. Do it anyway. Then pick a step from the options below and decide when it happens."),
+        fr("sh5-cl-m5", "That minute is real enough to remember, which makes it real enough to work toward. Roll your shoulders, take one long breath, and go into your day. The next small move is waiting just below. It will not take long, and it is yours to make."),
       ],
       evening: [
         fr("sh5-cl-e1", "Let the minute go slowly, the way music fades at the end of a song. Your heart can settle. Your hands can rest. You have been to the threshold tonight. You can sleep knowing what waits there."),
@@ -293,7 +293,7 @@ export const SHARED_STAGES: SharedStages = {
         fr("sh6-op-e1", "Let the evening be easy, {name}. Tonight’s chapter is a regular day, start to finish, in the life you asked for. You may find it comforting how little happens. Let it wash over you like music from another room."),
         fr("sh6-op-e2", "Get comfortable, {name}. Big moments get all the attention. This chapter is about the mornings after them, when the good thing has quietly become normal and nobody remarks on it. It is a lovely place to fall asleep."),
         fr("sh6-op-e3", "Let the day close, {name}. In the scene ahead, nothing needs fixing and nothing needs celebrating. It is a quiet day, and you are living it without thinking about how you got there. Let it carry you for a while."),
-        fr("sh6-op-e4", "Let your breathing slow, {name}. This chapter will not ask much of you. It is one ordinary day in a life where the hard part is behind you and the good part has become routine. Routine, here, is a gift."),
+        fr("sh6-op-e4", "Let your shoulders drop, {name}. This chapter will not ask much of you. It is one ordinary day in a life where the hard part is behind you and the good part has become routine. Routine, here, is a gift."),
         fr("sh6-op-e5", "Settle in, {name}. You are about to spend a day inside the life you described, so settled you hardly notice yourself living it. That is what it looks like when something truly arrives: it stops being an event and becomes a home."),
       ],
     },
@@ -308,13 +308,13 @@ export const SHARED_STAGES: SharedStages = {
       fr("sh6-re1", "There was a time when {desire.np} seemed like the answer to everything. Living with it, you know better. It answered some things and left the rest to you, the way real life does. You feel {feeling}, in the low, steady way that lasts."),
       fr("sh6-re2", "Somewhere along the way you stopped noticing it, which is the surprising part. The thing you wanted so badly is simply how your days go. When you do remember that {desire.done}, it comes back softly. You feel {feeling}, like sun coming out on a walk you were already enjoying."),
       fr("sh6-re3", "Underneath the words {desire.quote}, this is what you were asking for all along: days like this one. Unremarkable, unhurried, yours. You feel {feeling}, the way you feel in clothes that finally fit."),
-      fr("sh6-re4", "No one is watching and nothing is at stake, and still the day feels good in your hands. The dream behind {desire.np} turned out to be made mostly of afternoons like this. You feel {feeling}, and you do not need it to be more."),
+      fr("sh6-re4", "No one is watching and nothing is at stake, and still the day feels good in your hands. The dream behind {desire.np} turned out to be made mostly of afternoons like this. Feeling {feeling} is enough. You do not need the day to be more."),
       fr("sh6-re5", "It used to take effort to imagine {desire.np}. These days it would take effort to imagine life without it. You catch yourself feeling {feeling} over something tiny, a good cup of tea or a clear inbox, and you let that be enough."),
     ],
     closing: {
       morning: [
         fr("sh6-cl-m1", "Come back to your own ordinary day, {name}. It is closer to that one than you think. Pick one small step below and slot it in between the errands. That is how ordinary days quietly add up."),
-        fr("sh6-cl-m2", "Open your eyes. Today does not have to be special to count. Choose the step below that fits a normal day, and do it the way the person in that story does everything: without much fuss."),
+        fr("sh6-cl-m2", "Back to your own day, then. It does not have to be special to count. Choose the step below that fits a normal day, and do it the way that whole day was lived: without much fuss."),
         fr("sh6-cl-m3", "Let the chapter go, and keep its pace. Move through your morning a little slower than usual, as if you had all the time you need. Somewhere in it, between one thing and the next, take the step waiting just below."),
         fr("sh6-cl-m4", "Here is a quiet challenge for today: notice one thing that is already ordinary and good. Name it to yourself. Then take one step toward the rest. The options are under this page, and none of them is big."),
         fr("sh6-cl-m5", "That is a whole day, lived. Yours begins here. Bring that unhurried feeling into it, and give one small step a time and a place. The choices are waiting just below."),
@@ -322,7 +322,7 @@ export const SHARED_STAGES: SharedStages = {
       evening: [
         fr("sh6-cl-e1", "The ordinary day in the story ends the way good ordinary days do: dishes done, lights going off one by one. Let yours end the same way. Nothing left to do. Nothing left to fix. Let the dark come in, and rest."),
         fr("sh6-cl-e2", "Let the chapter fade, {name}. There is something deeply restful about a day with nothing in it to fix. Hold on to that feeling as you drift, and let sleep take the rest."),
-        fr("sh6-cl-e3", "Lie back and feel how little you need to do. The story did not need a big ending, and neither does your evening. Let your breath slow until the day is gone, and all that is left is warmth."),
+        fr("sh6-cl-e3", "Lie back and feel how little you need to do. The story did not need a big ending, and neither does your evening. Let the day drain out of your shoulders until all that is left is warmth."),
         fr("sh6-cl-e4", "Picture the end of that ordinary day, the last lamp switched off and the rooms settling. Let your own day settle the same way, slowly and completely, until there is nothing left but breathing and the dark."),
         fr("sh6-cl-e5", "Rest easy. The life you are building does not need you to hold it up tonight. It will still be there, ordinary and good, when you wake. Let your hands go loose and let the day finish without you."),
       ],
@@ -340,9 +340,9 @@ export const SHARED_STAGES: SharedStages = {
         fr("sh7-op-m5", "Here is a chapter to begin the day with, {name}: one about becoming. Nothing dramatic happens in it. You simply recognise yourself, maybe for the first time in a while."),
       ],
       evening: [
-        fr("sh7-op-e1", "Settle in, {name}. This is the last chapter of the season, and it is a gentle one. Let your breathing slow. Tonight you look back at the whole way you have come."),
+        fr("sh7-op-e1", "Settle in, {name}. This is the last chapter of the season, and it is a gentle one. Let the room go quiet. Tonight you look back at the whole way you have come."),
         fr("sh7-op-e2", "Let the day end here, {name}. The final chapter is about who you are on the other side of everything. Close your eyes if you like. You know this person better than you think. You have been becoming them for a while."),
-        fr("sh7-op-e3", "Get comfortable, {name}. Every season ends with a chapter like this one: quiet, looking back, a little proud. Let your breathing slow, and let yourself have the whole of it without hurrying toward the end. The end will wait."),
+        fr("sh7-op-e3", "Get comfortable, {name}. Every season ends with a chapter like this one: quiet, looking back, a little proud. Settle back, and let yourself have the whole of it without hurrying toward the end. The end will wait."),
         fr("sh7-op-e4", "Leave the day where it is, {name}. In the story you are about to enter, you find yourself somewhere familiar. You realise how much has changed, and that most of it changed in you. Let yourself notice it slowly."),
         fr("sh7-op-e5", "This is a chapter to fall asleep inside, {name}. It is about becoming, the slow kind that happens a day at a time until, one evening, you notice it. Let the room go dark around you first. Then come and look."),
       ],
@@ -356,21 +356,21 @@ export const SHARED_STAGES: SharedStages = {
     ],
     reflection: [
       fr("sh7-re1", "You think of the person who first wrote {desire.quote}. You would like to sit beside them for a minute. You would tell them about all of it: the hard day, the small steps, the people who noticed. You feel {feeling}, and very tender toward them."),
-      fr("sh7-re2", "The path to {desire.np} was made of a hundred small steps, most of them taken on ordinary days with nobody watching. You took every one of them yourself. Some were brave, and most were simply stubborn. You feel {feeling}, and it feels earned."),
+      fr("sh7-re2", "The path to {desire.np} was made of a hundred small steps, most of them taken on ordinary days with nobody watching. You took every one of them yourself. Some were brave, and most were simply stubborn. Feeling {feeling} like this, you know you earned it."),
       fr("sh7-re3", "You used to picture {desire.np} as something to reach. Somewhere along the way it became part of who you are. You are someone who keeps small promises to yourself, even on the days nobody would know. You feel {feeling}, and you need no one to confirm it."),
       fr("sh7-re4", "Gratitude comes up quietly, the way warmth comes back into cold hands. For the people who helped. For the days that went wrong and taught you things. For the stubborn part of you that kept going toward {desire.np}. You feel {feeling}."),
-      fr("sh7-re5", "The life where {desire.done} feels like a house you built and moved into, room by room. You know where everything is. You know how you got here, and what each room cost. You feel {feeling}, and steady, and entirely like yourself."),
+      fr("sh7-re5", "The life where {desire.done} feels like a house you built and moved into, room by room. You know where everything is. You know how you got here, and what each room cost. You feel {feeling} and steady, more yourself than you have ever been."),
     ],
     closing: {
       morning: [
-        fr("sh7-cl-m1", "Come back to your morning, {name}, and bring the person from that chapter with you. They are not far away. Whatever you do today, do it the way they would: steadily, kindly, and without apology."),
-        fr("sh7-cl-m2", "Open your eyes. A season is ending, and you are the reason it happened. Carry that into your day lightly, the way you would carry something precious that is also yours to use. Use it today, on something small."),
+        fr("sh7-cl-m1", "Bring the person from that chapter back with you, {name}. They are not far away. Whatever you do today, do it the way they would: steadily, kindly, and without apology."),
+        fr("sh7-cl-m2", "Come back to the room. A season is ending, and you are the reason it happened. Carry that into your day lightly, the way you would carry something precious that is also yours to use. Use it today, on something small."),
         fr("sh7-cl-m3", "Let the chapter go and look around the room you are in. This is where the next season begins: here, today, with you. Take one small, true thing into the morning and do it."),
         fr("sh7-cl-m4", "That is the end of the season’s story, and the start of whatever you write next. Stretch, breathe, and step into the day as the person who came this far. Stand a little taller than yesterday. You have reasons."),
         fr("sh7-cl-m5", "Before you go, say thank you, quietly, to the person who started this season. They did a brave thing without knowing how it would end. Go out into your day and give them something to be proud of."),
       ],
       evening: [
-        fr("sh7-cl-e1", "Let the season close gently, {name}. You have nothing left to prove tonight. Let your breath slow and your hands rest. Let yourself fall asleep as the person you have become, and let that person sleep well. They deserve a long, deep night."),
+        fr("sh7-cl-e1", "Let the season close gently, {name}. You have nothing left to prove tonight. Let your hands rest where they are. Let yourself fall asleep as the person you have become, and let that person sleep well. They deserve a long, deep night."),
         fr("sh7-cl-e2", "The story pauses here. Let the long light fade from it, and let the dark come in, soft and familiar. You can rest. You have come a long way, and every bit of it was yours."),
         fr("sh7-cl-e3", "Picture the whole season at once, every chapter, like lit windows in a row along a dark street. Then let them go out, one by one, until only the warmth is left. Sleep well, {name}. You walked the whole street."),
         fr("sh7-cl-e4", "Close your eyes on everything you have walked through. The hard day. The quiet day. The day someone noticed. It is all part of you, and none of it needs holding tonight. Let it settle where it belongs. Rest."),

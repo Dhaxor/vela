@@ -422,10 +422,12 @@ function draftEngine(input: WriteChapterInput, content: ContentSource, ctx: Ctx)
   // has answered you four times'), so it claims its room before the recall
   // paragraph, which degrades by citing fewer proofs. The Hard Day (stage III)
   // takes no upbeat motif 'living' moment; its motif shows up as a witness.
+  // The Threshold (stage V) is one unbroken minute, so it takes no motif at all.
   const room = () => WRITING_RULES.chapterWords.max - draftWords(draft);
   const indexOf = (beat: ParagraphBeat) => draft.body.findIndex((x) => x.beat === beat);
-  if (ctx.motif && input.stage !== 3) {
-    const d = draw(ctx.motif.living, ctx, ctx.values, room());
+  const motif = input.stage === 5 ? undefined : ctx.motif;
+  if (motif && input.stage !== 3) {
+    const d = draw(motif.living, ctx, ctx.values, room());
     if (d) draft.body.splice(indexOf("living") + 1, 0, piece("motif", d));
   }
   if (input.totalProofs >= 3) {
@@ -438,8 +440,8 @@ function draftEngine(input: WriteChapterInput, content: ContentSource, ctx: Ctx)
     const recall = drawRecall(content, ctx, input.history, input.todayKey, room());
     if (recall) draft.body.unshift(recall);
   }
-  if (ctx.motif && pos !== "witness") {
-    const d = draw(ctx.motif.witness, ctx, ctx.values, room());
+  if (motif && pos !== "witness") {
+    const d = draw(motif.witness, ctx, ctx.values, room());
     if (d) draft.body.splice(indexOf("reflection"), 0, piece("motif", d));
   }
   return draft;

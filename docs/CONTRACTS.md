@@ -114,6 +114,7 @@ All keys live in `lib/storageKeys.ts`. Inline key strings are not allowed anywhe
 |---|---|---|---|
 | `vela.arcs.v2` | `ArcIndex`: dreams, chapter metas, bridges, proofs, activeDreamId, schemaVersion | ArcContext (A2) | yes |
 | `vela.chapter.v2.<chapterId>` | one `Chapter` text per key, immutable per revision | ArcContext (A2) | yes |
+| `vela.arcs.v2.unreadable` | the raw arc index as found when it could not be read at launch (first copy wins); while it exists, no chapter key is garbage-collected | ArcContext | no (device-local) |
 | `vela.profile.v2` | `ProfileV2` | UserContext (A2) | yes |
 | `vela.progress.v2` | `ProgressState` (shape: A6) | RitualContext (A2) | yes |
 | `vela.journal.v2` | journal entries + 369 sheet | JournalContext (A2) | yes |
@@ -456,7 +457,7 @@ Good fragments, one per kind:
 
 ```ts
 fr("ca3-ar2", "The client email arrives at nine: the deadline moved up two days. You read it once, breathe, and open the file. {name}, you have done harder things than this.")
-fr("wv-d-ar3", "You remember the afternoon you {proof.done}. Nobody saw it, and it still counted. This morning began right there.")
+fr("wv-d-ar3", "You remember the afternoon {proof.done}. Nobody saw it, and it still counted. This morning began right there.")
 fr("wv-rc4", "On {proof.date} you wrote {proof.quote}. You were already on your way.")
 fr("wv-cu2", "Reality has answered you {proofs.count} times now, {name}. You notice the pattern.")
 { id: "br-ca11", focus: "career", tier: "brave", stage: 4, text: "Show one finished piece to someone whose eye you trust." }
@@ -768,3 +769,315 @@ waits for every store to be `ready`.
 - 2026-10-15 A2: ArcContext real (ARC_IS_STUB=false); StoryContext/useStories, useRitual, useBoard are adapters over v2. Chapter gains optional usedIds (ids the revision consumed; the next chapter never repeats them). ArcContext also exports holdForCeremony(maxMs?) → release: RN 0.86's InteractionManager is a stub (handles do nothing), so S4 holds this during Star Birth / Named Sky / the Weave instead; every persist queue waits for it (lib/store/ceremony).
 - 2026-10-15 A2: RitualContext adds useProgress() (CONTRACTS §10) and internal useRitualStore(); UserContext adds replaceProfile(p) and the NewProfile/ProfilePatch types (saveProfile fills v2 defaults; v1 migration keeps a 1.0 'reminders off' via legacyReminderChoice); JournalContext adds entry(id), addEntry(kind, prompt, text, {promptId?, dreamId?}) → JournalEntry | null, exportJournal/replaceJournal; new contexts/ScenesContext (useScenes: cards with caption, dreamId, proofId; canAddScene, addPhoto/addGoal(…, {dreamId}), setCaption, attach, removeCard; proof photos join automatically) — BoardProvider is ScenesProvider; PlusContext adds canAddDream(activeCount), canUseBed(bedId), canUseArea(focus), sceneLimit; new contexts/useBackup (snapshot, exportToFile, readFromFile, plan, apply(merge|replace)).
 - 2026-10-15 A2: content engine notes for writers: fillTemplate collapses a doubled subject ('the afternoon you {proof.done}' renders 'the afternoon you sent…', not 'you you'); {desire.done} for a bare noun phrase is '<np> is/are part of your life' ('you have <np>' when it starts with a determiner); bridge text is filled and sentence-cased by lib/futureMemory bridgeText. Golden matrix + rendered-chapter style lint live in lib/story/content/golden.test.ts, so `bun test lib/story/content` runs them.
+- 2026-10-15 integrator: STORAGE_KEYS.arcsUnreadable ('vela.arcs.v2.unreadable', device-local, not backed up). ArcProvider copies an arc index it cannot read there before anything can overwrite it, and collects orphan chapter keys only from an index it read and never while a quarantine exists (new pure lib/store/indexLoad: classifyIndexRead, orphanChapterKeys; contexts/persist adds writeRaw). Before this, an unreadable index deleted every chapter key and was overwritten with an empty index on launch.
+- 2026-10-15 integrator: lib/loopEffects imports useProgress directly. The 1.0 Settings reminder buttons now set profile.remindersEnabled, which the v2 queue reads. Neutral 'ritual-bridge' copy (nt-rb2/3/6/7/9) now reads right when the heard chapter has no bridge chosen yet. ios-release.yml refuses a build with EXPO_PUBLIC_STILL set. The §7.3 example is 'the afternoon {proof.done}'.
+
+## 20. Integration notes (Phase 1 complete)
+
+Phase 1 is integrated on `elevate-1.1`. This section is the Phase 2 cheat
+sheet. Where it and the code disagree, the code wins. The barrels and
+contract files named here are the source of truth.
+
+**Gates at hand-off:**
+- `npx tsc --noEmit`: 0 errors.
+- `bun test`: every test passes.
+- `node scripts/lint-ui.mjs`: 88 violations, all in the fifteen 1.0 screens (fontWeight 35, fontSize 26, a11y 17, alert 10). Every screen you rewrite must leave 0.
+
+Every `*_IS_STUB` flag is `false`: ARC, AUDIO, PROGRESS, NOTIFICATIONS and ASKS.
+
+**Verified on web (8094):**
+- The 30-step audit walk.
+- Fresh user, then Chapter I, then a proof, then the woven Chapter II, then a reload.
+- v1 migration of all five real fixtures. Name, desire, chapter, the 1.0 streak, nights, proofs, journal and board survive, and the v1 keys stay byte-identical.
+
+### 20.1 What the root layout already does (don't redo it in a screen)
+
+`app/_layout.tsx` sets up the following. Fonts gate first render; the splash
+stays up until the fonts AND every store are ready.
+
+```
+UserProvider > PlusProvider > RitualProvider > ArcProvider > StoryProvider (adapter)
+  > JournalProvider > BoardProvider (= ScenesProvider) > UIProvider > RootNavigator
+```
+
+`RootNavigator`:
+- Waits for user, arc, ritual, stories, journal and board to be `ready`.
+- Calls `useNotificationRouting(ready && !!profile)`. This is A6's hook around `useLastNotificationResponse`; it is web-safe and cold-start safe.
+- Mounts `useLoopEffects()` once.
+- Feeds `SkyProvider` (seed from the profile; focus = active dream, then the first story, then the profile's focus; dawn for morning-ritual users).
+- Wraps the Stack in a Night Atlas navigation theme. `Stack.Protected` shows `(tabs)` with a profile and `onboarding` without one.
+
+`RootLayout` also calls `configureNotificationHandler()` and `setAudioSession('idle')` once.
+
+**When Phase 2 deletes the adapters** (only after a grep shows no `app/**` importer of `useStories`, `useRitual` or `useBoard`):
+- Drop `StoryProvider`.
+- Mount `ScenesProvider` in place of `BoardProvider`.
+- Remove `stories.ready` from the ready gate and `stories.intents[0]?.focus` from the sky-focus fallback.
+- Delete `lib/store/legacy.ts` and `lib/notifications/legacy.ts` (with its test) once Settings v2 stops calling `applyReminders` / `clearReminders`.
+
+The tabs are still Today | Stories | Journal | Board, with hidden `arc` and
+`rituals` stubs (`href: null`). S5/S6 swap in Today | Arc | Rituals in
+`app/(tabs)/_layout.tsx`.
+
+### 20.2 Rules every Phase 2 screen follows
+
+- Import UI only from `@/components/ui`, `@/components/sky` and `@/components/glyphs`. Tokens come from `@/constants/theme`; pure geometry from `@/lib/sky`.
+- Every screen is a `<Screen>`, which owns the sky.
+  - Text goes only through `<T>`.
+  - One filled CTA per viewport: `PrimaryButton` (gold, the future) or `BridgeButton` (violet, the loop's act).
+  - Use `useConfirm()` / `useToast()`, never `Alert.alert`.
+  - Icon-only controls are `<IconButton accessibilityLabel>`.
+  - Every control gets a `testID`, and every 1.0 testID is kept (ELEVATE §0).
+- Time comes from `now()` in `@/lib/clock`. Day keys come from `localDateKey()`. Screens never touch AsyncStorage.
+- Hold `const release = holdForCeremony()` (from `@/contexts/ArcContext`) during Star Birth, Named Sky and the Weave, and call `release()` when the animation ends. Persist queues wait for it. RN 0.86's InteractionManager is a stub, so it can't do this job.
+- Arc actions reject with `ArcError` (`isArcError(e)`, typed `e.code`) and leave state untouched. Branch on `code`, not on the message.
+
+### 20.3 `@/components/ui`
+
+| Export | Use |
+|---|---|
+| `T` | `<T variant="display\|title\|body\|reading\|caption\|eyebrow" tone? italic? strong? numeric? center? size?>`. Tones: primary, secondary, muted, faint, gold, violet, onGold, onViolet, danger, did, moved, learned. `size` ('S'\|'M'\|'L') applies to `reading` only. fontWeight and fontStyle are stripped. |
+| `UserWords` | The user's own words: gold Newsreader Italic inside curly quotes. |
+| `Screen` | `variant` ('calm'\|'reveal'\|'reader'\|'still'), `focus`, `scroll` (true), `edges` (['top']), `padded` (true), `header`, `dock`, `contentStyle`, `scrollProps`, `testID`. `useGutter()` returns 24, or 16 below 380pt. |
+| `Header` | `title`, `back` (true), `onBack` (default `safeBack`), `right`, `testID` (back is `${testID}-back`). |
+| `Dock` | Bottom bar over a gradient scrim. `progress` (0..1 horizon line), `inset` (false inside tab screens). |
+| `PrimaryButton` `BridgeButton` `SecondaryButton` `GhostButton` `DangerButton` | `label onPress icon? trailing? disabled? loading? testID? style?`. `GhostButton` also takes `tone` ('secondary'\|'muted'\|'danger'\|'violet'). |
+| `IconButton` | `accessibilityLabel` is required. `variant` 'plain'\|'vellum'. Children are a glyph or a lucide icon at strokeWidth 1.75. |
+| `Press` | A pressable with the .97 spring. |
+| `VellumCard`, `CheckBadge` | `onPress selected tone('default'\|'bridge') padding('default'\|'compact'\|'none') raised`. |
+| `GildedPlate` | Hero and chapter plates only. `figure lit inset padding onPress`. Leave about 76×44pt free top-right for the inset figure. |
+| `Chip` | `label selected onPress role icon disabled`. |
+| `ChipGroup` | `options value onChange testIDPrefix`, with `multiple` and `max` for multi-select. Chip testIDs are `${testIDPrefix}${value}`. |
+| `TextField` | `label voice('ui'\|'words') hint error showCount maxLength multiline …TextInputProps`. Use 'words' for desire, proof and journal text. |
+| `Sheet` | `visible onClose title subtitle footer dismissible scroll testID` (scrim is `${testID}-scrim`). |
+| `ConfirmSheet`, `useConfirm()` | `const ok = await confirm({ title, message, confirmLabel, cancelLabel?, destructive? })`. The buttons are `${testID}-confirm` and `${testID}-cancel`. |
+| `useToast()` | `toast.show('Saved')` or `toast.show({ message, tone: 'info'\|'proof'\|'error', action: { label, onPress }, duration })`. |
+| `Segmented` | `options [{value,label,accessibilityLabel?}] value onChange testID`. Segment testIDs are `${testID}-${value}`. |
+| `Switch` | `value onValueChange accessibilityLabel`. |
+| `ProgressStars` | `total value` for onboarding, or `states` (['lit'\|'current'\|'rest'\|'upcoming']) for the weekly rhythm. |
+| `useMotion()` | Returns `{ reduced, still, ambient, transitions }`; check it before any animation. Also exports `drift` and `pressSpring`. |
+| `haptics` | `.select()` `.step()` `.reveal()` `.success()`. |
+
+```tsx
+<Screen header={<Header title="Settings" testID="settings" />}
+  dock={<Dock><PrimaryButton label="Save" onPress={save} testID="settings-save" /></Dock>}>
+  <T variant="eyebrow" tone="muted">You</T>
+  <TextField label="Name" value={name} onChangeText={setName} testID="settings-name" />
+</Screen>
+```
+
+### 20.4 `@/components/sky`, `@/lib/sky`, `@/components/glyphs`
+
+- `ConstellationFigure` takes `figure? lit kinds? width height padding? variant('hero'|'inset') drawLatest? onStarPress? starLabel? accessibilityLabel testID`.
+  - Star 0 is the gold anchor, the dream. Stars 1..7 are proofs, and `kinds[i]` is the kind of star i+1.
+  - Tap targets are `${testID}-star-${i}`.
+  - `drawLatest` gives the Star Birth line draw.
+  - Build `kinds` from `arc.proofs(dreamId, season).map(p => p.kind)`. `lit` is `arc.seasonProgress(dreamId).stars`, which counts the onboarding seed.
+- `ChapterCover` takes `dreamId season focus chapter lit kinds? width height showNumeral?`.
+- `SkyBackdrop` lives inside `Screen`; use it directly only in previews. `useSky()` returns the identity the root feeds.
+- `lib/sky`:
+  - `figureFor(dreamId, season)` and `VELA_SAIL`
+  - `heroHeight(windowHeight)`: about 30%, minimum 200, maximum 340
+  - `fitFigure`, `hitBoxes`, `gutterFor`, `toRoman`, `skySeed`
+  - `litEdges` / `edgesLitAt` / `isPointLit`
+- Glyphs:
+  - `VelaMark`
+  - `StarProof` (kind), `ProofStarShape`, `PROOF_TINT`, `PROOF_LABEL`
+  - `BridgeGlyph`, `AreaSign` (focus), `ChapterNumeral` (value, variant, ruled)
+  - `TabIcon` (name 'today'|'arc'|'rituals'|'sky'|'scenes', focused)
+  - `Vignette` ('sail'|'horizon'|'window'|'door') for empty states
+  - lucide stays for system chrome only.
+
+### 20.5 `useArc()` (`@/contexts/ArcContext`; types in `@/contexts/arc.types`)
+
+- **State:** `ready`, `dreams` (newest first, every status), `activeDreamId`, `activeDream`, `weavingDreamIds`, `planLockedDreamIds`, `canCreateDream`, `totalStars`.
+- **Selectors** (sync, pure):
+  - `dream(id)`, `chapters(dreamId)`, `chapterMeta(id)`, `latestChapter(dreamId)`
+    - `chapters` is ascending by (season, number); reader prev/next uses it.
+  - `bridges(dreamId)`, `bridge(id)`, `openBridge(dreamId)`
+    - `bridges` includes lapsed ones; hide them.
+  - `proofs(dreamId, season?)`, `proof(id)`, `seasonProgress(dreamId)`
+    - `seasonProgress` returns `{ season, stage, stars, complete }`.
+  - `bridgeOffers(chapterId)`: 3 offers (2min, 15min, brave), exactly one `suggested`, or `[]`.
+  - `loopState(dreamId, now?)`, `suggestConstellationName(dreamId)`.
+- **Text:**
+  - `peekChapter(id)` (sync; latest chapters are always cached once `ready`) and `loadChapter(id)` (async).
+  - `paragraphsForDaypart(chapter, daypartAt(now()))` gives the paragraphs. Each paragraph has `spans` ('desire' | 'proof' | 'name', UTF-16 `[start, end)`), and exactly one paragraph per woven chapter carries `wovenProofId` ('Woven from your proof').
+- **Actions** (Promise, atomic):
+
+| Action | Returns / rejects |
+|---|---|
+| `createDream({ focus, desire, feeling, seedProof?: { text, photoUri? } })` | Chapter · plan-limit, invalid-input |
+| `chooseBridge({ chapterId, choice: { tier, libraryId } \| { tier: 'own', text }, ifThen?: { when, then }, remindAt?: iso })` | Bridge · not-latest-chapter, bridge-resolved, season-complete, dream-not-weaving |
+| `saveProofAndWeave({ dreamId, kind, text, photoUri?, origin?: 'bridge' \| 'not-today' })` | `{ proof, starIndex, nextChapter?, seasonComplete }` · season-complete, no-open-bridge, dream-not-weaving, invalid-input |
+| `rerenderChapter(chapterId)` | Chapter (same id and number, revision + 1) · not-latest-chapter, dream-not-weaving |
+| `markHeard(chapterId)` | Idempotent; records the 'chapter-heard' act itself |
+| `saveForRitual(chapterId, iso)` | Today [D] and the 'next-woven' notification |
+| `nameConstellation(dreamId, season, name)` | season-incomplete, invalid-input |
+| `beginNextSeason(dreamId, { desire?, feeling? })` | Chapter · season-incomplete |
+| `renameDream(id, label \| null)`, `restDream(id)`, `releaseDream(id)`, `setActiveDream(id)` | `setActiveDream` is the free-tier swap and the lapsed user's 'keeps weaving' choice |
+| `flush()`, `exportSnapshot()`, `importSnapshot(s)` | Use them through `useBackup()`, not directly |
+
+`LIMITS` (arc.types): desire 200, proofText 240, bridgeOwnText 180, ifThen
+when/then 40/120, dreamLabel and constellationName 40.
+
+```tsx
+// S1 onboarding: profile first, then the dream (with the optional seed proof).
+await saveProfile({ name, focusAreas: [focus], ritual, pronunciation, ritualTimes });
+const chapter = await arc.createDream({ focus, desire, feeling, seedProof: seed ? { text: seed } : undefined });
+router.replace({ pathname: "/story/[id]", params: { id: chapter.id } });
+
+// S2 Today: one card from the loop state, one filled CTA per state (CONTRACTS §5.1).
+const loop = arc.loopState(arc.activeDreamId);
+// 'chapter-waiting' → heard ? "Choose today's bridge" : 'Enter chapter'
+// 'bridge-open' → BridgeButton 'I crossed it' + GhostButton 'Not today'
+// 'next-woven' → 'Read now' + arc.saveForRitual(loop.chapterId, nextRitualIso)
+// 'sealed' · 'season-complete' (Named Sky / beginNextSeason) · 'resting' · 'empty'
+const { summary } = useProgress(); // summary.chipLabel → '12 nights · 9 stars'
+
+// S3 reader: mark heard at 60%, then the bridge chooser after the last paragraph.
+const offers = arc.bridgeOffers(id); // [] when not the latest chapter or the season is complete
+await arc.chooseBridge({ chapterId: id, choice: { tier: pick.tier, libraryId: pick.libraryId } });
+
+// S4 proof → Star Birth → (Named Sky) → the Weave.
+const release = holdForCeremony();
+try {
+  const { starIndex, nextChapter, seasonComplete } = await arc.saveProofAndWeave({ dreamId, kind, text, photoUri });
+  playStarBirthChime(); // then animate to starIndex
+} finally { release(); }
+// Not today: always a learned proof, never a dead end.
+await arc.saveProofAndWeave({ dreamId, kind: "learned", text: lesson, origin: "not-today" });
+```
+
+### 20.6 The other stores
+
+| Hook | API |
+|---|---|
+| `useUser()` | `ready`, `profile: ProfileV2 \| null`, `saveProfile(NewProfile)` (fills v2 defaults), `updateProfile(patch)`, `replaceProfile(p)`. ProfileV2 fields: `name pronunciation focusAreas ritual ritualTimes{morning,evening} remindersEnabled lockScreenPrivate voiceId rate(0.8\|0.9\|1.0) textSize(S\|M\|L) bed createdAt`. |
+| `useProgress()` (`@/contexts/RitualContext`) | `ready`, `state`, `summary`, `recordAct(act)`, `setRhythmTarget(3..7)`, `pauseUntil(dateKey)`, `resume()`. `summary` holds `nightsShownUp`, `stars`, `chipLabel`, `week { weekStart, target, shownUp, met, days[7] }`, `paused`, `pausedUntil` and `doneToday`. Each day is 'shown-up' \| 'rest' \| 'today-open' \| 'future' \| 'paused'. Screens record 'line-carried' (Your lines) and 'ritual-saved' (a practice saved); ArcContext records 'chapter-heard' and 'proof'. |
+| `useJournal()` | `entries` (newest first), `entry(id)`, `addEntry(kind, prompt, text, { promptId?, dreamId? })` (returns the entry, or null when empty), `sheetToday`, `phrase369`, `setPhrase369`, `addRep(slot, text)`. |
+| `useScenes()` (`@/contexts/ScenesContext`) | `cards`, `canAddScene`, `addPhoto(uri, caption, { dreamId })`, `addGoal(text, { dreamId })` (both return null at the free limit), `setCaption`, `attach(id, dreamId \| null)`, `removeCard`. Proof photos join automatically and never count toward the limit. |
+| `usePlus()` | `isPlus`, `prices`, `purchase(plan)`, `restore()`, `canAddDream(n)`, `canUseBed(bedId)`, `canUseArea(focus)`, `sceneLimit`. The second-dream gate is `arc.canCreateDream`. |
+| `useBackup()` (`@/contexts/useBackup`) | `exportToFile()` ('shared' \| 'downloaded' \| 'unavailable'), `readFromFile()` (null = cancelled, else `{ ok, backup, summary }` or `{ ok: false, error }`; show `BACKUP_ERROR_COPY[error]` from `@/lib/backup`), `plan(backup)` (`{ needsChoice, recommended, nothingNew, current, incoming }`), `apply(backup, 'merge' \| 'replace')`. Offer merge (recommended) or replace only when `needsChoice` is true. |
+
+Adapters kept for the 1.0 screens: `useStories()`, `useRitual()` and `useBoard()`. Don't use them in new code.
+
+### 20.7 Story and content helpers
+
+- `daypartAt(now)` and `paragraphsForDaypart(chapter, daypart)` come from `@/contexts/arc.types`. Daypart is picked at READ time (04:00–14:59 is morning).
+- `chapterLabel(stage)` ('Chapter III · The Hard Day'), `seasonStageLabel(season, stage)` and `stageMeta(stage)` come from `@/lib/story/seasons`.
+- From `@/lib/futureMemory`:
+  - `TIER_LABEL`
+  - `reshapeStarters(focus, desire)`: 3 'Write my own' starters
+  - `learnedRetryLine({ chapterId, name, bridgeText, proofText })`: the chooser header after a learned proof
+  - `suggestedTier(kind)`
+- `shapeDesire(desire)` from `@/lib/story/shaper` returns `{ quote, np, done, npMy, doneI, fallback }`. Use `npMy`/`doneI` for the 3·6·9 suggestions, and treat `fallback: true` as unshaped. `canFill(template, values)` is in `@/lib/story/fill`.
+- `@/lib/story/content`:
+  - `ONBOARDING_CHIPS.desires[focus]` (4 tap-in phrases) and `.feelings` (the six 1.0 ids)
+  - `IDENTITY_LINES[kind][focus]` (Your lines; pick by the kind of the latest proof)
+  - `RITUAL_PROMPTS.script[focus]` / `.scriptArc` / `.gratitude` / `.frames369[focus]`
+    - Offer a `scriptArc` prompt only when `canFill` says every token fills.
+
+### 20.8 Audio (`@/lib/audio`)
+
+```tsx
+const plus = usePlus();
+const [bedId, setBedId] = useState(() => resolveBed(profile.bed, plus.isPlus));
+const bed = useSoundscape(bedId, { locked: !plus.canUseBed(bedId) });
+const narration = useNarration(chapter, {
+  daypart: daypartAt(now()), name: profile.name, pronunciation: profile.pronunciation,
+  rate: profile.rate, voiceId: profile.voiceId, sleepTimer,
+  onHeard: () => void arc.markHeard(chapter.id),
+  onSpeakingChange: bed.duck,
+  onSleepTimerEnd: () => void bed.fadeOut(),
+});
+// Start both inside the Listen tap handler (web autoplay rules).
+const listen = () => { void bed.start(); narration.play(); };
+```
+
+**Narration** (`useNarration`):
+- The controller exposes `status` ('idle'|'playing'|'paused'|'finished'|'unavailable'), `sentences`, `current`, `progress` (feed it to `<Dock progress>`), `estimatedTotalMs`, `estimatedElapsedMs`, `sleepRemainingMs`, `rate`, `voice` and `voices`.
+- Methods: `play(from?)`, `pause()`, `resume()`, `stop()`, `seekToParagraph(i)`, `setRate`, `setVoice`, `setSleepTimer`.
+- Highlight: `current.paragraphIndex`, `current.start` and `current.end` are UTF-16 offsets into that paragraph's text. Render three nested `<T>` spans: before (faint), sentence (primary), after (faint).
+- Rate and voice changes apply from the next sentence. The hooks claim the 'chapter' audio session themselves, so the reader never calls `setAudioSession`.
+
+**Soundscape** (`useSoundscape`):
+- Returns `status` and `start / stop / duck / fadeOut(ms = 30000)`.
+- Changing `bedId` crossfades. Catalogue: `SOUNDSCAPES` (Night first), `BEDS`, `isBedLocked`, `suggestedBed(focus, daypart, isPlus)`.
+
+**Other exports:**
+- Settings > Listening: `useNarration(null, { daypart, rate, voiceId }).voices`, with `voiceDisplayName` / `voiceSubtitle`. Show `VOICE_DOWNLOAD_HINT` only when `Platform.OS === 'ios' && suggestsVoiceDownload(voices)`. Rates come from `NARRATION_RATES`.
+- `playStarBirthChime()` for S4. `formatDuration(ms)`.
+
+### 20.9 Progress (`@/lib/progress`, pure)
+
+- `localDateKey`, `addDays`, `daysBetween`, `weekdayIndex` (0 = Monday), `weekStartKey`.
+- `maxPauseUntil(now)` is the pause date-picker bound (today + 30).
+- `formatNightsStars(n, s)`.
+- `weeklyLedger(proofs, now)` returns `{ weekStart, weekEnd, total, counts, sentenceOfWeek }`. `shouldShowLedger(ledger, now)` is true on the local Sunday with 2 or more proofs; feed it every dream's proofs.
+- `RHYTHM_TARGET` (3..7, default 4), `MAX_PAUSE_DAYS`.
+
+### 20.10 Asks and the review prompt (`@/lib/asks`, `@/lib/reviewPrompt`)
+
+```tsx
+// S3, bridge commitment with a time: ask for notification permission at most once per session.
+if ((await getPermission()) === "undetermined" && (await claimAsk(["notifications"])) === "notifications") {
+  // In-app sheet: 'Remind me at 9am to do this?'. On yes:
+  const result = await requestPermissionAtCommitment(); // a grant rebuilds the queue at once
+  if (result === "granted" || result === "denied") await settle("notifications");
+} // dismissing the in-app sheet does not settle; the cooldown handles it
+
+// S4, after the 2nd proof's Star Birth (never in Chapter I):
+const candidates: AskKind[] = [...(nudgeEligible ? ["plus-nudge" as const] : []),
+  ...((await reviewIsDue(arc.proofs(dreamId))) ? ["review" as const] : [])];
+const ask = await claimAsk(candidates);
+if (ask === "review") setTimeout(() => void requestReviewNow(), REVIEW_PROMPT_DELAY_MS);
+if (ask === "plus-nudge") showNudge();
+// After the Named Sky alone: void requestReviewIfDue(arc.proofs(dreamId));
+```
+
+Priority is notifications, then plus-nudge, then review. A session renews after
+30 minutes in the background. Settled asks never return. The 1.0
+`maybeRequestStoreReview(actions)` stays only until S4 replaces the evidence screen.
+
+### 20.11 Notifications (`@/lib/notifications`)
+
+Screens never schedule anything. The root `useLoopEffects()` rebuilds the
+rolling queue (debounced 750 ms) on every relevant state change and on
+foreground.
+
+What screens do:
+- Settings v2:
+  - Toggle `profile.remindersEnabled`; turning it on also calls `requestPermissionAtCommitment()`.
+  - `lockScreenPrivate` picks neutral copy only.
+  - Ritual times live in `profile.ritualTimes`; rhythm target and pause live in `useProgress()`.
+- S3: the permission ask in 20.10.
+- Deep links: use `urlForChapter(id)` (`vela://story/<id>`), `urlForEvidence(dreamId)` and `APP_HOME_URL`. `hrefForNotificationData` maps them to routes. Every deep-linked screen uses `safeBack(router)` from `@/lib/nav`.
+- Diagnostics (app/dev only): `planQueue(snapshot, now, emptyTemplateHistory())` and `rebuild(snapshot)`. `requestRebuild()` forces a rebuild.
+
+Six slots:
+- 'ritual-chapter' and 'ritual-bridge'. A heard chapter's cue opens the proof form when a bridge is open, otherwise the chapter's chooser.
+- 'ifthen' at `bridge.remindAt`.
+- 'next-woven' at `savedForAt`.
+- 'ledger' (Sunday).
+- 'quiet-return'.
+
+### 20.12 Time, still mode, dev tools
+
+- `now()` / `setClock()` from `@/lib/clock`. Still mode is web-only: `?still=1`, or `EXPO_PUBLIC_STILL=1` in a dev bundle. It pins 2026-10-21 21:04 local and freezes motion. `ios-release.yml` fails a build that sets it.
+- `/dev/kitchen-sink` shows every primitive, glyph, figure and sky; `/dev/audio` is the reference reader-audio wiring. Both are `__DEV__` only.
+- `node scripts/shots/audit.mjs <outDir>` walks the 1.0 flow. It takes CDP_PORT, APP_URL, W, H and SCALE; give each parallel agent its own CDP_PORT. `cdp.mjs` clicks the first VISIBLE match, because navigators keep hidden duplicates mounted.
+- `node scripts/lint-ui.mjs [paths] [--summary|--json]`.
+
+### 20.13 Owner checks that only a device can answer (TestFlight)
+
+1. Narration with the mute switch on and the screen locked, with and without a bed.
+2. The bed loops at 2:00 with no gap.
+3. Speech resumes after pause and after a mid-chapter speed change.
+4. The native line draw (strokeDashoffset), Sheet on iOS Modal, boxShadow glows, haptics, and font/splash gating.
+5. Notifications:
+   - DATE triggers and the identifiers they carry
+   - the 1.0 DAILY reminders superseded
+   - cold-start deep links
+   - provisional permission
+6. Backup export to Files and import back. A proof photo copied into documents.

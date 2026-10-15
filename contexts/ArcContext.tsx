@@ -24,7 +24,7 @@ import {
   type V1RawStorage,
 } from "./arc.types";
 import { ArcCtx, ArcStateCtx } from "./arcCtx";
-import { allKeys, createStoreQueue, parseJson, readMany, readRaw } from "./persist";
+import { allKeys, createStoreQueue, parseJson, readMany, readRaw, writeRaw } from "./persist";
 import { useUser } from "./UserContext";
 import { usePlus } from "./PlusContext";
 import { useRitualStore } from "./RitualContext";
@@ -51,6 +51,7 @@ import {
   weavingOf,
 } from "@/lib/store/arcSelectors";
 import { newId, randomSeed } from "@/lib/store/ids";
+import { classifyIndexRead, orphanChapterKeys } from "@/lib/store/indexLoad";
 import { writeChapter } from "@/lib/story/engine";
 import { hash32 } from "@/lib/story/text";
 
@@ -142,11 +143,13 @@ export function ArcProvider({ children }: { children: React.ReactNode }) {
     if (!userReady || !plusReady || readyRef.current) return;
     let stale = false;
     void (async () => {
-      const rawIndex = await readRaw(STORAGE_KEYS.arcs);
+      const [rawIndex, quarantine] = await readMany([STORAGE_KEYS.arcs, STORAGE_KEYS.arcsUnreadable]);
       let index = parseIndex(parseJson(rawIndex));
+      const read = classifyIndexRead(rawIndex, index);
+      let quarantined = !!quarantine;
       let texts: Record<ChapterId, Chapter> = {};
       let toWrite: ChapterId[] = [];
-      if (!index && rawIndex === null) {
+      if (read === "absent") {
         // First launch of 1.1: migrate 1.0 (v1 keys are only read).
         const [stories, ritualRaw, profile, journal, board] = await readMany([V1_KEYS.stories, V1_KEYS.ritual, V1_KEYS.profile, V1_KEYS.journal, V1_KEYS.board]);
         const raw: V1RawStorage = { stories, ritual: ritualRaw, profile, journal, board };
@@ -162,8 +165,11 @@ export function ArcProvider({ children }: { children: React.ReactNode }) {
             if (__DEV__) console.warn("[vela] migration failed", e);
           }
         }
-      } else if (!index && __DEV__) {
-        console.warn("[vela] arc index unreadable; starting empty without overwriting it");
+      } else if (read === "unreadable") {
+        // Keep the unreadable index before any action can write over it. The first
+        // copy wins: a later unreadable write never replaces the original.
+        if (!quarantined) quarantined = await writeRaw(STORAGE_KEYS.arcsUnreadable, rawIndex!);
+        if (__DEV__) console.warn("[vela] arc index unreadable; kept under", STORAGE_KEYS.arcsUnreadable);
       }
       index = index ?? EMPTY_ARC_INDEX;
 
@@ -177,9 +183,14 @@ export function ArcProvider({ children }: { children: React.ReactNode }) {
         if (!stored) toWrite.push(meta.id);
       });
 
-      // Orphan chapter keys (a crash between a chapter write and its index write) are garbage-collected.
-      const known = new Set(index.chapters.map((c) => chapterStorageKey(c.id)));
-      const orphans = rawIndex ? (await allKeys()).filter((k) => k.startsWith(STORAGE_KEYS.chapterPrefix) && !known.has(k)) : [];
+      // Orphan chapter keys (a crash between a chapter write and its index write) are
+      // garbage-collected, but only from an index that was read (lib/store/indexLoad).
+      const orphans = orphanChapterKeys(read === "readable" ? await allKeys() : [], index, {
+        read,
+        quarantined,
+        chapterKey: chapterStorageKey,
+        prefix: STORAGE_KEYS.chapterPrefix,
+      });
       if (stale) return;
       const next: ArcState = { index, texts };
       ref.current = next;

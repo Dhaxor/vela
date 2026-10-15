@@ -47,7 +47,8 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint:ui": "node scripts/lint-ui.mjs"
   },
   "private": true
 }

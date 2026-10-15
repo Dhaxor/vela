@@ -21,10 +21,14 @@ export function proofQuote(text: string): string {
 
 const LEADING_TIME = /^(?:today|tonight|yesterday|earlier|this (?:morning|afternoon|evening)|at last|so)[,\s]+/iu;
 
-const SWAP: Readonly<Record<string, string>> = {
-  my: "your", our: "your", mine: "yours", ours: "yours", me: "you", us: "you", myself: "yourself",
-  ourselves: "yourselves", i: "you", we: "you",
-};
+// A Map, so a word like 'constructor' never resolves to an Object.prototype member.
+const SWAP: ReadonlyMap<string, string> = new Map([
+  ["my", "your"], ["our", "your"], ["mine", "yours"], ["ours", "yours"], ["me", "you"], ["us", "you"], ["myself", "yourself"],
+  ["ourselves", "yourselves"], ["i", "you"], ["we", "you"],
+]);
+
+const SECOND_PERSON: ReadonlySet<string> = new Set(["you", "your", "yours", "yourself", "you're", "you've", "you'd", "you'll"]);
+const FIRST_CONTRACTED: ReadonlySet<string> = new Set(["i'm", "i've", "i'd", "i'll"]);
 
 function swapWords(tokens: readonly string[]): string[] {
   return tokens.map((t) => {
@@ -34,7 +38,7 @@ function swapWords(tokens: readonly string[]): string[] {
     if (lower === "i'm") return `you're${m[2]}`;
     if (lower === "i've") return `you've${m[2]}`;
     if (lower === "i'd") return `you'd${m[2]}`;
-    const swapped = SWAP[lower];
+    const swapped = SWAP.get(lower);
     return swapped ? swapped + m[2] : t;
   });
 }
@@ -58,6 +62,8 @@ export function proofDoneClause(text: string): string | null {
 
   // Drop the subject: 'I sent…', 'I've started…', 'I was brave'.
   let verbAt = 0;
+  // 'I write better at night' is a present-tense lesson; 'you wrote better' would change it.
+  let presentSubject = false;
   if (["i", "we"].includes(lower(0))) verbAt = 1;
   if (["i've", "we've"].includes(lower(0))) {
     const p = verbByParticiple(lower(1));
@@ -68,7 +74,10 @@ export function proofDoneClause(text: string): string | null {
   } else if (verbAt === 1) {
     if (["am", "was"].includes(lower(1))) tokens = ["were", ...tokens.slice(2)];
     else if (["have", "had"].includes(lower(1)) && verbByParticiple(lower(2))) tokens = [verbByParticiple(lower(2))!.past, ...tokens.slice(3)];
-    else tokens = tokens.slice(1);
+    else {
+      tokens = tokens.slice(1);
+      presentSubject = true;
+    }
   }
   if (tokens.length === 0) return null;
 
@@ -78,11 +87,18 @@ export function proofDoneClause(text: string): string | null {
   if (head === "were" || /n't$/u.test(head)) verb = head;
   else if (verbByPast(head)) verb = head;
   // 'Walk 20 minutes' → 'you walked…'; an ambiguous word needs an object ('Design review went well' stays quoted).
-  else if (verbByBase(head) && (!AMBIGUOUS.has(head) || OBJECTISH.test(next))) verb = verbByBase(head)!.past;
+  else if (verbByBase(head) && (!AMBIGUOUS.has(head) || OBJECTISH.test(next))) {
+    if (presentSubject) return null;
+    verb = verbByBase(head)!.past;
+  }
   else if (looksPast(head)) verb = head;
   if (!verb) return null;
 
-  const rest = swapWords(tokens.slice(1)).join(" ");
+  // 'Said I love you first': the user's own 'you' is someone else, so swapping
+  // their 'I' to 'you' would read 'you said you love you first'. Keep it quoted.
+  const restLower = tokens.slice(1).map((t) => t.toLowerCase().replace(/’/gu, "'").replace(/[^\p{L}']/gu, ""));
+  if (restLower.some((w) => SECOND_PERSON.has(w)) && restLower.some((w) => SWAP.has(w) || FIRST_CONTRACTED.has(w))) return null;
+  const rest = swapWords(tokens.slice(1)).join(" ").replace(/\byou was\b/gu, "you were").replace(/\byou am\b/gu, "you are");
   return lowerFirst(`you ${verb}${rest ? ` ${rest}` : ""}`);
 }
 

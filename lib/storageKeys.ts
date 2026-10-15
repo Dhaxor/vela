@@ -22,6 +22,8 @@ export const V1_KEYS = {
 export const STORAGE_KEYS = {
   /** Arc index: dreams, chapter metas, bridges, proofs, activeDreamId. Owner A2. */
   arcs: "vela.arcs.v2",
+  /** The raw arc index as found when it could not be read at launch, kept so it is never lost. Device-local. Owner A2. */
+  arcsUnreadable: "vela.arcs.v2.unreadable",
   /** Prefix of the one-immutable-key-per-chapter store. Use chapterStorageKey(). Owner A2. */
   chapterPrefix: "vela.chapter.v2.",
   /** ProfileV2 (contexts/user.types.ts). Migrated from vela.profile.v1. Owner A2. */

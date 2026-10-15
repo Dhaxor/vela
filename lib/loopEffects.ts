@@ -19,7 +19,7 @@
 import { useEffect, useRef } from "react";
 import type { Dream } from "@/contexts/arc.types";
 import { useArc } from "@/contexts/ArcContext";
-import * as RitualContext from "@/contexts/RitualContext";
+import { useProgress } from "@/contexts/RitualContext";
 import { useUser } from "@/contexts/UserContext";
 import { onAppStateChange } from "@/lib/asks";
 import { now } from "@/lib/clock";
@@ -33,23 +33,7 @@ import {
   type SnapshotProfile,
 } from "@/lib/notifications";
 import { createRebuilder, type Rebuilder } from "@/lib/notifications/rebuilder";
-import { emptyProgress, type ProgressState } from "@/lib/progress";
 import { shapeDesire } from "@/lib/story/shaper";
-
-interface ProgressSource {
-  readonly ready: boolean;
-  readonly state: ProgressState;
-}
-
-const NO_PROGRESS: ProgressSource = { ready: true, state: emptyProgress() };
-
-/**
- * RitualContext gains useProgress() when A2 moves it onto lib/progress
- * (CONTRACTS §10); until then the queue runs without pause and nights data.
- * Resolved once at module load, so the hook order never changes.
- */
-const useProgressSource: () => ProgressSource =
-  (RitualContext as unknown as { useProgress?: () => ProgressSource }).useProgress ?? (() => NO_PROGRESS);
 
 /** {desire.np} from the shaper; templates that need it are skipped when it can only fall back. */
 function desireNp(dream: Dream): string | null {
@@ -60,7 +44,7 @@ function desireNp(dream: Dream): string | null {
 export function useLoopEffects(): void {
   const user = useUser();
   const arc = useArc();
-  const progress = useProgressSource();
+  const progress = useProgress();
   const profile: SnapshotProfile | null = user.profile;
   const ready = user.ready && arc.ready && progress.ready;
 

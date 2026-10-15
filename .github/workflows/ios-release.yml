@@ -56,6 +56,20 @@ jobs:
       - name: Verify the lockfile matches package.json
         run: npm ci --include=dev
 
+      # Still mode pins the clock and freezes motion for web screenshots. The
+      # app ignores it off web, but EXPO_PUBLIC_* is inlined at build time, so
+      # a release bundle must never carry it (ELEVATE §8).
+      - name: Refuse a still-mode release
+        run: |
+          if [ -n "${EXPO_PUBLIC_STILL:-}" ]; then
+            echo "::error::EXPO_PUBLIC_STILL is set in the build environment."
+            exit 1
+          fi
+          if grep -n "EXPO_PUBLIC_STILL" eas.json app.json .env .env.* 2>/dev/null; then
+            echo "::error::EXPO_PUBLIC_STILL is configured for builds; remove it."
+            exit 1
+          fi
+
       - name: Tests and typecheck
         run: |
           npx --yes bun@1.3.14 test

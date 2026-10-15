@@ -248,6 +248,13 @@ describe("motifs and flags", () => {
     }
   });
 
+  test("the Threshold (stage V) is one unbroken minute: no motif paragraph", () => {
+    for (let seed = 0; seed < 40; seed += 1) {
+      const c = write({ seed, stage: 5, number: 5, motifIds: ["own-business"], woven: proof("p1", "learned", "Asked too late") }).chapter;
+      expect(c.body.filter((p) => p.beat === "motif")).toEqual([]);
+    }
+  });
+
   test("{motif.*} fragments only when a motif matched; then a motif paragraph joins", () => {
     for (let seed = 0; seed < 60; seed += 1) {
       const c = write({ seed }).chapter;

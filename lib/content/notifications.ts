@@ -53,17 +53,18 @@ export const NOTIFICATIONS: NotificationLibrary = {
     nt("nt-rc19", "Your next scene", "One more chapter of {desire.np}, written for you. Press play when you’re settled."),
     nt("nt-rc20", "Back inside it", "Chapter {chapter.numeral} of {desire.quote} is waiting, {name}."),
   ],
-  // At ritual time, today's bridge is still open.
+  // At ritual time once the chapter is heard: today's bridge is open, or still to be
+  // chosen (the tap then opens the chooser), so neutral copy must fit both.
   "ritual-bridge": [
     nt("nt-rb1", "Your bridge is waiting", "One small step, then one sentence about it. Your next chapter grows from that, {name}."),
-    nt("nt-rb2", "One step, any size", "Did you cross today’s bridge? Tell Vela in one sentence. A smaller step counts too."),
-    nt("nt-rb3", "How did it go, {name}?", "Crossed it, moved toward it, or learned something? Each one becomes a star."),
+    nt("nt-rb2", "One step, any size", "Today’s bridge is one small step. Choose it, cross it, or tell Vela how it went."),
+    nt("nt-rb3", "One step, then a star", "Choose a small step, or tell Vela how today’s went. Each one becomes a star, {name}."),
     nt("nt-rb4", "Your next chapter is listening", "Whatever you did today, write it in one line. The next chapter is woven from it."),
     nt("nt-rb5", "A star is waiting", "Log what you did today, {name}, even if it was small. It becomes part of your sky."),
-    nt("nt-rb6", "Not today? That counts too", "If the bridge didn’t happen, tell Vela what you learned. It still becomes a star."),
-    nt("nt-rb7", "It’s {ritual.time}", "Time to look back at today’s bridge, {name}. One honest sentence is enough."),
+    nt("nt-rb6", "Any size counts", "A two-minute step counts. So does an honest ‘not today’. Both become stars, {name}."),
+    nt("nt-rb7", "It’s {ritual.time}", "Time for today’s small step, {name}: choose it, or tell Vela how it went."),
     nt("nt-rb8", "Small steps make stars", "You have {proofs.phrase} so far. Add today’s, however it went."),
-    nt("nt-rb9", "Close the loop, {name}", "Write one line about today’s step. Your story picks up from there."),
+    nt("nt-rb9", "Close the loop, {name}", "Choose a small step, or write one line about it. Your story picks up from there."),
     nt("nt-rb10", "One line, one star", "However today went, there’s a star in it, {name}. Tap to tell Vela."),
     nt("nt-rb11", "Your sky has room for one more", "Tell Vela what you did toward your dream today. One line is plenty."),
     nt("nt-rb12", "Today’s bridge", "{bridge.quote}. Did it happen? One sentence turns it into a star, {name}."),

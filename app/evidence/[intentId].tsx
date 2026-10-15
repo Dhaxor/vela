@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Platform,
@@ -14,9 +14,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 import { ArrowLeft, Check, Footprints, Lightbulb, Sparkles } from "lucide-react-native";
+import { useArc } from "@/contexts/ArcContext";
 import { useStories } from "@/contexts/StoryContext";
 import {
-  proofConstellation,
   proofEnding,
   type EvidenceKind,
 } from "@/lib/futureMemory";
@@ -42,10 +42,8 @@ export default function EvidenceScreen() {
   const [kind, setKind] = useState<EvidenceKind>("did");
   const [note, setNote] = useState("");
   const [ending, setEnding] = useState<string | null>(null);
-  const points = useMemo(
-    () => proofConstellation(actions.filter((item) => item.intentId === intentId)),
-    [actions, intentId]
-  );
+  // Stars in the dream's current season, the saved proof included once it lands.
+  const stars = useArc().seasonProgress(intentId)?.stars ?? 0;
   const reviewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Leaving before the delay elapses cancels the ask; the next proof retries.
@@ -123,7 +121,7 @@ export default function EvidenceScreen() {
               <Text style={s.successBody}>{ending}</Text>
               <View style={s.constellation}>
                 {Array.from({ length: 7 }, (_, index) => {
-                  const lit = index < Math.min(7, points.length + 1);
+                  const lit = index < stars;
                   return <View key={index} style={[s.star, lit && s.starLit]} />;
                 })}
               </View>
