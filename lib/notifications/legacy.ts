@@ -1,3 +1,11 @@
+// LEGACY 1.0 ritual reminders (moved verbatim from lib/notifications.ts so the
+// new lib/notifications/ folder can own the "@/lib/notifications" path).
+// Re-exported unchanged from ./index.ts so app/settings.tsx and
+// lib/notifications.test.ts keep working. A6 deletes this file once no 1.0
+// screen imports remindersFor/applyReminders/clearReminders. NOTE: its
+// cancelAllScheduledNotificationsAsync() also wipes the v2 rolling queue, so
+// the v2 rebuild must run after any legacy call until then.
+//
 // Ritual reminders. The pure part — which hours a ritual choice means, and
 // the copy each one carries — is tested; the scheduling seam is a thin
 // wrapper over expo-notifications that no-ops off-iOS.
