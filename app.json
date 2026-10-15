@@ -2,7 +2,7 @@
   "expo": {
     "name": "Vela",
     "slug": "vela-manifest",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
@@ -10,13 +10,14 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "app.vela.manifest",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "config": {
         "usesNonExemptEncryption": false
       },
       "icon": "./assets/icon.png",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Vela lets you pin photos from your library to your vision board. Photos stay on this device."
+        "NSPhotoLibraryUsageDescription": "Vela lets you pin photos from your library to your vision board. Photos stay on this device.",
+        "NSPhotoLibraryAddUsageDescription": "Vela saves the proof cards you choose to share to your photo library."
       }
     },
     "android": {
@@ -40,6 +41,14 @@
           "imageWidth": 180,
           "resizeMode": "contain",
           "backgroundColor": "#0B0A18"
+        }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": true
         }
       ]
     ],
