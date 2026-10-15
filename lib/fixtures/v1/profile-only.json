@@ -1,0 +1,10 @@
+{
+  "_comment": "REAL 1.0.1 storage captured from the 1.0 web build on 2026-10-15 by driving onboarding, intake, rerolls, proofs and weaves. Values are the raw AsyncStorage strings.",
+  "raw": {
+    "stories": null,
+    "ritual": null,
+    "profile": "{\"name\":\"Kit\",\"focusAreas\":[\"career\",\"abundance\"],\"ritual\":\"evening\",\"mood\":\"hopeful\",\"createdAt\":\"2026-10-15T17:11:10.058Z\"}",
+    "journal": null,
+    "board": null
+  }
+}

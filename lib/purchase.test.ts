@@ -2,7 +2,11 @@ import { describe, expect, test } from "bun:test";
 import {
   ALL_SKUS,
   canAddBoardCard,
+  canAddDream,
+  canAddScene,
   canCreateIntent,
+  canUseArea,
+  canUseBed,
   classifyPurchaseError,
   displayablePrice,
   FREE_BOARD_CARDS,
@@ -97,5 +101,31 @@ describe("free-tier rules", () => {
     expect(canAddBoardCard(FREE_BOARD_CARDS - 1, false)).toBe(true);
     expect(canAddBoardCard(FREE_BOARD_CARDS, false)).toBe(false);
     expect(canAddBoardCard(500, true)).toBe(true);
+  });
+});
+
+describe("Plus gates (1.1)", () => {
+  test("one active dream free; Plus holds many", () => {
+    expect([canAddDream(0, false), canAddDream(1, false), canAddDream(5, true)]).toEqual([true, false, true]);
+  });
+
+  test("Night is the free bed; the others are Plus", () => {
+    expect(canUseBed("night", false)).toBe(true);
+    for (const bed of ["rain", "hearth", "dawn"] as const) {
+      expect(canUseBed(bed, false)).toBe(false);
+      expect(canUseBed(bed, true)).toBe(true);
+    }
+  });
+
+  test("the user's own focus areas are free; every area with Plus", () => {
+    expect(canUseArea("love", ["love", "career"], false)).toBe(true);
+    expect(canUseArea("peace", ["love"], false)).toBe(false);
+    expect(canUseArea("peace", ["love"], true)).toBe(true);
+  });
+
+  test("a few hand-added Scenes free; unlimited with Plus", () => {
+    expect(canAddScene(FREE_BOARD_CARDS - 1, false)).toBe(true);
+    expect(canAddScene(FREE_BOARD_CARDS, false)).toBe(false);
+    expect(canAddScene(999, true)).toBe(true);
   });
 });

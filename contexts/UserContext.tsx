@@ -1,110 +1,104 @@
-// Who the user is and what they're calling in. Local-only — Vela has no
-// accounts and no backend by design. Losing this on reinstall is acceptable;
-// syncing it to a server is not.
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { FocusId, sanitizeFocusIds } from "@/lib/focus";
+// Who the user is and how they like to listen (ProfileV2, contexts/user.types).
+// Local-only: Vela has no accounts and no backend by design. Stored under
+// 'vela.profile.v2'; on first run of 1.1 the 1.0 profile is migrated from
+// 'vela.profile.v1', which is read but never written (rollback safety).
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import type { ProfileV2, RitualTime } from "./user.types";
+import { createStoreQueue, parseJson, readRaw } from "./persist";
+import { STORAGE_KEYS, V1_KEYS } from "@/lib/storageKeys";
+import { now } from "@/lib/clock";
+import { legacyReminderChoice } from "@/lib/notifications";
+import { normalizeProfile, parseProfileV2, patchProfile, profileFromV1 } from "@/lib/store/profile";
 
-const PROFILE_KEY = "vela.profile.v1";
+export type { RitualTime };
+/** 1.0 name for the profile type; every 1.0 field keeps its name and meaning. */
+export type Profile = ProfileV2;
 
-export type RitualTime = "morning" | "evening" | "both";
+/** What onboarding provides. Everything else takes its v2 default. */
+export type NewProfile = Pick<ProfileV2, "name" | "focusAreas" | "ritual"> &
+  Partial<Omit<ProfileV2, "version" | "createdAt" | "name" | "focusAreas" | "ritual">>;
 
-export interface Profile {
-  name: string;
-  focusAreas: FocusId[];
-  ritual: RitualTime;
-  /** How the wanting feels right now — captured at onboarding, optional. */
-  mood?: string;
-  createdAt: string; // ISO
-}
+export type ProfilePatch = Partial<Omit<ProfileV2, "version" | "createdAt">>;
 
 interface UserValue {
-  /** null until AsyncStorage answered — gate navigation on `ready`. */
+  /** false until storage answered — gate navigation on `ready`. */
   ready: boolean;
-  profile: Profile | null;
-  saveProfile: (p: Omit<Profile, "createdAt">) => Promise<void>;
-  updateProfile: (patch: Partial<Omit<Profile, "createdAt">>) => Promise<void>;
+  profile: ProfileV2 | null;
+  saveProfile: (p: NewProfile) => Promise<void>;
+  updateProfile: (patch: ProfilePatch) => Promise<void>;
+  /** Backup import: replace the whole profile (validated). */
+  replaceProfile: (p: ProfileV2 | null) => Promise<void>;
 }
 
 const Ctx = createContext<UserValue | null>(null);
 
-function parseProfile(raw: string | null): Profile | null {
-  if (!raw) return null;
-  try {
-    const p = JSON.parse(raw) as Partial<Profile>;
-    if (typeof p.name !== "string" || !p.name.trim()) return null;
-    const focusAreas = sanitizeFocusIds(p.focusAreas);
-    const ritual: RitualTime =
-      p.ritual === "morning" || p.ritual === "evening" || p.ritual === "both"
-        ? p.ritual
-        : "both";
-    return {
-      name: p.name.trim().slice(0, 40),
-      focusAreas,
-      ritual,
-      ...(typeof p.mood === "string" && p.mood ? { mood: p.mood.slice(0, 40) } : {}),
-      createdAt:
-        typeof p.createdAt === "string" ? p.createdAt : new Date().toISOString(),
-    };
-  } catch {
-    return null;
-  }
-}
-
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<ProfileV2 | null>(null);
+  const ref = useRef<ProfileV2 | null>(null);
+  const queue = useMemo(createStoreQueue, []);
+
+  const commit = useCallback(
+    (next: ProfileV2 | null) => {
+      ref.current = next;
+      setProfile(next);
+      if (next) queue.enqueue({ head: [STORAGE_KEYS.profile, next] });
+      else queue.enqueue({ remove: [STORAGE_KEYS.profile] });
+    },
+    [queue]
+  );
 
   useEffect(() => {
     let stale = false;
     void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(PROFILE_KEY);
-        if (!stale) setProfile(parseProfile(raw));
-      } catch {
-        // unreadable storage = first run
-      } finally {
-        if (!stale) setReady(true);
+      const t = now();
+      let loaded = parseProfileV2(parseJson(await readRaw(STORAGE_KEYS.profile)), t);
+      let migrated = loaded ? null : profileFromV1(parseJson(await readRaw(V1_KEYS.profile)), t);
+      if (migrated) {
+        // Keep a 1.0 'reminders off' choice. Runs before ready, so before the first queue rebuild.
+        const choice = await legacyReminderChoice();
+        if (choice !== null) migrated = { ...migrated, remindersEnabled: choice };
       }
+      if (stale) return;
+      if (migrated) {
+        loaded = migrated;
+        queue.enqueue({ head: [STORAGE_KEYS.profile, migrated] });
+      }
+      ref.current = loaded;
+      setProfile(loaded);
+      setReady(true);
     })();
     return () => {
       stale = true;
     };
-  }, []);
-
-  const persist = useCallback(async (p: Profile) => {
-    setProfile(p);
-    try {
-      await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-    } catch {
-      // in-memory state still stands for this session
-    }
-  }, []);
+  }, [queue]);
 
   const saveProfile = useCallback(
-    async (p: Omit<Profile, "createdAt">) =>
-      persist({ ...p, createdAt: new Date().toISOString() }),
-    [persist]
+    async (p: NewProfile) => {
+      const next = normalizeProfile({ ...p, version: 2 }, now().toISOString());
+      if (next) commit({ ...next, createdAt: now().toISOString() });
+    },
+    [commit]
   );
 
   const updateProfile = useCallback(
-    async (patch: Partial<Omit<Profile, "createdAt">>) => {
-      if (!profile) return;
-      await persist({ ...profile, ...patch });
+    async (patch: ProfilePatch) => {
+      if (ref.current) commit(patchProfile(ref.current, patch));
     },
-    [profile, persist]
+    [commit]
+  );
+
+  const replaceProfile = useCallback(
+    async (p: ProfileV2 | null) => {
+      commit(p ? normalizeProfile({ ...p }, p.createdAt) : null);
+      await queue.flush();
+    },
+    [commit, queue]
   );
 
   const value = useMemo<UserValue>(
-    () => ({ ready, profile, saveProfile, updateProfile }),
-    [ready, profile, saveProfile, updateProfile]
+    () => ({ ready, profile, saveProfile, updateProfile, replaceProfile }),
+    [ready, profile, saveProfile, updateProfile, replaceProfile]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

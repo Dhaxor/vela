@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { remindersFor } from "./notifications";
+import { remindersFor } from "./legacy";
 
 describe("remindersFor", () => {
   test("morning ritual gets one 8am reminder", () => {
@@ -15,6 +15,11 @@ describe("remindersFor", () => {
   test("both bookend the day, morning first", () => {
     const r = remindersFor("both");
     expect(r.map((x) => x.hour)).toEqual([8, 21]);
+  });
+  test("no streak or guilt framing (ELEVATE P8)", () => {
+    for (const r of remindersFor("both")) {
+      expect(`${r.title} ${r.body}`.toLowerCase()).not.toContain("streak");
+    }
   });
   test("every reminder carries human copy", () => {
     for (const ritual of ["morning", "evening", "both"] as const) {

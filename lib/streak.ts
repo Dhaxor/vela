@@ -1,13 +1,15 @@
+// DEPRECATED in 1.1: lib/progress.ts replaces the resetting streak with
+// nights that never decrease. Kept only for the 1.0 screens and the useRitual()
+// adapter; delete once nothing under app/** or contexts/** imports it.
+//
 // Streak arithmetic over local-date keys. Pure and timezone-honest: a "day"
 // is the user's wall-clock day, so the key is built from local components,
 // never from ISO/UTC strings.
 
-export function dateKey(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
+import { localDateKey } from "./progress";
+
+/** Same as lib/progress localDateKey, the one day-key function in 1.1. */
+export const dateKey: (d: Date) => string = localDateKey;
 
 function shiftDays(d: Date, delta: number): Date {
   const next = new Date(d);

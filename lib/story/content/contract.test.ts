@@ -42,10 +42,14 @@ const PROSE: ReadonlySet<ContentKind> = new Set<ContentKind>([
   "beat", "weave", "seed", "notToday", "recall", "cumulative", "motifLine", "bridge", "reshape",
   "learnedRetry", "notification", "identityLine", "scriptPrompt", "arcPrompt", "frame369",
 ]);
-/** Tokens whose value starts with a capital letter or a quote mark, so they may open a sentence. */
+/**
+ * Tokens whose value starts with a capital letter or a quote mark, so they may
+ * open a sentence. Not {desire.done.i}: noun desires shape to a lowercase
+ * clause ('slow, quiet mornings are part of my life').
+ */
 const SENTENCE_INITIAL_OK: ReadonlySet<string> = new Set([
   "{name}", "{desire.quote}", "{proof.quote}", "{bridge.quote}", "{proof.date}", "{chapter.numeral}",
-  "{chapter.title}", "{stage.name}", "{ritual.time}", "{desire.done.i}",
+  "{chapter.title}", "{stage.name}", "{ritual.time}",
 ]);
 
 const tokensIn = (text: string): string[] => text.match(/\{[^{}]+\}/g) ?? [];

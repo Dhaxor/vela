@@ -1,16 +1,19 @@
-// LEGACY 1.0 ritual reminders (moved verbatim from lib/notifications.ts so the
-// new lib/notifications/ folder can own the "@/lib/notifications" path).
-// Re-exported unchanged from ./index.ts so app/settings.tsx and
-// lib/notifications.test.ts keep working. A6 deletes this file once no 1.0
-// screen imports remindersFor/applyReminders/clearReminders. NOTE: its
+// LEGACY 1.0 ritual reminders (moved from lib/notifications.ts so the new
+// lib/notifications/ folder can own the "@/lib/notifications" path; the
+// evening copy lost its streak framing, ELEVATE P8).
+// Re-exported unchanged from ./index.ts so the 1.0 app/settings.tsx keeps
+// working. A6 deletes this file once no 1.0 screen imports
+// remindersFor/applyReminders/clearReminders. Its
 // cancelAllScheduledNotificationsAsync() also wipes the v2 rolling queue, so
-// the v2 rebuild must run after any legacy call until then.
+// both calls end with requestRebuild(): the v2 rebuild always runs after them,
+// and once the user has a weaving dream it supersedes these DAILY reminders.
 //
 // Ritual reminders. The pure part — which hours a ritual choice means, and
 // the copy each one carries — is tested; the scheduling seam is a thin
 // wrapper over expo-notifications that no-ops off-iOS.
 
-import type { RitualTime } from "@/contexts/UserContext";
+import type { RitualTime } from "@/contexts/user.types";
+import { requestRebuild } from "./bus";
 
 export interface ReminderSpec {
   hour: number;
@@ -31,7 +34,7 @@ export function remindersFor(ritual: RitualTime): ReminderSpec[] {
     hour: 21,
     minute: 0,
     title: "Close the day inside your story",
-    body: "One listen, one line, and the streak stays lit.",
+    body: "One listen and one quiet line before you rest.",
   };
   if (ritual === "morning") return [morning];
   if (ritual === "evening") return [evening];
@@ -62,6 +65,8 @@ export async function applyReminders(specs: ReminderSpec[]): Promise<boolean> {
     return true;
   } catch {
     return false; // web / simulator without permission — reminders just stay off
+  } finally {
+    requestRebuild();
   }
 }
 
@@ -72,5 +77,7 @@ export async function clearReminders(): Promise<void> {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {
     // nothing scheduled anywhere notifications don't exist
+  } finally {
+    requestRebuild();
   }
 }

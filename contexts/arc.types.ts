@@ -189,6 +189,8 @@ export interface Chapter {
   readonly wordCount: DaypartPair<number>;
   /** Engine version that wrote this revision (golden-test stability). */
   readonly engineVersion: number;
+  /** Content ids this revision consumed (title, fragments, motif details). The next chapter never repeats them. Absent on migrated text. */
+  readonly usedIds?: readonly string[];
 }
 
 /** Index entry for a chapter. Lives in the arc index; carries the mutable loop fields. */

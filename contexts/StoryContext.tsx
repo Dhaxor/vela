@@ -1,57 +1,24 @@
-// Intents and their stories. An intent is the thing being called in; a story
-// is one rendering of life inside it. Regeneration accumulates used fragment
-// ids per intent so no two renderings repeat until the pools are exhausted —
-// the exact complaint that sinks the incumbent.
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// 1.0 STORIES API, now a thin adapter over ArcContext (CONTRACTS §15). The
+// 1.0 screens (Today, reader, evidence, intake, Stories tab) keep running on
+// v2 data until Phase 2 replaces them; then this file is deleted.
+//
+// The rule that matters: the chapter number never moves without a proof.
+// regenerate() opens a chapter already woven from a proof, starts the next
+// season when the current one is complete, and otherwise REWRITES the latest
+// chapter (same number). 1.0 tied every chapter to an action, so the adapter
+// picks the suggested bridge where 1.0 derived one.
+import React, { useCallback, useContext, useMemo } from "react";
+import { isArcError, type ChapterId } from "./arc.types";
+import { ArcStateCtx } from "./arcCtx";
+import { useArc } from "./ArcContext";
+import { usePlus } from "./PlusContext";
 import type { FocusId } from "@/lib/focus";
-import { composeStory, StoryParagraph } from "@/lib/story/engine";
-import {
-  deriveFutureAction,
-  evidenceBridge,
-  sanitizeEvidence,
-  type EvidenceKind,
-  type FutureAction,
-} from "@/lib/futureMemory";
-import { useUser } from "./UserContext";
+import type { EvidenceKind, FutureAction } from "@/lib/futureMemory";
+import { now } from "@/lib/clock";
+import { latestChapterOf, offersFor, openBridgeOf, seasonProgressOf, chapterMetaOf } from "@/lib/store/arcSelectors";
+import { actionFor, actionOfBridge, actionsOf, intentOf, isPendingChapter, storyOf, type Intent, type StoredStory } from "@/lib/store/legacy";
 
-const STORE_KEY = "vela.stories.v1";
-
-/** Free tier: one living intent. Enforced at the UI seam; Plus lifts it (P4). */
-export const MAX_FREE_INTENTS = 1;
-
-export interface Intent {
-  id: string;
-  focus: FocusId;
-  desire: string;
-  feeling: string;
-  createdAt: string;
-  /** Fragment/title ids consumed by past renderings — the repetition guard. */
-  usedIds: string[];
-  /** Increments when evidence is folded into a new future-memory chapter. */
-  chapter: number;
-}
-
-export interface StoredStory {
-  id: string;
-  intentId: string;
-  title: string;
-  paragraphs: StoryParagraph[];
-  createdAt: string;
-}
-
-interface Persisted {
-  intents: Intent[];
-  stories: StoredStory[];
-  actions: FutureAction[];
-}
+export type { Intent, StoredStory };
 
 interface StoryValue {
   ready: boolean;
@@ -60,298 +27,108 @@ interface StoryValue {
   actions: FutureAction[];
   storyForIntent: (intentId: string) => StoredStory | undefined;
   actionForIntent: (intentId: string) => FutureAction | undefined;
-  createIntent: (input: {
-    focus: FocusId;
-    desire: string;
-    feeling: string;
-  }) => Promise<StoredStory>;
+  createIntent: (input: { focus: FocusId; desire: string; feeling: string }) => Promise<StoredStory>;
   regenerate: (intentId: string) => Promise<StoredStory | undefined>;
-  saveEvidence: (input: {
-    intentId: string;
-    kind: EvidenceKind;
-    evidence: string;
-  }) => Promise<FutureAction | undefined>;
+  saveEvidence: (input: { intentId: string; kind: EvidenceKind; evidence: string }) => Promise<FutureAction | undefined>;
   reshapeAction: (intentId: string, text: string) => Promise<void>;
   removeIntent: (intentId: string) => Promise<void>;
 }
 
-const Ctx = createContext<StoryValue | null>(null);
-
-const newId = () =>
-  `${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
-
-function parse(raw: string | null): Persisted {
-  if (!raw) return { intents: [], stories: [], actions: [] };
-  try {
-    const p = JSON.parse(raw) as Partial<Persisted>;
-    const intents = Array.isArray(p.intents)
-      ? (p.intents as Intent[]).map((intent) => ({
-          ...intent,
-          chapter:
-            typeof intent.chapter === "number" && intent.chapter > 0
-              ? intent.chapter
-              : 1,
-        }))
-      : [];
-    const stories = Array.isArray(p.stories) ? (p.stories as StoredStory[]) : [];
-    const actions = Array.isArray(p.actions) ? [...(p.actions as FutureAction[])] : [];
-    // Existing users keep their story data and receive the new action bridge
-    // automatically. Migration is additive and never resets an intent.
-    for (const intent of intents) {
-      if (actions.some((action) => action.intentId === intent.id)) continue;
-      const story = stories.find((item) => item.intentId === intent.id);
-      if (!story) continue;
-      actions.push({
-        id: newId(),
-        intentId: intent.id,
-        storyId: story.id,
-        text: deriveFutureAction({
-          focus: intent.focus,
-          desire: intent.desire,
-          chapter: intent.chapter,
-        }),
-        state: "open",
-        createdAt: story.createdAt,
-      });
-    }
-    return {
-      intents,
-      stories,
-      actions,
-    };
-  } catch {
-    return { intents: [], stories: [], actions: [] };
-  }
+/** Pass-through: the data lives in ArcProvider. Kept so the root tree keeps its shape. */
+export function StoryProvider({ children }: { children: React.ReactNode }) {
+  return <>{children}</>;
 }
 
-export function StoryProvider({ children }: { children: React.ReactNode }) {
-  const { profile } = useUser();
-  const [ready, setReady] = useState(false);
-  const [data, setData] = useState<Persisted>({ intents: [], stories: [], actions: [] });
+export function useStories(): StoryValue {
+  const arc = useArc();
+  const live = useContext(ArcStateCtx);
+  const { isPlus } = usePlus();
+  if (!live) throw new Error("useStories must be used inside ArcProvider");
 
-  useEffect(() => {
-    let stale = false;
-    void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(STORE_KEY);
-        if (!stale) setData(parse(raw));
-      } catch {
-        // first run
-      } finally {
-        if (!stale) setReady(true);
-      }
-    })();
-    return () => {
-      stale = true;
-    };
-  }, []);
+  const index = live.current.index;
+  const texts = live.current.texts;
 
-  const persist = useCallback(async (next: Persisted) => {
-    setData(next);
-    try {
-      await AsyncStorage.setItem(STORE_KEY, JSON.stringify(next));
-    } catch {
-      // session state still stands
-    }
-  }, []);
-
-  const render = useCallback(
-    (
-      intent: Intent,
-      chapter: number,
-      latestEvidence?: string
-    ): { story: StoredStory; action: FutureAction; usedIds: string[] } => {
-      const composed = composeStory({
-        name: profile?.name ?? "",
-        focus: intent.focus,
-        desire: intent.desire,
-        feeling: intent.feeling,
-        seed: (Date.now() ^ Math.floor(Math.random() * 0xffffffff)) >>> 0,
-        avoid: new Set(intent.usedIds),
-      });
-      const storyId = newId();
-      const bridge = evidenceBridge(latestEvidence);
-      const paragraphs = bridge
-        ? [
-            ...composed.paragraphs,
-            { fragmentId: `proof-${chapter}`, text: bridge },
-          ]
-        : composed.paragraphs;
-      const createdAt = new Date().toISOString();
-      return {
-        story: {
-          id: storyId,
-          intentId: intent.id,
-          title: composed.title,
-          paragraphs,
-          createdAt,
-        },
-        action: {
-          id: newId(),
-          intentId: intent.id,
-          storyId,
-          text: deriveFutureAction({
-            focus: intent.focus,
-            desire: intent.desire,
-            chapter,
-          }),
-          state: "open",
-          createdAt,
-        },
-        usedIds: composed.usedIds,
-      };
+  /** Pick the suggested bridge for a chapter, as 1.0 derived one automatically. */
+  const chooseSuggested = useCallback(
+    async (chapterId: ChapterId) => {
+      const offers = offersFor(live.current.index, chapterId, isPlus);
+      const pick = offers.find((o) => o.suggested) ?? offers[0];
+      if (pick) await arc.chooseBridge({ chapterId, choice: { tier: pick.tier, libraryId: pick.libraryId } });
     },
-    [profile?.name]
+    [arc, live, isPlus]
   );
 
-  const createIntent = useCallback(
-    async (input: { focus: FocusId; desire: string; feeling: string }) => {
-      const intent: Intent = {
-        id: newId(),
-        focus: input.focus,
-        desire: input.desire.trim(),
-        feeling: input.feeling,
-        createdAt: new Date().toISOString(),
-        usedIds: [],
-        chapter: 1,
-      };
-      const { story, action, usedIds } = render(intent, 1);
-      intent.usedIds = usedIds;
-      await persist({
-        intents: [intent, ...data.intents],
-        // One living story per intent: the newest rendering replaces the old.
-        stories: [story, ...data.stories.filter((s) => s.intentId !== intent.id)],
-        actions: [action, ...data.actions],
-      });
-      return story;
+  const storyById = useCallback(
+    (chapterId: ChapterId): StoredStory | undefined => {
+      const meta = chapterMetaOf(live.current.index, chapterId);
+      const text = live.current.texts[chapterId];
+      return meta && text ? storyOf(meta, text, now()) : undefined;
     },
-    [data, persist, render]
+    [live]
   );
 
   const regenerate = useCallback(
     async (intentId: string) => {
-      const intent = data.intents.find((i) => i.id === intentId);
-      if (!intent) return undefined;
-      const chapter = (intent.chapter ?? 1) + 1;
-      const latestEvidence = data.actions.find(
-        (action) => action.intentId === intentId && action.evidence
-      )?.evidence;
-      const { story, action, usedIds } = render(intent, chapter, latestEvidence);
-      const nextIntent: Intent = {
-        ...intent,
-        usedIds: [...intent.usedIds, ...usedIds],
-        chapter,
-      };
-      await persist({
-        intents: data.intents.map((i) => (i.id === intentId ? nextIntent : i)),
-        stories: [story, ...data.stories.filter((s) => s.intentId !== intentId)],
-        actions: [action, ...data.actions],
-      });
-      return story;
+      const latest = latestChapterOf(live.current.index, intentId);
+      if (!latest) return undefined;
+      try {
+        if (isPendingChapter(live.current.index, latest)) {
+          // The 1.0 'Weave chapter N+1' button: the chapter was woven when the proof was saved.
+          await arc.markHeard(latest.id);
+          if (!seasonProgressOf(live.current.index, intentId)?.complete) await chooseSuggested(latest.id);
+          return storyById(latest.id);
+        }
+        if (seasonProgressOf(live.current.index, intentId)?.complete) {
+          const first = await arc.beginNextSeason(intentId);
+          await chooseSuggested(first.id);
+          return storyById(first.id);
+        }
+        return storyById((await arc.rerenderChapter(latest.id)).id);
+      } catch (e) {
+        if (isArcError(e)) return undefined;
+        throw e;
+      }
     },
-    [data, persist, render]
+    [arc, live, chooseSuggested, storyById]
   );
 
-  const saveEvidence = useCallback(
-    async (input: { intentId: string; kind: EvidenceKind; evidence: string }) => {
-      const current = data.actions.find(
-        (action) => action.intentId === input.intentId && action.state !== "completed"
-      );
-      const evidence = sanitizeEvidence(input.evidence);
-      if (!current || !evidence) return undefined;
-      const completed: FutureAction = {
-        ...current,
-        state: "completed",
-        evidence,
-        evidenceKind: input.kind,
-        completedAt: new Date().toISOString(),
-      };
-      await persist({
-        ...data,
-        actions: data.actions.map((action) =>
-          action.id === current.id ? completed : action
-        ),
-      });
-      return completed;
-    },
-    [data, persist]
-  );
-
-  const reshapeAction = useCallback(
-    async (intentId: string, text: string) => {
-      const current = data.actions.find(
-        (action) => action.intentId === intentId && action.state !== "completed"
-      );
-      const clean = text.trim().replace(/\s+/gu, " ").slice(0, 180);
-      if (!current || !clean) return;
-      await persist({
-        ...data,
-        actions: data.actions.map((action) =>
-          action.id === current.id
-            ? { ...action, text: clean, state: "reshaped" }
-            : action
-        ),
-      });
-    },
-    [data, persist]
-  );
-
-  const removeIntent = useCallback(
-    async (intentId: string) => {
-      await persist({
-        intents: data.intents.filter((i) => i.id !== intentId),
-        stories: data.stories.filter((s) => s.intentId !== intentId),
-        actions: data.actions.filter((a) => a.intentId !== intentId),
-      });
-    },
-    [data, persist]
-  );
-
-  const storyForIntent = useCallback(
-    (intentId: string) => data.stories.find((s) => s.intentId === intentId),
-    [data.stories]
-  );
-
-  const actionForIntent = useCallback(
-    (intentId: string) =>
-      data.actions.find(
-        (action) => action.intentId === intentId && action.state !== "completed"
-      ) ?? data.actions.find((action) => action.intentId === intentId),
-    [data.actions]
-  );
-
-  const value = useMemo<StoryValue>(
-    () => ({
-      ready,
-      intents: data.intents,
-      stories: data.stories,
-      actions: data.actions,
-      storyForIntent,
-      actionForIntent,
-      createIntent,
+  return useMemo<StoryValue>(() => {
+    const dreams = index.dreams.filter((d) => d.status !== "released");
+    const ids = new Set(dreams.map((d) => d.id));
+    const stories = dreams.flatMap((d) => {
+      const meta = latestChapterOf(index, d.id);
+      const text = meta ? texts[meta.id] : undefined;
+      return meta && text ? [storyOf(meta, text, now())] : [];
+    });
+    return {
+      ready: arc.ready,
+      intents: dreams.map((d) => intentOf(index, d)),
+      stories,
+      actions: actionsOf(index, ids),
+      storyForIntent: (intentId) => stories.find((s) => s.intentId === intentId),
+      actionForIntent: (intentId) => actionFor(index, intentId),
+      createIntent: async (input) => {
+        const chapter = await arc.createDream(input);
+        await chooseSuggested(chapter.id);
+        return storyById(chapter.id)!;
+      },
       regenerate,
-      saveEvidence,
-      reshapeAction,
-      removeIntent,
-    }),
-    [
-      ready,
-      data,
-      storyForIntent,
-      actionForIntent,
-      createIntent,
-      regenerate,
-      saveEvidence,
-      reshapeAction,
-      removeIntent,
-    ]
-  );
-
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
-}
-
-export function useStories(): StoryValue {
-  const v = useContext(Ctx);
-  if (!v) throw new Error("useStories must be used inside StoryProvider");
-  return v;
+      saveEvidence: async ({ intentId, kind, evidence }) => {
+        const open = openBridgeOf(live.current.index, intentId);
+        if (!open) return undefined;
+        try {
+          const { proof } = await arc.saveProofAndWeave({ dreamId: intentId, kind, text: evidence });
+          return actionOfBridge({ ...open, status: kind === "learned" ? "learned" : "crossed", proofId: proof.id }, proof);
+        } catch (e) {
+          if (isArcError(e)) return undefined;
+          throw e;
+        }
+      },
+      reshapeAction: async (intentId, text) => {
+        const open = openBridgeOf(live.current.index, intentId);
+        if (open) await arc.chooseBridge({ chapterId: open.chapterId, choice: { tier: "own", text } }).catch(() => undefined);
+      },
+      removeIntent: (intentId) => arc.releaseDream(intentId),
+    };
+  }, [arc, index, texts, live, chooseSuggested, storyById, regenerate]);
 }

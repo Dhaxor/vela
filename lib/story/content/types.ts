@@ -369,7 +369,7 @@ export const TOKEN_REFERENCE = {
   "{desire.np}": { value: "Noun phrase, second person, lowercase first letter. Unshapeable desire → 'the life you described'.", example: "your own design studio · finding your soulmate · being debt free", span: "desire", personal: true },
   "{desire.done}": { value: "Completed clause, second person, lowercase first letter. Never sentence-initial. Unshapeable desire → 'you found your way to {desire.quote}'.", example: "you opened your bakery · you are debt free", span: "desire", personal: true },
   "{desire.np.my}": { value: "First-person noun phrase. Rituals only, never narration.", example: "my own design studio", personal: true },
-  "{desire.done.i}": { value: "First-person completed clause. Rituals only, never narration.", example: "I opened my bakery · I am debt free", personal: true },
+  "{desire.done.i}": { value: "First-person completed clause. Rituals only, never narration. Lowercase for noun desires, so it never opens a sentence.", example: "I opened my bakery · slow, quiet mornings are part of my life", personal: true },
   "{proof.quote}": { value: "The proof sentence in curly quotes, trailing punctuation removed.", example: "“Sent my portfolio to two studios”", span: "proof", personal: true },
   "{proof.done}": { value: "The proof as a second-person past clause, lowercase. Falls back to 'you wrote {proof.quote}'.", example: "you sent your portfolio to two studios", span: "proof", personal: true },
   "{proof.ago}": { value: "Relative day in words, lowercase.", example: "earlier today · yesterday · twelve days ago" },

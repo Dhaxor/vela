@@ -1,13 +1,20 @@
 import { describe, expect, test } from "bun:test";
+import type { Proof } from "@/contexts/arc.types";
+import type { AskKind } from "./asks";
 import type { FutureAction } from "./futureMemory";
 import {
   maybeRequestStoreReview,
+  proofTimesFromProofs,
   recordedProofTimes,
+  requestReviewIfDue,
+  requestReviewNow,
   REVIEW_MIN_RETURN_GAP_MS,
   REVIEW_REQUESTED_KEY,
+  reviewIsDue,
   shouldRequestReview,
   type ReviewDeps,
 } from "./reviewPrompt";
+import { STORAGE_KEYS } from "./storageKeys";
 
 const HOUR = 60 * 60 * 1000;
 const T0 = Date.parse("2026-09-01T09:00:00.000Z");
@@ -158,5 +165,96 @@ describe("maybeRequestStoreReview", () => {
     expect(await maybeRequestStoreReview(eligible, sheetFails.deps)).toBe(false);
     // The flag was written first, so a failed sheet is still never retried.
     expect(sheetFails.store.has(REVIEW_REQUESTED_KEY)).toBe(true);
+  });
+});
+
+function v2Proof(id: string, createdAtMs: number): Proof {
+  const iso = new Date(createdAtMs).toISOString();
+  return {
+    id,
+    dreamId: "d1",
+    bridgeId: null,
+    kind: "did",
+    text: `proof ${id}`,
+    photoUri: null,
+    createdAt: iso,
+    dateKey: iso.slice(0, 10),
+    wovenInChapterId: null,
+    starIndex: 1,
+    season: 1,
+    origin: "bridge",
+  };
+}
+
+/** fakeDeps plus a scripted asks arbiter. */
+function arbiterDeps(options: { now: number; stored?: string | null; available?: boolean; grant?: AskKind | null }) {
+  const fake = fakeDeps(options);
+  const claims: (readonly AskKind[])[] = [];
+  fake.deps.claimAsk = async (candidates) => {
+    claims.push(candidates);
+    return options.grant === undefined ? candidates[0] ?? null : options.grant;
+  };
+  return { ...fake, claims };
+}
+
+describe("1.1 review moments (2nd proof, Named Sky)", () => {
+  const proofs = [v2Proof("seed", T0), v2Proof("p1", T0 + 26 * HOUR)];
+  const now = T0 + 26 * HOUR;
+
+  test("the 1.0 once-ever flag key is unchanged", () => {
+    expect(REVIEW_REQUESTED_KEY).toBe("vela-review-requested-v1");
+    expect(STORAGE_KEYS.reviewRequested).toBe(REVIEW_REQUESTED_KEY);
+  });
+
+  test("proof times come from v2 proofs, oldest first", () => {
+    expect(proofTimesFromProofs([proofs[1], proofs[0], { ...proofs[0], createdAt: "nope" }])).toEqual([T0, T0 + 26 * HOUR]);
+  });
+
+  test("due after the 2nd proof once the user came back; never twice, never without StoreKit", async () => {
+    expect(await reviewIsDue(proofs, fakeDeps({ now }).deps)).toBe(true);
+    expect(await reviewIsDue(proofs.slice(0, 1), fakeDeps({ now }).deps)).toBe(false);
+    expect(await reviewIsDue([v2Proof("a", T0), v2Proof("b", T0 + HOUR)], fakeDeps({ now: T0 + HOUR }).deps)).toBe(false);
+    expect(await reviewIsDue(proofs, fakeDeps({ now, stored: "2026-08-01T00:00:00.000Z" }).deps)).toBe(false);
+    expect(await reviewIsDue(proofs, fakeDeps({ now, available: false }).deps)).toBe(false);
+  });
+
+  test("goes through the asks arbiter and asks once", async () => {
+    const { deps, calls, claims, store } = arbiterDeps({ now });
+    expect(await requestReviewIfDue(proofs, deps)).toBe(true);
+    expect(claims).toEqual([["review"]]);
+    expect(calls.requestReview).toBe(1);
+    expect(store.get(REVIEW_REQUESTED_KEY)).toBe(new Date(now).toISOString());
+    // The Named Sky later: already asked, the arbiter is not even consulted.
+    const seven = [...proofs, ...[2, 3, 4, 5, 6].map((i) => v2Proof(`p${i}`, now + i * 24 * HOUR))];
+    deps.now = () => now + 7 * 24 * HOUR;
+    expect(await requestReviewIfDue(seven, deps)).toBe(false);
+    expect(claims.length).toBe(1);
+    expect(calls.requestReview).toBe(1);
+  });
+
+  test("when the session's ask went elsewhere, nothing is shown and the review stays due", async () => {
+    const { deps, calls, store } = arbiterDeps({ now, grant: null });
+    expect(await requestReviewIfDue(proofs, deps)).toBe(false);
+    expect(calls.requestReview).toBe(0);
+    expect(store.has(REVIEW_REQUESTED_KEY)).toBe(false);
+    expect(await reviewIsDue(proofs, deps)).toBe(true);
+  });
+
+  test("not due: the arbiter's ask is never spent", async () => {
+    const { deps, claims } = arbiterDeps({ now: T0 + HOUR });
+    expect(await requestReviewIfDue([v2Proof("a", T0), v2Proof("b", T0 + HOUR)], deps)).toBe(false);
+    expect(claims).toEqual([]);
+  });
+
+  test("requestReviewNow flags first and never asks twice", async () => {
+    const { deps, calls, store } = fakeDeps({ now });
+    deps.requestReview = async () => {
+      calls.requestReview += 1;
+      throw new Error("StoreKit error");
+    };
+    expect(await requestReviewNow(deps)).toBe(false);
+    expect(store.has(REVIEW_REQUESTED_KEY)).toBe(true);
+    expect(await requestReviewNow(deps)).toBe(false);
+    expect(calls.requestReview).toBe(1);
   });
 });

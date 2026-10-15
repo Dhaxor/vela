@@ -1,53 +1,128 @@
-// Vela design system — single source of truth. No screen may hardcode a hex.
+// Vela design system v2, "Night Atlas". The single source of truth for colour,
+// type, spacing and motion. No screen may hardcode a hex, a font size or a
+// weight (scripts/lint-ui.mjs enforces it in app/**).
 //
-// Direction (mobile-app-ui-design skill): sleep/meditation conventions — deep
-// indigo night sky, ambient low-contrast surfaces, soft transitions. 60/30/10:
-// 60% indigo base, 30% starlight text, 10% gold accent reserved for primary
-// actions and moments of abundance. Dark-only in v1: one perfect theme beats
-// two adequate ones, and manifestation is an evening/morning ritual.
-import { Platform } from "react-native";
+// Colour grammar (docs/ELEVATE_1.1.md §2): the sky is 60%, one starlight hue in
+// four tiers is 30%, and the loop owns the last 10%: GOLD is the future (the
+// one filled CTA, numerals, the user's own words), VIOLET is the bridge,
+// STARLIGHT is proof. Kind of proof is shown by tint and glyph, never by gold.
+//
+// The 1.0 token names survive as aliases at the bottom of `colors`, so screens
+// that haven't been rebuilt yet pick up the new palette without edits.
+import type { FocusId } from "@/lib/focus";
+
+/** Raw v2 palette. Components read these through `colors`. */
+export const palette = {
+  // SKY (60%)
+  sky950: "#05040D",
+  sky900: "#0B0A18",
+  sky800: "#110F2A",
+  sky700: "#19163A",
+  sky600: "#241F52",
+
+  // STARLIGHT TEXT (30%): one hue, four tiers. ink48 is the floor on open sky,
+  // ink56 the floor on cards. The 1.0 .38 tier is gone.
+  ink100: "rgba(246, 242, 255, 1)",
+  ink80: "rgba(246, 242, 255, 0.80)",
+  ink64: "rgba(246, 242, 255, 0.64)",
+  ink56: "rgba(246, 242, 255, 0.56)",
+  ink48: "rgba(246, 242, 255, 0.48)",
+
+  // GOLD = the future
+  gold500: "#E9B44C",
+  gold300: "#F5D58E",
+  goldEngrave: "rgba(233, 180, 76, 0.24)",
+  goldLine: "rgba(245, 213, 142, 0.44)",
+  onGold: "#1E1503",
+
+  // VIOLET = the bridge
+  violet400: "#A897FF",
+  violetWash: "rgba(168, 151, 255, 0.10)",
+  violetLine: "rgba(168, 151, 255, 0.30)",
+
+  // STARLIGHT = proof
+  did: "#FFF3D6",
+  moved: "#EEF0FF",
+  learned: "#C9D8FF",
+  starGlow: "rgba(255, 236, 190, 0.35)",
+
+  // Lines and the one alarm colour
+  hairline: "rgba(214, 206, 255, 0.10)",
+  chartLine: "rgba(214, 206, 255, 0.06)",
+  danger: "#E8938F",
+  dangerWash: "rgba(232, 147, 143, 0.12)",
+
+  // Atmosphere
+  nebulaViolet: "#A897FF",
+  nebulaTeal: "#6FD3C1",
+  dawn: "#F2A27C",
+  white: "#FFFFFF",
+} as const;
 
 export const colors = {
-  // 60% — the night
-  bg: "#0B0A18",
-  bgRaised: "#12102400", // transparent helper for gradients-by-overlay
-  surface: "#161430",
-  card: "#1C1A3A",
-  cardPressed: "#232052",
-  hairline: "#2A2750",
+  ...palette,
 
-  // 30% — starlight text (opacity tiers of one hue, per the skill)
-  text: "rgba(244, 241, 255, 0.96)",
-  textSecondary: "rgba(244, 241, 255, 0.72)",
-  textMuted: "rgba(244, 241, 255, 0.55)",
-  textFaint: "rgba(244, 241, 255, 0.38)",
+  /** Vellum card base: sky700 at 72%. */
+  vellum: "rgba(25, 22, 58, 0.72)",
+  /** Raised/selected vellum (sky600 tint), the 1.0 gold-wash replacement. */
+  vellumRaised: "rgba(36, 31, 82, 0.72)",
+  /** Dock and tab bar: sky950 at 92%. */
+  chrome: "rgba(5, 4, 13, 0.92)",
+  /** Modal scrim behind sheets. */
+  scrim: "rgba(5, 4, 13, 0.64)",
+  /** 1px top highlight on vellum. */
+  highlight: "rgba(255, 255, 255, 0.06)",
+  /** 1px inner highlight on filled buttons. */
+  buttonHighlight: "rgba(255, 255, 255, 0.35)",
+  /** Shadows are tinted sky950, never grey. */
+  shadow: "rgba(5, 4, 13, 0.6)",
+  transparent: "transparent",
 
-  // 10% — gold, the color of the thing being called in
-  accent: "#E9B44C",
+  // ---- 1.0 aliases (keep until Phase 2 screens stop using them) ----
+  bg: palette.sky900,
+  bgRaised: "rgba(17, 15, 42, 0)",
+  surface: palette.sky800,
+  card: "rgba(25, 22, 58, 0.72)",
+  cardPressed: palette.sky600,
+  text: palette.ink100,
+  textSecondary: palette.ink80,
+  textMuted: palette.ink64,
+  textFaint: palette.ink48,
+  accent: palette.gold500,
   accentPressed: "#D9A43C",
-  onAccent: "#241B04",
-  accentSoft: "rgba(233, 180, 76, 0.12)", // secondary buttons / highlights
-  accentBorder: "rgba(233, 180, 76, 0.28)",
-
-  // supporting aurora violet — selection, links, secondary identity
-  aurora: "#9D8CFF",
-  auroraSoft: "rgba(157, 140, 255, 0.14)",
-  auroraBorder: "rgba(157, 140, 255, 0.30)",
-
-  // semantic, softened for a calm app
-  success: "#7FC8A9",
-  successSoft: "rgba(127, 200, 169, 0.14)",
-  danger: "#E28B8B",
-  dangerSoft: "rgba(226, 139, 139, 0.14)",
-
-  // shadows tinted to the background, never gray
-  shadow: "rgba(4, 3, 18, 0.6)",
+  onAccent: palette.onGold,
+  /** Was a gold wash, which turns brown on indigo. Now a raised sky surface. */
+  accentSoft: "rgba(36, 31, 82, 0.72)",
+  accentBorder: palette.goldLine,
+  aurora: palette.violet400,
+  auroraSoft: palette.violetWash,
+  auroraBorder: palette.violetLine,
+  /** The success green is retired; proof is starlight. */
+  success: palette.did,
+  successSoft: "rgba(255, 243, 214, 0.06)",
+  dangerSoft: palette.dangerWash,
 } as const;
 
 export type ThemeColors = typeof colors;
+export type ColorToken = keyof typeof colors;
+
+/**
+ * Horizon tint per focus area, painted as a radial glow over the bottom 30% of
+ * the sky. `null` (no dream yet) uses the neutral Night horizon.
+ */
+export const horizonTint: Record<FocusId | "none", string> = {
+  love: "#3A2147",
+  abundance: "#3A2A22",
+  career: "#1C2B4A",
+  health: "#123A3A",
+  confidence: "#2A2160",
+  peace: "#1A2E4F",
+  none: "#1E1A44",
+};
 
 /** 8-point grid. No other spacing values exist. */
 export const space = {
+  xxs: 2,
   xs: 4,
   sm: 8,
   md: 12,
@@ -58,63 +133,91 @@ export const space = {
   huge: 64,
 } as const;
 
+/** Screen gutter: 24, or 16 below 380pt wide (iPhone SE and mini). */
+export const gutter = { regular: 24, compact: 16, compactBelow: 380 } as const;
+
 export const radius = {
+  xs: 8,
   sm: 12,
   md: 16,
+  /** Vellum cards. */
+  card: 20,
   lg: 24,
   xl: 28,
   pill: 999,
 } as const;
 
+/** Minimum tap target (Apple HIG). */
+export const hitSize = 44;
+
 /**
- * Two families with a clear division of labor:
- * UI speaks the system sans; the manifested world speaks a serif.
- * Four sizes, two weights — the skill's ceiling, treated as a budget.
+ * Registered font family names. They must match the keys passed to useFonts in
+ * app/_layout.tsx. Custom families never take fontWeight or fontStyle: the
+ * weight and the italic are separate files.
+ */
+export const fonts = {
+  serif: "Newsreader_400Regular",
+  serifItalic: "Newsreader_400Regular_Italic",
+  sans: "InstrumentSans_400Regular",
+  sansSemiBold: "InstrumentSans_600SemiBold",
+} as const;
+
+/**
+ * The scale: four sizes (32, 22, 17, 13), two weights (400, 600). `reading`
+ * is the story voice at body size; `eyebrow` is the caption size set in 600
+ * caps. `<T variant>` (components/ui) is the only consumer in screens.
+ */
+export const typeScale = {
+  display: { fontFamily: fonts.serif, fontSize: 32, lineHeight: 38, letterSpacing: -0.3 },
+  title: { fontFamily: fonts.serif, fontSize: 22, lineHeight: 28, letterSpacing: -0.1 },
+  body: { fontFamily: fonts.sans, fontSize: 17, lineHeight: 26, letterSpacing: 0 },
+  reading: { fontFamily: fonts.serif, fontSize: 17, lineHeight: 28, letterSpacing: 0 },
+  caption: { fontFamily: fonts.sans, fontSize: 13, lineHeight: 18, letterSpacing: 0.1 },
+  eyebrow: { fontFamily: fonts.sansSemiBold, fontSize: 13, lineHeight: 18, letterSpacing: 1.2 },
+} as const;
+
+export type TypeVariant = keyof typeof typeScale;
+
+/** Reader text size (ProfileV2.textSize). S is the design default; M and L are accessibility steps. */
+export const readerSizes = {
+  S: { fontSize: 17, lineHeight: 28 },
+  M: { fontSize: 19, lineHeight: 31 },
+  L: { fontSize: 21, lineHeight: 34 },
+} as const;
+
+/**
+ * 1.0 alias. Spreading `type.x` now sets the v2 family and size with no
+ * fontWeight, so untouched screens render Newsreader / Instrument Sans.
  */
 export const type = {
-  display: {
-    fontSize: 32,
-    lineHeight: 40,
-    fontWeight: "600" as const,
-    letterSpacing: 0.2,
-  },
-  title: {
-    fontSize: 22,
-    lineHeight: 28,
-    fontWeight: "600" as const,
-  },
-  body: {
-    fontSize: 16,
-    lineHeight: 24,
-    fontWeight: "400" as const,
-  },
-  caption: {
-    fontSize: 13,
-    lineHeight: 18,
-    fontWeight: "400" as const,
-  },
+  display: typeScale.display,
+  title: typeScale.title,
+  body: typeScale.body,
+  caption: typeScale.caption,
 } as const;
 
-/** Serif voice for stories and affirmations. */
-export const serif = Platform.select({
-  ios: "Georgia",
-  default: "serif",
-});
+/** 1.0 alias: the serif voice. Georgia and the generic 'serif' are banned. */
+export const serif = fonts.serif;
 
-/** Soft ambient shadow for cards; tinted to the night, never gray. */
-export const cardShadow = {
-  shadowColor: colors.shadow,
-  shadowOpacity: 0.5,
-  shadowRadius: 24,
-  shadowOffset: { width: 0, height: 8 },
-  elevation: 6,
-} as const;
+/** Soft ambient shadow for cards, tinted to the night (never grey). */
+export const cardShadow = { boxShadow: "0px 8px 24px rgba(5, 4, 13, 0.6)" } as const;
 
-/** Gold glow reserved for the primary CTA and peak moments. */
-export const accentGlow = {
-  shadowColor: colors.accent,
-  shadowOpacity: 0.35,
-  shadowRadius: 16,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 8,
+/** The gold glow (r16, .35). It belongs to the primary button only. */
+export const accentGlow = { boxShadow: "0px 4px 16px rgba(233, 180, 76, 0.35)" } as const;
+
+/**
+ * Motion vocabulary (ELEVATE §2.6). Easing is the "drift" bezier; components
+ * build it with Reanimated's Easing.bezier(...motion.drift).
+ */
+export const motion = {
+  tap: 120,
+  state: 220,
+  enter: 420,
+  reveal: 900,
+  ceremony: 2200,
+  drift: [0.22, 1, 0.36, 1] as const,
+  press: { damping: 18, stiffness: 160, scale: 0.97 },
+  twinkle: { min: 2400, max: 5600, low: 0.35, high: 1 },
+  nebulaDriftPx: 16,
+  nebulaPeriodMs: 24000,
 } as const;

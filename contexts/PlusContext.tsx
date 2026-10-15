@@ -13,9 +13,12 @@ import React, {
 import { AppState, Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  ALL_SKUS,
+  canAddDream,
+  canUseArea,
+  canUseBed,
   classifyPurchaseError,
   displayablePrice,
+  FREE_SCENES,
   INAPP_SKUS,
   ownsPlus,
   PlanId,
@@ -23,8 +26,12 @@ import {
   PurchaseResult,
   SUBSCRIPTION_SKUS,
 } from "@/lib/purchase";
+import type { BedId } from "@/lib/audio/types";
+import type { FocusId } from "@/lib/focus";
+import { STORAGE_KEYS } from "@/lib/storageKeys";
+import { useUser } from "./UserContext";
 
-const PLUS_KEY = "vela.plus.v1";
+const PLUS_KEY = STORAGE_KEYS.plus;
 
 export const PURCHASES_ENABLED = Platform.OS === "ios";
 
@@ -41,6 +48,14 @@ function iap(): typeof import("expo-iap") | null {
 interface PlusValue {
   ready: boolean;
   isPlus: boolean;
+  /** May another dream become active? `activeDreams` = dreams with status 'active' (ArcValue.canCreateDream applies this). */
+  canAddDream: (activeDreams: number) => boolean;
+  /** Soundscape bed gate: Night free, the rest Plus. A locked bed falls back to Night. */
+  canUseBed: (bedId: BedId) => boolean;
+  /** Affirmation area gate: the user's own focus areas free, every area with Plus. */
+  canUseArea: (area: FocusId) => boolean;
+  /** Hand-added Scenes allowed for free (Infinity with Plus). Proof photos never count. */
+  sceneLimit: number;
   /** Localised prices per plan, or null until the store answers. */
   prices: Record<PlanId, string | null>;
   purchase: (plan: PlanId) => Promise<PurchaseResult>;
@@ -189,10 +204,15 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     }
   }, [setEntitlement]);
 
+  const focusAreas = useUser().profile?.focusAreas;
   const value = useMemo<PlusValue>(
     () => ({
       ready,
       isPlus,
+      canAddDream: (activeDreams: number) => canAddDream(activeDreams, isPlus),
+      canUseBed: (bedId: BedId) => canUseBed(bedId, isPlus),
+      canUseArea: (area: FocusId) => canUseArea(area, focusAreas ?? [], isPlus),
+      sceneLimit: isPlus ? Number.POSITIVE_INFINITY : FREE_SCENES,
       prices,
       purchase,
       restore,
@@ -200,7 +220,7 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
         setEntitlement(v);
       },
     }),
-    [ready, isPlus, prices, purchase, restore, setEntitlement]
+    [ready, isPlus, focusAreas, prices, purchase, restore, setEntitlement]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -1,18 +1,21 @@
-// PLACEHOLDER — replaced by content writer (A4).
-// Ritual prompts for the Rituals tab (exactly 3 practices: Script, 3·6·9, Gratitude).
-// script: 12 per focus · scriptArc: 12 arc-linked (use {chapter.numeral},
-// {chapter.title}, {stage.name}, {bridge.quote}, {proof.quote}; a prompt is
-// offered only when every token it uses can be filled) · gratitude: 48 stems
-// ending with '…' · frames369: 10 per focus, FIRST person, filled through the
-// shaper ({desire.done.i}, {desire.np.my}, {feeling}). Targets: POOL_TARGETS.prompts.
+// RITUAL PROMPTS (A4) for the Rituals tab's three practices: Script, 3·6·9, Gratitude.
+// script: 12 per focus, addressed to the user, present-tense scenes from inside
+//   the life they want ({desire.np} / {desire.quote} only where the grammar holds
+//   for every desire shape).
+// scriptArc: 12 prompts tied to the arc. A prompt is offered only when every
+//   token it uses can be filled, so the bridge and proof prompts appear once
+//   those exist.
+// gratitude: 48 stems ending with '…', completed by the user in their own voice.
+// frames369: 10 per focus, FIRST person, filled through the shaper. {desire.done.i}
+//   never opens a sentence: the shaper can return 'slow mornings are part of my
+//   life', which starts lowercase.
 // STYLE HEADER (binding for every content file; full guide: docs/CONTRACTS.md §7–§8)
-// - Original prose only. Second person, present tense. Never 'I' in narration.
+// - Original prose only. Second person in prompts; first person only in stems and frames.
 // - Template sentences ≤ 24 words (each {token} counts as one word). No parentheses,
 //   abbreviations or '&'. Curly quotes only. At most one em dash per fragment.
 // - No 'not X but Y'. Nothing from BANNED_PHRASES in lib/story/content/types.ts: no 'future self', no
 //   moon or astrology, no weekdays, no health or money guarantees, no stock LLM words.
-// - No gendered pronouns for other people. Never assume a body, gender or relationship:
-//   a line that assumes a partner, child, boss or client declares `requires: [flag]`.
+// - No gendered pronouns for other people. Never assume a body, gender or relationship.
 // - Only the tokens ALLOWED_TOKENS permits for this content kind. Never start a sentence
 //   with a lowercase-valued token ({desire.np}, {desire.done}, {proof.done}, {feeling}…).
 // - Ids are permanent once shipped: never rename, never reuse. Prefixes: CONTRACTS.md §7.2.
@@ -20,30 +23,233 @@
 
 import type { ContentStatus, Fragment, RitualPrompts } from "@/lib/story/content/types";
 
-export const STATUS: ContentStatus = "placeholder";
+export const STATUS: ContentStatus = "final";
 
 const fr = (id: string, text: string): Fragment => ({ id, text });
 
 export const RITUAL_PROMPTS: RitualPrompts = {
   script: {
-    love: [fr("sp-lo1", "Placeholder. Write the quiet evening after {desire.np} became ordinary.")],
-    abundance: [fr("sp-ab1", "Placeholder. Write the morning you paid a bill without flinching.")],
-    career: [fr("sp-ca1", "Placeholder. Write the moment someone asks how you built {desire.np}.")],
-    health: [fr("sp-he1", "Placeholder. Write a day where your energy lasts until evening.")],
-    confidence: [fr("sp-co1", "Placeholder. Write the meeting where you spoke first and meant it.")],
-    peace: [fr("sp-pe1", "Placeholder. Write a slow morning with nothing to rush.")],
+    love: [
+      fr("sp-lo1", "Write the quiet evening after {desire.np} became ordinary."),
+      fr("sp-lo2", "Describe the first morning you wake up inside the love you want. Use the present tense."),
+      fr("sp-lo3", "Write the message someone sends you that makes you smile at your phone."),
+      fr("sp-lo4", "Write the moment someone who loves you notices you are tired, and what they do about it."),
+      fr("sp-lo5", "Describe an ordinary evening at a table full of people you love. Who laughs first?"),
+      fr("sp-lo6", "Write the conversation where you finally say exactly what you feel, and it goes well."),
+      fr("sp-lo7", "Write the toast someone gives about you at a dinner a year from now."),
+      fr("sp-lo8", "Describe what you no longer settle for in love, and what you have instead."),
+      fr("sp-lo9", "Write a scene where you are completely yourself and completely welcome."),
+      fr("sp-lo10", "Write the phone call where you tell your oldest friend your news, and how they react."),
+      fr("sp-lo11", "Write about {desire.quote} as if it is already true, using only what you can see, hear and touch."),
+      fr("sp-lo12", "List ten small, everyday signs of the love you want, as if you noticed them today."),
+    ],
+    abundance: [
+      fr("sp-ab1", "Write the morning you check your balance and feel nothing but calm."),
+      fr("sp-ab2", "Describe the first thing you buy without checking the price, and why you chose it."),
+      fr("sp-ab3", "Write the moment you pay off the last of something, in full detail."),
+      fr("sp-ab4", "Describe an ordinary week where money is simply handled. What do you notice?"),
+      fr("sp-ab5", "Write the conversation where you ask for more, and hear yes."),
+      fr("sp-ab6", "Describe a free afternoon once money worries have gone quiet. Where do you go?"),
+      fr("sp-ab7", "Write the generous thing you do for someone, simply because you can."),
+      fr("sp-ab8", "Write a thank-you note to the version of you who started saving."),
+      fr("sp-ab9", "Describe your table, your plans and your evenings, a year into {desire.np}."),
+      fr("sp-ab10", "Write about {desire.quote} as if it happened last year, and today is ordinary."),
+      fr("sp-ab11", "List five things you no longer worry about, and what fills that space instead."),
+      fr("sp-ab12", "Write the day you realise you have more than enough, and what you do next."),
+    ],
+    career: [
+      fr("sp-ca1", "Write the moment someone asks how you built {desire.np}, and your honest answer."),
+      fr("sp-ca2", "Describe a working morning you love, from the first coffee to the first win."),
+      fr("sp-ca3", "Write the email that tells you yes. Then write your reply."),
+      fr("sp-ca4", "Describe the room where you do your best work, object by object."),
+      fr("sp-ca5", "Write the conversation where you name your price and nobody blinks."),
+      fr("sp-ca6", "Write a hard working day handled well, inside the career you want."),
+      fr("sp-ca7", "Write the introduction someone gives just before you speak at an event."),
+      fr("sp-ca8", "Describe what you are known for, in the words of the people you work with."),
+      fr("sp-ca9", "Write tomorrow’s to-do list as the person who already has the work you want."),
+      fr("sp-ca10", "Write the thank-you note you send to someone who helped you get here."),
+      fr("sp-ca11", "Describe the first sixty seconds after the good news arrives."),
+      fr("sp-ca12", "Write about {desire.quote} as if you are describing it to a curious friend a year from now."),
+    ],
+    health: [
+      fr("sp-he1", "Write a day where your energy lasts from morning until evening."),
+      fr("sp-he2", "Describe how your body feels when you wake up rested, part by part."),
+      fr("sp-he3", "Write the moment you say yes to a plan you would once have cancelled."),
+      fr("sp-he4", "Describe a meal you love that also leaves you feeling good."),
+      fr("sp-he5", "Write about a hard day in your body, handled with care and patience."),
+      fr("sp-he6", "Write what a friend says when they notice how well you seem."),
+      fr("sp-he7", "Describe an ordinary afternoon with energy to spare. What do you spend it on?"),
+      fr("sp-he8", "Write a thank-you letter to your body for what it does every day."),
+      fr("sp-he9", "Write the scene of {desire.np}, using only what you can see, hear and feel."),
+      fr("sp-he10", "List five habits you keep without thinking, in the life you want."),
+      fr("sp-he11", "Write about the first time you notice you have stopped bracing for tiredness."),
+      fr("sp-he12", "Write about {desire.quote} as if it is already true, in the present tense."),
+    ],
+    confidence: [
+      fr("sp-co1", "Write the meeting where you spoke first and meant it."),
+      fr("sp-co2", "Describe how you enter a room full of strangers, in the life you want."),
+      fr("sp-co3", "Write the moment you say no, kindly and clearly, and how it feels afterwards."),
+      fr("sp-co4", "Write a compliment you accept without deflecting, and exactly what you say."),
+      fr("sp-co5", "Describe your voice when you are fully confident. How does it sound?"),
+      fr("sp-co6", "Write about a stumble in public that you recover from with grace."),
+      fr("sp-co7", "Write what you would do this week if you trusted yourself completely."),
+      fr("sp-co8", "Describe the outfit that feels most like you, and where you go in it."),
+      fr("sp-co9", "Write the message you have been afraid to send, as the boldest version of you."),
+      fr("sp-co10", "Write the scene where someone tells you that you inspired them."),
+      fr("sp-co11", "List ten things that scare you today which you do easily in the life you want."),
+      fr("sp-co12", "Write about {desire.quote} as if it is already true, from the moment you wake."),
+    ],
+    peace: [
+      fr("sp-pe1", "Write a slow morning with nothing to rush."),
+      fr("sp-pe2", "Describe the sounds you hear in the calmest hour of your day."),
+      fr("sp-pe3", "Write about a stressful moment you meet calmly, one step at a time."),
+      fr("sp-pe4", "Describe an evening after the phone has gone to bed before you."),
+      fr("sp-pe5", "Write the boundary you set, and the space it opens up."),
+      fr("sp-pe6", "Describe the room where you feel most at peace, object by object."),
+      fr("sp-pe7", "Write about a day with white space in it. What do you do with the gaps?"),
+      fr("sp-pe8", "Write the moment a friend says you seem so calm, and what you tell them."),
+      fr("sp-pe9", "List everything you no longer carry, and how it feels to set each one down."),
+      fr("sp-pe10", "Write a walk with no destination and no headphones."),
+      fr("sp-pe11", "Write about {desire.np} as an ordinary part of your week."),
+      fr("sp-pe12", "Write about {desire.quote} as if it is already true, in one unhurried paragraph."),
+    ],
   },
-  scriptArc: [fr("sp-arc1", "Placeholder. Write the scene just after Chapter {chapter.numeral} ends.")],
+  scriptArc: [
+    fr("sp-arc1", "Write the scene just after Chapter {chapter.numeral} ends."),
+    fr("sp-arc2", "Write the next morning, the one that comes after {chapter.title}."),
+    fr("sp-arc3", "Your story has reached {stage.name}. Write the hour just before it begins."),
+    fr("sp-arc4", "You chose {bridge.quote}. Write the moment just after you cross it."),
+    fr("sp-arc5", "You wrote {proof.quote}. Script what happened next, as if telling a friend."),
+    fr("sp-arc6", "Write Chapter {chapter.numeral} again, through the eyes of someone who loves you."),
+    fr("sp-arc7", "Imagine {bridge.quote} is done. Write how the rest of that day feels."),
+    fr("sp-arc8", "Write the chapter after {chapter.title} in five sentences."),
+    fr("sp-arc9", "Write one detail Chapter {chapter.numeral} left out, the one only you would notice."),
+    fr("sp-arc10", "{proof.quote}. Write the ordinary day that step leads to, a month from now."),
+    fr("sp-arc11", "Write a note from the person in Chapter {chapter.numeral} to you, {name}, as you are today."),
+    fr("sp-arc12", "Chapter {chapter.numeral} is {stage.name}. Write your own version of that scene, {name}, in your own words."),
+  ],
   gratitude: [
-    fr("gs1", "Placeholder. Something small that went right today…"),
-    fr("gs2", "Placeholder. A person I am glad exists…"),
+    fr("gs1", "Something small that went right today…"),
+    fr("gs2", "A person I am glad exists…"),
+    fr("gs3", "Something my body did for me today…"),
+    fr("gs4", "A comfort I usually overlook…"),
+    fr("gs5", "Something hard that taught me something…"),
+    fr("gs6", "A sound I enjoyed today…"),
+    fr("gs7", "Something I have that I once wished for…"),
+    fr("gs8", "A door that is open to me…"),
+    fr("gs9", "A moment today I would happily live again…"),
+    fr("gs10", "Someone who made today easier…"),
+    fr("gs11", "A taste I enjoyed today…"),
+    fr("gs12", "Something in my home I love…"),
+    fr("gs13", "A skill I worked hard for…"),
+    fr("gs14", "A kindness I received recently…"),
+    fr("gs15", "A kindness I gave today…"),
+    fr("gs16", "Something I liked about the weather today…"),
+    fr("gs17", "A step I took toward my dream…"),
+    fr("gs18", "Something I learned this week…"),
+    fr("gs19", "A place that feels like mine…"),
+    fr("gs20", "A memory that still makes me smile…"),
+    fr("gs21", "A worry that turned out smaller than I feared…"),
+    fr("gs22", "A friend I think of when I hear good news…"),
+    fr("gs23", "Something my younger self would be proud of…"),
+    fr("gs24", "A problem I solved recently…"),
+    fr("gs25", "A book, song or film that stayed with me…"),
+    fr("gs26", "Something that made me laugh today…"),
+    fr("gs27", "A quiet moment I had today…"),
+    fr("gs28", "Someone who believed in me early…"),
+    fr("gs29", "Something I am looking forward to…"),
+    fr("gs30", "A part of my routine I love…"),
+    fr("gs31", "Something beautiful I noticed outside…"),
+    fr("gs32", "A way my life is easier than it used to be…"),
+    fr("gs33", "A boundary that protected my peace…"),
+    fr("gs34", "Something I made with my own hands…"),
+    fr("gs35", "A lesson from a hard day this week…"),
+    fr("gs36", "Someone I can always call…"),
+    fr("gs37", "A small luxury I enjoyed…"),
+    fr("gs38", "Something I have outgrown…"),
+    fr("gs39", "A choice I made today that I feel good about…"),
+    fr("gs40", "Something that went better than I expected…"),
+    fr("gs41", "A part of my health I don’t want to take for granted…"),
+    fr("gs42", "A teacher, of any kind, who shaped me…"),
+    fr("gs43", "Something I can do today that I couldn’t do a year ago…"),
+    fr("gs44", "An ordinary thing that is quietly wonderful…"),
+    fr("gs45", "The best part of the last few hours…"),
+    fr("gs46", "Something that reminded me I am on my way…"),
+    fr("gs47", "A voice I love to hear…"),
+    fr("gs48", "Something I forgave, or was forgiven for…"),
   ],
   frames369: {
-    love: [fr("f369-lo1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
-    abundance: [fr("f369-ab1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
-    career: [fr("f369-ca1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
-    health: [fr("f369-he1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
-    confidence: [fr("f369-co1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
-    peace: [fr("f369-pe1", "Placeholder. I am so {feeling} that {desire.done.i}.")],
+    love: [
+      fr("f369-lo1", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-lo2", "I am so grateful that {desire.done.i}."),
+      fr("f369-lo3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-lo4", "Love finds me easily, and I let it in."),
+      fr("f369-lo5", "I give love freely, and it comes back to me."),
+      fr("f369-lo6", "My heart is open, and I feel {feeling}."),
+      fr("f369-lo7", "I deserve the love in my life, and I welcome more of it."),
+      fr("f369-lo8", "It is safe for me to be fully known and fully loved."),
+      fr("f369-lo9", "I celebrate {desire.np.my} with my whole heart."),
+      fr("f369-lo10", "Thank you, thank you, thank you: {desire.done.i}."),
+    ],
+    abundance: [
+      fr("f369-ab1", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-ab2", "I am so grateful that {desire.done.i}."),
+      fr("f369-ab3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-ab4", "I handle money with calm, clear confidence."),
+      fr("f369-ab5", "Every choice I make with money is an act of care."),
+      fr("f369-ab6", "I celebrate {desire.np.my} today and every day."),
+      fr("f369-ab7", "I am calm, capable and wise with money."),
+      fr("f369-ab8", "My money grows steadily because I tend it."),
+      fr("f369-ab9", "I give thanks that {desire.done.i}."),
+      fr("f369-ab10", "I welcome more ease into my life, and I feel {feeling}."),
+    ],
+    career: [
+      fr("f369-ca1", "I am so proud that {desire.done.i}."),
+      fr("f369-ca2", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-ca3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-ca4", "My work is valued, and I value it too."),
+      fr("f369-ca5", "I do work I love, with people who respect it."),
+      fr("f369-ca6", "I show up ready, and good opportunities find me."),
+      fr("f369-ca7", "I finish what I start, and I share it proudly."),
+      fr("f369-ca8", "I celebrate {desire.np.my} with gratitude."),
+      fr("f369-ca9", "Every day my skills grow and my work speaks for me."),
+      fr("f369-ca10", "My working days leave me feeling {feeling}."),
+    ],
+    health: [
+      fr("f369-he1", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-he2", "I am so grateful that {desire.done.i}."),
+      fr("f369-he3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-he4", "My body is my ally, and I treat it with care."),
+      fr("f369-he5", "I rest well and wake with energy for my day."),
+      fr("f369-he6", "I listen to my body, and I give it what it needs."),
+      fr("f369-he7", "Every day I choose what makes me feel strong and well."),
+      fr("f369-he8", "I celebrate {desire.np.my} with every breath."),
+      fr("f369-he9", "My energy is steady, and my days feel good."),
+      fr("f369-he10", "My body feels like home, and I feel {feeling}."),
+    ],
+    confidence: [
+      fr("f369-co1", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-co2", "I am so proud that {desire.done.i}."),
+      fr("f369-co3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-co4", "I trust myself, and I speak with ease."),
+      fr("f369-co5", "My voice matters, and I use it."),
+      fr("f369-co6", "I belong in every room I enter."),
+      fr("f369-co7", "I take up space calmly and kindly."),
+      fr("f369-co8", "I celebrate {desire.np.my} and the courage it took."),
+      fr("f369-co9", "I am so grateful that {desire.done.i}."),
+      fr("f369-co10", "I am exactly who I want to be, and I feel {feeling}."),
+    ],
+    peace: [
+      fr("f369-pe1", "I feel {feeling} knowing that {desire.done.i}."),
+      fr("f369-pe2", "I am so grateful that {desire.done.i}."),
+      fr("f369-pe3", "I am thankful every day for {desire.np.my}."),
+      fr("f369-pe4", "My mornings are slow, and my mind is calm."),
+      fr("f369-pe5", "I breathe slowly, and my whole body softens."),
+      fr("f369-pe6", "I let go of what is no longer mine to carry."),
+      fr("f369-pe7", "Calm is my home, and I return to it easily."),
+      fr("f369-pe8", "I celebrate {desire.np.my} with a calm and open heart."),
+      fr("f369-pe9", "There is enough time for everything that matters."),
+      fr("f369-pe10", "My days have room in them, and I feel {feeling}."),
+    ],
   },
 };

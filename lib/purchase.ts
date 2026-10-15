@@ -6,6 +6,9 @@
 // real bugs live — is interpretation: cancel vs failure, whether a restore
 // genuinely proves Plus, and whether a price is safe to show.
 
+import { FREE_BEDS, type BedId } from "./audio/types";
+import type { FocusId } from "./focus";
+
 export const PLUS_SKUS = {
   monthly: "app.vela.manifest.plus.monthly",
   yearly: "app.vela.manifest.plus.yearly",
@@ -88,16 +91,39 @@ export function displayablePrice(
 }
 
 // ------------------------------------------------------- free-tier rules
+//
+// Free forever: one dream at a time with the whole loop (chapters, bridges,
+// proofs, the sky, unlimited listening, backup), the Night bed, the user's own
+// focus areas for affirmations, and a few Scenes. Plus adds room: more dreams
+// at once, every bed, every affirmation area, unlimited Scenes. Plus never
+// locks anything a user made (the Plus-lapse rule lives in contexts/arc.types).
 
-/** Free tier: one living intent. Unlimited listens are free forever. */
+/** Free tier: one ACTIVE dream at a time (resting or releasing frees the slot). Same rule as arc.types FREE_ACTIVE_DREAMS. */
 export const FREE_INTENTS = 1;
-/** Free tier: three board cards. */
+/** Free tier: Scenes the user adds by hand. Proof photos join Scenes automatically and never count. */
 export const FREE_BOARD_CARDS = 3;
+export const FREE_SCENES = FREE_BOARD_CARDS;
 
+/** 1.0 name: may another dream start? `currentCount` = active dreams. */
 export function canCreateIntent(currentCount: number, isPlus: boolean): boolean {
   return isPlus || currentCount < FREE_INTENTS;
 }
 
+export const canAddDream = canCreateIntent;
+
+/** 1.0 name for the Scenes gate. */
 export function canAddBoardCard(currentCount: number, isPlus: boolean): boolean {
-  return isPlus || currentCount < FREE_BOARD_CARDS;
+  return isPlus || currentCount < FREE_SCENES;
+}
+
+export const canAddScene = canAddBoardCard;
+
+/** Soundscape beds: Night is free; Rain on Glass, Hearth and Dawn are Plus. */
+export function canUseBed(bedId: BedId, isPlus: boolean): boolean {
+  return isPlus || FREE_BEDS.includes(bedId);
+}
+
+/** Affirmation areas: the user's own focus areas are free; every area with Plus. */
+export function canUseArea(area: FocusId, ownAreas: readonly FocusId[], isPlus: boolean): boolean {
+  return isPlus || ownAreas.includes(area);
 }

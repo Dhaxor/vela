@@ -1,7 +1,7 @@
 // Walks a fresh user through every Vela screen on the local web build and
 // captures each one. Used for design audits and as the base for store shots.
 //
-//   node store/shots/audit.mjs <outDir>      (APP_URL, SCALE, W, H optional)
+//   node scripts/shots/audit.mjs <outDir>      (APP_URL, SCALE, W, H, CDP_PORT optional)
 import path from 'node:path';
 import { launch } from './cdp.mjs';
 
@@ -14,7 +14,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const tid = (id) => `[data-testid="${id}"]`;
 const has = (t) => `document.body.innerText.includes(${JSON.stringify(t)})`;
 
-const page = await launch({ port: 9344 });
+const page = await launch({ port: Number(process.env.CDP_PORT || 9344) });
 await page.viewport(W, H, SCALE);
 let n = 0;
 const shot = async (name) => {

@@ -82,12 +82,17 @@ export async function launch({ port = 9333 } = {}) {
       }
       throw new Error(`timed out waiting for: ${expression}`);
     },
-    /** Center of the first element matching a CSS selector (or containing text), in CSS px. */
+    /**
+     * Center of the first VISIBLE element matching a CSS selector (or with that
+     * exact text), in CSS px. Navigators keep hidden screens mounted with 0×0
+     * rects, so a bare querySelector can land on a stale duplicate.
+     */
     async centerOf(selectorOrText) {
       const expr = `(() => {
         const q = ${JSON.stringify(selectorOrText)};
+        const visible = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; };
         let el = null;
-        try { el = document.querySelector(q); } catch {}
+        try { el = [...document.querySelectorAll(q)].find(visible) || null; } catch {}
         if (!el) {
           const all = [...document.querySelectorAll('div,span,a,button')].filter(e => e.offsetParent !== null && e.children.length === 0 && e.textContent.trim() === q);
           el = all[all.length - 1] || null;

@@ -174,6 +174,12 @@ export interface NarrationOptions {
   readonly onFinished?: () => void;
   /** Fired when the sleep timer ends playback; the reader fades the bed with it. */
   readonly onSleepTimerEnd?: () => void;
+  /**
+   * Additive (A5): true on each utterance's onStart, false on its onDone and on
+   * pause/stop. Pass the bed's duck: `onSpeakingChange: bed.duck` (R6). The
+   * bed holds 'underSpeech' through the short gaps between sentences.
+   */
+  readonly onSpeakingChange?: (speaking: boolean) => void;
 }
 
 export interface NarrationController {

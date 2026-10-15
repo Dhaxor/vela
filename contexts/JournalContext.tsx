@@ -1,164 +1,159 @@
-// Journal persistence: script & gratitude entries as an append-only list,
-// plus one 369 sheet per day (phrase carried forward day to day). Local-only,
-// like everything in Vela.
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+// Journal: script and gratitude pages (newest first, each with a stable id so
+// a past page can be opened) plus one 3·6·9 sheet per day with its phrase
+// carried forward. Stored under 'vela.journal.v2'; migrated once from
+// 'vela.journal.v1', which is never written.
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createStoreQueue, parseJson, readRaw } from "./persist";
+import { STORAGE_KEYS, V1_KEYS } from "@/lib/storageKeys";
+import { now } from "@/lib/clock";
+import { localDateKey } from "@/lib/progress";
+import { newId } from "@/lib/store/ids";
 import {
+  addJournalEntry,
   addRepetition,
+  emptyJournal,
   emptySheet,
-  Sheet369,
-  Slot369,
+  journalFromV1,
+  parseJournal,
+  PHRASE_369_MAX,
+  type EntryKind,
+  type JournalData,
+  type JournalEntry,
+  type Sheet369,
+  type Slot369,
 } from "@/lib/journal";
-import { dateKey } from "@/lib/streak";
 
-const STORE_KEY = "vela.journal.v1";
-const MAX_ENTRIES = 500;
+export type { EntryKind, JournalEntry };
 
-export type EntryKind = "script" | "gratitude";
-
-export interface JournalEntry {
-  id: string;
-  kind: EntryKind;
-  dateKey: string;
-  /** The prompt (script) or stems (gratitude, joined) the entry answered. */
-  prompt: string;
-  text: string;
-  createdAt: string;
-}
-
-interface Persisted {
-  entries: JournalEntry[];
-  /** Today's (or the most recent) 369 sheet. One at a time, by design. */
-  sheet: Sheet369 | null;
-  /** The intention phrase carried between days. */
-  phrase369: string;
+export interface EntryOptions {
+  readonly promptId?: string;
+  readonly dreamId?: string;
 }
 
 interface JournalValue {
   ready: boolean;
+  /** Newest first. */
   entries: JournalEntry[];
-  addEntry: (kind: EntryKind, prompt: string, text: string) => Promise<void>;
-  /** Today's sheet — created lazily from the carried phrase. */
+  /** A past page by id (/journal/entry/[id]). */
+  entry: (id: string) => JournalEntry | undefined;
+  /** Saves a page and returns it (null when the text is empty). */
+  addEntry: (kind: EntryKind, prompt: string, text: string, opts?: EntryOptions) => Promise<JournalEntry | null>;
+  /** Today's sheet, created lazily from the carried phrase. */
   sheetToday: Sheet369 | null;
   phrase369: string;
   setPhrase369: (phrase: string) => Promise<void>;
   addRep: (slot: Slot369, text: string) => Promise<boolean>;
+  /** Backup: the whole journal, and replacing it. */
+  exportJournal: () => JournalData;
+  replaceJournal: (data: JournalData) => Promise<void>;
 }
 
 const Ctx = createContext<JournalValue | null>(null);
 
-const newId = () =>
-  `${Date.now().toString(36)}-${Math.floor(Math.random() * 1e9).toString(36)}`;
-
-function parse(raw: string | null): Persisted {
-  const empty: Persisted = { entries: [], sheet: null, phrase369: "" };
-  if (!raw) return empty;
-  try {
-    const p = JSON.parse(raw) as Partial<Persisted>;
-    return {
-      entries: Array.isArray(p.entries) ? (p.entries as JournalEntry[]) : [],
-      sheet: p.sheet && typeof p.sheet === "object" ? (p.sheet as Sheet369) : null,
-      phrase369: typeof p.phrase369 === "string" ? p.phrase369 : "",
-    };
-  } catch {
-    return empty;
-  }
-}
-
 export function JournalProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [data, setData] = useState<Persisted>({ entries: [], sheet: null, phrase369: "" });
+  const [data, setData] = useState<JournalData>(emptyJournal);
+  const ref = useRef<JournalData>(data);
+  const queue = useMemo(createStoreQueue, []);
+
+  const commit = useCallback(
+    (next: JournalData) => {
+      ref.current = next;
+      setData(next);
+      queue.enqueue({ head: [STORAGE_KEYS.journal, next] });
+    },
+    [queue]
+  );
 
   useEffect(() => {
     let stale = false;
     void (async () => {
-      try {
-        const raw = await AsyncStorage.getItem(STORE_KEY);
-        if (!stale) setData(parse(raw));
-      } catch {
-        // first run
-      } finally {
-        if (!stale) setReady(true);
+      const raw = await readRaw(STORAGE_KEYS.journal);
+      let loaded = raw ? parseJournal(parseJson(raw)) : null;
+      if (!loaded) {
+        const v1 = await readRaw(V1_KEYS.journal);
+        loaded = v1 ? journalFromV1(parseJson(v1)) : emptyJournal();
+        if (v1) queue.enqueue({ head: [STORAGE_KEYS.journal, loaded] });
       }
+      if (stale) return;
+      ref.current = loaded;
+      setData(loaded);
+      setReady(true);
     })();
     return () => {
       stale = true;
     };
-  }, []);
+  }, [queue]);
 
-  const persist = useCallback(async (next: Persisted) => {
-    setData(next);
-    try {
-      await AsyncStorage.setItem(STORE_KEY, JSON.stringify(next));
-    } catch {
-      // session state still stands
-    }
-  }, []);
+  const today = localDateKey(now());
+  const sheetFor = useCallback(
+    (d: JournalData, day: string): Sheet369 | null =>
+      d.sheet && d.sheet.dateKey === day && d.sheet.phrase === d.phrase369 ? d.sheet : d.phrase369 ? emptySheet(day, d.phrase369) : null,
+    []
+  );
 
   const addEntry = useCallback(
-    async (kind: EntryKind, prompt: string, text: string) => {
+    async (kind: EntryKind, prompt: string, text: string, opts?: EntryOptions) => {
+      const at = now();
       const entry: JournalEntry = {
         id: newId(),
         kind,
-        dateKey: dateKey(new Date()),
+        dateKey: localDateKey(at),
         prompt,
         text: text.trim(),
-        createdAt: new Date().toISOString(),
+        createdAt: at.toISOString(),
+        ...(opts?.promptId ? { promptId: opts.promptId } : {}),
+        ...(opts?.dreamId ? { dreamId: opts.dreamId } : {}),
       };
-      await persist({
-        ...data,
-        entries: [entry, ...data.entries].slice(0, MAX_ENTRIES),
-      });
+      const next = addJournalEntry(ref.current, entry);
+      if (next === ref.current) return null;
+      commit(next);
+      return next.entries[0];
     },
-    [data, persist]
+    [commit]
   );
-
-  const today = dateKey(new Date());
-  const sheetToday =
-    data.sheet && data.sheet.dateKey === today && data.sheet.phrase === data.phrase369
-      ? data.sheet
-      : data.phrase369
-        ? emptySheet(today, data.phrase369)
-        : null;
 
   const setPhrase369 = useCallback(
     async (phrase: string) => {
-      const p = phrase.trim().slice(0, 80);
-      await persist({ ...data, phrase369: p, sheet: p ? emptySheet(today, p) : null });
+      const p = phrase.trim().slice(0, PHRASE_369_MAX);
+      commit({ ...ref.current, phrase369: p, sheet: p ? emptySheet(localDateKey(now()), p) : null });
     },
-    [data, persist, today]
+    [commit]
   );
 
   const addRep = useCallback(
     async (slot: Slot369, text: string) => {
-      const base = sheetToday;
-      if (!base) return false;
-      const next = addRepetition(base, slot, text);
+      const base = sheetFor(ref.current, localDateKey(now()));
+      const next = base ? addRepetition(base, slot, text) : null;
       if (!next) return false;
-      await persist({ ...data, sheet: next });
+      commit({ ...ref.current, sheet: next });
       return true;
     },
-    [data, persist, sheetToday]
+    [commit, sheetFor]
+  );
+
+  const replaceJournal = useCallback(
+    async (next: JournalData) => {
+      commit(parseJournal(next));
+      await queue.flush();
+    },
+    [commit, queue]
   );
 
   const value = useMemo<JournalValue>(
     () => ({
       ready,
       entries: data.entries,
+      entry: (id) => data.entries.find((e) => e.id === id),
       addEntry,
-      sheetToday,
+      sheetToday: sheetFor(data, today),
       phrase369: data.phrase369,
       setPhrase369,
       addRep,
+      exportJournal: () => ref.current,
+      replaceJournal,
     }),
-    [ready, data.entries, data.phrase369, addEntry, sheetToday, setPhrase369, addRep]
+    [ready, data, today, sheetFor, addEntry, setPhrase369, addRep, replaceJournal]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

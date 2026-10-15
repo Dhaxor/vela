@@ -1,18 +1,30 @@
 // The App Store rating ask — once, ever, at a genuinely good moment.
 //
-// The moment is the proof-confirmation card ("A point of proof") after a
-// user has recorded their SECOND piece of proof and has come back to do it:
-// they returned, acted in the real world twice, and are looking at evidence
-// that it worked. Never onboarding, never the paywall, never mid-story.
+// 1.1 (S4): the moments are the Star Birth after the SECOND proof (or the
+// first eligible proof after it) and the Named Sky at the season's seventh.
+// The user has come back (the first proof is at least 4 hours old), acted in
+// the real world twice, and is looking at a star made of it. Never
+// onboarding, never the paywall, never mid-story. It goes through the asks
+// arbiter (lib/asks), so it never stacks on another ask in the same session.
+//
+//   requestReviewIfDue(proofs)               // review is the only candidate (Named Sky)
+//   if (await reviewIsDue(proofs)) candidates.push("review");
+//   if ((await claimAsk(candidates)) === "review") await requestReviewNow();
+//
+// 1.0: maybeRequestStoreReview(actions) keeps its signature and behaviour for
+// the 1.0 evidence screen until S4 replaces it.
 //
 // The gate is pure and tested. The native seam (AsyncStorage + StoreReview)
-// is required lazily inside the wrapper — the same pattern as
-// lib/notifications.ts — so bun can load this module without parsing
-// react-native, and so the wrapper itself can be tested with fakes.
+// is required lazily inside the wrapper, so bun can load this module without
+// parsing react-native, and so the wrapper itself can be tested with fakes.
 
+import type { Proof } from "@/contexts/arc.types";
+import { claimAsk, type AskKind } from "./asks";
 import type { FutureAction } from "./futureMemory";
+import { now as clockNow } from "./clock";
+import { STORAGE_KEYS } from "./storageKeys";
 
-export const REVIEW_REQUESTED_KEY = "vela-review-requested-v1";
+export const REVIEW_REQUESTED_KEY = STORAGE_KEYS.reviewRequested;
 /** Ask on the second recorded proof (or the first eligible one after it). */
 export const REVIEW_PROOF_MILESTONE = 2;
 /**
@@ -47,12 +59,22 @@ export function shouldRequestReview(input: {
   return input.now - first >= REVIEW_MIN_RETURN_GAP_MS;
 }
 
+/** Epoch-ms of every saved v2 proof (seed included), oldest first. Malformed dates are ignored. */
+export function proofTimesFromProofs(proofs: readonly Proof[]): number[] {
+  return proofs
+    .map((p) => Date.parse(p.createdAt))
+    .filter((ms) => Number.isFinite(ms))
+    .sort((a, b) => a - b);
+}
+
 export interface ReviewDeps {
   getItem: (key: string) => Promise<string | null>;
   setItem: (key: string, value: string) => Promise<void>;
   isAvailableAsync: () => Promise<boolean>;
   requestReview: () => Promise<void>;
   now: () => number;
+  /** The asks arbiter (lib/asks claimAsk). Only the 1.1 path uses it. */
+  claimAsk?: (candidates: readonly AskKind[]) => Promise<AskKind | null>;
 }
 
 function nativeDeps(): ReviewDeps {
@@ -67,7 +89,8 @@ function nativeDeps(): ReviewDeps {
     setItem: (key, value) => AsyncStorage.setItem(key, value),
     isAvailableAsync: () => StoreReview.isAvailableAsync(),
     requestReview: () => StoreReview.requestReview(),
-    now: () => Date.now(),
+    now: () => clockNow().getTime(),
+    claimAsk,
   };
 }
 
@@ -100,6 +123,55 @@ export async function maybeRequestStoreReview(
     await d.setItem(REVIEW_REQUESTED_KEY, new Date(now).toISOString());
     await d.requestReview();
     return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 1.1: true when a review may be asked now: the proof gate passes, it was
+ * never asked (1.0 included), and StoreKit can show it. Use it to build the
+ * candidates for claimAsk. Never throws.
+ */
+export async function reviewIsDue(proofs: readonly Proof[], deps?: ReviewDeps): Promise<boolean> {
+  try {
+    const proofTimes = proofTimesFromProofs(proofs);
+    const d = deps ?? nativeDeps();
+    const now = d.now();
+    if (!shouldRequestReview({ proofTimes, now, alreadyRequested: false })) return false;
+    const [alreadyRequested, isAvailable] = await Promise.all([d.getItem(REVIEW_REQUESTED_KEY), d.isAvailableAsync()]);
+    return isAvailable && !alreadyRequested;
+  } catch {
+    return false;
+  }
+}
+
+/** 1.1: show the system rating sheet, once ever. Call only after claimAsk returned 'review'. Never throws. */
+export async function requestReviewNow(deps?: ReviewDeps): Promise<boolean> {
+  try {
+    const d = deps ?? nativeDeps();
+    if (await d.getItem(REVIEW_REQUESTED_KEY)) return false;
+    // Flag first: even if the sheet fails, we never ask twice.
+    await d.setItem(REVIEW_REQUESTED_KEY, new Date(d.now()).toISOString());
+    await d.requestReview();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * 1.1, when the review is the only candidate (after the Named Sky, or a proof
+ * Star Birth with no Plus nudge due): gate, claim this session's ask, then
+ * ask. `proofs` must include the proof that was just saved. Never throws.
+ */
+export async function requestReviewIfDue(proofs: readonly Proof[], deps?: ReviewDeps): Promise<boolean> {
+  try {
+    const d = deps ?? nativeDeps();
+    if (!(await reviewIsDue(proofs, d))) return false;
+    const claim = d.claimAsk ?? claimAsk;
+    if ((await claim(["review"])) !== "review") return false;
+    return await requestReviewNow(d);
   } catch {
     return false;
   }

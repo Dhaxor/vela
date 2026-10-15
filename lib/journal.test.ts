@@ -1,10 +1,17 @@
 import { describe, expect, test } from "bun:test";
+import fs from "node:fs";
+import path from "node:path";
 import {
+  addJournalEntry,
   addRepetition,
   dailyGratitudeStems,
   dailyPrompt,
+  emptyJournal,
   emptySheet,
+  journalFromV1,
+  parseJournal,
   progress369,
+  SCRIPT_PROMPTS,
   SLOT_CAPS,
   slotForHour,
   TOTAL_369,
@@ -77,5 +84,37 @@ describe("daily prompts", () => {
       expect(stems.length).toBe(3);
       expect(new Set(stems.map((s) => s.id)).size).toBe(3);
     }
+  });
+});
+
+describe("journal storage v2", () => {
+  const v1 = JSON.parse(JSON.parse(fs.readFileSync(path.join(import.meta.dir, "fixtures", "v1", "nine-proofs.json"), "utf8")).raw.journal);
+
+  test("a real 1.0 journal migrates with its entry ids, so past pages can be opened", () => {
+    const j = journalFromV1(v1);
+    expect(j.version).toBe(2);
+    expect(j.entries.map((e) => e.id)).toEqual(v1.entries.map((e: { id: string }) => e.id));
+    expect(j.phrase369).toBe(v1.phrase369);
+    expect(j.sheet?.evening).toEqual(v1.sheet.evening);
+    expect(parseJournal(JSON.parse(JSON.stringify(j)))).toEqual(j);
+  });
+
+  test("entries without an id get a stable one; malformed entries are dropped", () => {
+    const raw = { entries: [{ kind: "script", text: "A page", createdAt: "2026-10-01T10:00:00.000Z" }, { kind: "poem", text: "x" }, { kind: "gratitude", text: "  " }] };
+    const a = journalFromV1(raw);
+    expect(a.entries).toHaveLength(1);
+    expect(a.entries[0].id).toBe(journalFromV1(raw).entries[0].id);
+    expect(parseJournal({ entries: [] })).toEqual(emptyJournal());
+  });
+
+  test("adding a page prepends, trims and caps", () => {
+    const page = { id: "p", kind: "script" as const, dateKey: "2026-10-16", prompt: "Write it", text: "  It happened.  ", createdAt: "2026-10-16T08:00:00.000Z", dreamId: "d1" };
+    const j = addJournalEntry(journalFromV1(v1), page);
+    expect(j.entries[0]).toMatchObject({ id: "p", text: "It happened.", dreamId: "d1" });
+    expect(addJournalEntry(emptyJournal(), { ...page, text: "   " })).toEqual(emptyJournal());
+  });
+
+  test("no 1.0 prompt says 'future self'", () => {
+    for (const p of SCRIPT_PROMPTS) expect(p.text.toLowerCase()).not.toContain("future self");
   });
 });
