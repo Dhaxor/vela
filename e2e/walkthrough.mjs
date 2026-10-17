@@ -100,6 +100,27 @@ function record(name, pass, detail) {
   log(`${name} RESULT: ${pass ? "PASS" : "FAIL"} — ${detail}`);
 }
 
+/** Swipe the page up until the selector exists (the reader's bridge sits after the last paragraph). */
+async function scrollTo(driver, selector, label, tries = 14) {
+  for (let i = 0; i < tries; i++) {
+    if (await exists(driver, selector, 800)) return true;
+    try {
+      await driver.execute("mobile: swipe", { direction: "up", velocity: 2500 });
+    } catch (e) {
+      log("swipe-failed", label, (e.message || "").split("\n")[0]);
+    }
+    await sleep(500);
+  }
+  const found = await exists(driver, selector, 1500);
+  if (!found) log("scroll-missed", label);
+  return found;
+}
+
+// The 1.1 'Night Atlas' review path (CONTRACTS §20, docs/SHOTS.md):
+// First Light (6 steps, with the optional seed proof) → the Weave → Chapter I
+// with the seed woven in gold → choose a bridge → 'I crossed it' → a proof →
+// Star Birth → the Weave → Chapter II → Today → Your line → Rituals 3·6·9 →
+// the Arc ghost plate's paywall.
 async function main() {
   const driver = await connect();
   await sleep(6000);
@@ -109,16 +130,17 @@ async function main() {
   const welcome = await exists(driver, "~onboarding-next", 15000);
   record("WELCOME", welcome, welcome ? "welcome beat renders" : "no welcome CTA");
 
-  // --- 2. Onboarding walk ---
+  // --- 2. First Light: focus, own words, name, ritual, seed ---
   await tap(driver, "~onboarding-next", "Begin");
   await sleep(1200);
-  await tap(driver, "~focus-love", "Love");
-  await tap(driver, "~focus-abundance", "Abundance");
+  await tap(driver, "~focus-career", "Career");
   await shot(driver, "focus-areas");
   await tap(driver, "~onboarding-next", "Continue focus");
   await sleep(1000);
-  await tap(driver, "~mood-hopeful", "mood");
-  await tap(driver, "~onboarding-next", "Continue mood");
+  await typeInto(driver, "~onboarding-desire", "my own design studio, with clients who trust my eye", "desire");
+  await tap(driver, "~onboarding-feeling-proud", "feeling");
+  await shot(driver, "own-words");
+  await tap(driver, "~onboarding-next", "Continue words");
   await sleep(1000);
   await typeInto(driver, "~name-input", "Maya", "name");
   await tap(driver, "~onboarding-next", "Continue name");
@@ -126,57 +148,80 @@ async function main() {
   await tap(driver, "~ritual-evening", "Evening");
   await tap(driver, "~onboarding-next", "Continue ritual");
   await sleep(1200);
-  await shot(driver, "practice-primer");
-  const primer = await exists(driver, "~onboarding-done", 8000);
-  record("ONBOARDING", primer, primer ? "reached primer" : "primer missing");
-  await tap(driver, "~onboarding-done", "Write my first story");
-  await sleep(2000);
+  await typeInto(driver, "~onboarding-seed", "Bought the domain name.", "seed proof");
+  await shot(driver, "seed");
+  const seed = await exists(driver, "~onboarding-done", 8000);
+  record("ONBOARDING", seed, seed ? "reached the seed step" : "seed step missing");
+  await tap(driver, "~onboarding-done", "Weave Chapter I");
 
-  // --- 3. First story intake -> reveal (marketing shots) ---
-  const intake = await exists(driver, "~intake-desire", 12000);
-  record("INTAKE", intake, intake ? "onboarding lands in intake" : "intake missing");
-  await typeInto(driver, "~intake-desire", "a home that feels like rest", "desire");
-  await tap(driver, "~intake-feeling-peaceful", "feeling");
-  await shot(driver, "intake");
-  await tap(driver, "~intake-weave", "Step inside");
-  await sleep(7000); // let the reveal cascade land
-  await shot(driver, "story-reveal");
-  const listen = await exists(driver, "~story-listen", 10000);
-  record("STORY", listen, listen ? "story rendered with listen CTA" : "no story");
-  await sleep(4000);
-  await shot(driver, "story-full");
-  await tap(driver, "~story-back", "back to app", 8000);
+  // --- 3. The Weave → Chapter I with the seed woven in gold ---
+  await sleep(1300);
+  await shot(driver, "weave");
+  const listen = await exists(driver, "~story-listen", 15000); // the Weave opens Chapter I on its own (~2.75s)
+  record("CHAPTER-I", listen, listen ? "the Weave landed on Chapter I" : "no reader");
+  await sleep(1500);
+  await shot(driver, "chapter-one");
+  const woven = await scrollTo(driver, "~story-woven", "woven paragraph", 6);
+  record("WOVEN", woven, woven ? "the seed proof is woven in gold" : "no woven paragraph");
+  if (woven) await shot(driver, "chapter-one-woven");
+
+  // --- 4. Choose a bridge → 'I crossed it' → a proof → Star Birth ---
+  const chooser = await scrollTo(driver, "~story-bridge-15min", "bridge chooser");
+  if (chooser) {
+    await tap(driver, "~story-bridge-15min", "15-minute bridge");
+    await shot(driver, "bridge-chooser");
+    await tap(driver, "~story-bridge-commit", "Make it observable");
+    await sleep(1500);
+    // The notification ask at commitment (iOS, permission undetermined): decline for the walk.
+    if (await exists(driver, "~story-remind-no", 2500)) await tap(driver, "~story-remind-no", "Not now");
+  }
+  const crossed = await scrollTo(driver, "~story-record-proof", "I crossed it", 6);
+  record("BRIDGE", crossed, crossed ? "bridge committed" : "bridge not committed");
+  await tap(driver, "~story-record-proof", "I crossed it");
+  await sleep(1500);
+  await tap(driver, "~evidence-kind-did", "I did it");
+  await typeInto(driver, "~evidence-note", "Sent my portfolio to two studios I admire.", "proof");
+  await shot(driver, "proof-form");
+  await tap(driver, "~evidence-save", "Chart this proof");
+  await sleep(2600); // the flight, the landing, the caption
+  const birth = await exists(driver, "~evidence-finish", 12000);
+  record("STAR-BIRTH", birth, birth ? "Star Birth finished" : "no Star Birth");
+  await shot(driver, "star-birth");
+
+  // --- 5. The Weave → Chapter II (the proof highlighted) ---
+  await tap(driver, "~evidence-finish", "Carry it forward");
+  const ch2 = await exists(driver, "~story-listen", 15000);
+  record("CHAPTER-II", ch2, ch2 ? "Chapter II woven from the proof" : "no Chapter II");
+  await sleep(1500);
+  await shot(driver, "chapter-two");
+  await tap(driver, "~story-back", "back to Today", 8000);
   await sleep(1500);
 
-  // --- 4. Today with streak (marketing shot) ---
-  const streak = await exists(driver, "~streak-chip", 8000);
-  record("STREAK", streak, streak ? "streak chip after first story" : "no streak chip");
+  // --- 6. Today (marketing shot) ---
+  const chip = await exists(driver, "~streak-chip", 8000);
+  record("TODAY", chip, chip ? "nights and stars chip on Today" : "no chip");
   await shot(driver, "today");
 
-  // --- 5. Daily affirmation (marketing shot) ---
-  if (await tap(driver, "~ritual-affirmation", "Affirmation card")) {
+  // --- 7. Your line (marketing shot) ---
+  if (await tap(driver, "~ritual-affirmation", "Carry a line")) {
     await sleep(2000);
-    await shot(driver, "affirmation");
+    await shot(driver, "your-line");
     const carried = await tap(driver, "~affirmation-carry", "carry");
-    record("AFFIRMATION", carried, carried ? "daily affirmation carried" : "carry failed");
-    await tap(driver, "~affirmation-close", "close affirmation", 6000);
+    record("LINE", carried, carried ? "line carried" : "carry failed");
+    await tap(driver, "~affirmation-close", "close line", 6000);
     await sleep(1200);
   } else {
-    record("AFFIRMATION", false, "card not reachable");
+    record("LINE", false, "card not reachable");
   }
 
-  // --- 6. Journal: 369 sheet (marketing shot) ---
-  await tap(driver, "~door-369", "369 door", 8000) ||
-    (await tap(driver, "~ritual-script", "script card") && await tap(driver, "~door-369", "369 door", 8000));
-  // journal tab route: reach via tab bar if door not present
-  if (!(await exists(driver, "~phrase-input", 4000)) && !(await exists(driver, "~rep-input", 3000))) {
-    await tap(driver, "~door-369", "369 door retry", 4000);
-  }
-  if (await exists(driver, "~phrase-input", 6000)) {
-    await typeInto(driver, "~phrase-input", "I am calm, capable, and paid well", "phrase");
-    await tap(driver, "~phrase-set", "begin practice");
-    await sleep(1500);
-  }
+  // --- 8. Rituals: 3·6·9 (marketing shot) ---
+  await tap(driver, "~tab-rituals", "Rituals tab", 8000);
+  await sleep(1200);
+  await tap(driver, "~door-369", "369 door", 8000);
+  if (await exists(driver, "~suggest-369-0", 4000)) await tap(driver, "~suggest-369-0", "suggested phrase");
+  else if (await exists(driver, "~phrase-input", 3000)) await typeInto(driver, "~phrase-input", "I am calm, capable, and paid well", "phrase");
+  if (await exists(driver, "~phrase-set", 3000)) await tap(driver, "~phrase-set", "begin practice");
+  await sleep(1200);
   if (await exists(driver, "~rep-write", 8000)) {
     await tap(driver, "~rep-write", "write rep 1");
     await tap(driver, "~rep-write", "write rep 2");
@@ -189,25 +234,18 @@ async function main() {
   await tap(driver, "~m369-close", "close 369", 6000);
   await sleep(1200);
 
-  // --- 7. Paywall (subscription review screenshot) ---
-  // Closing the 369 sheet lands on the Journal tab; the story hero lives on
-  // Today, so switch tabs first.
-  await tap(
-    driver,
-    '-ios predicate string:type == "XCUIElementTypeButton" AND (name == "Today" OR label BEGINSWITH "Today")',
-    "Today tab",
-    8000,
-  );
+  // --- 9. Paywall (subscription review screenshot): the Arc ghost plate ---
+  await tap(driver, "~tab-arc", "Arc tab", 8000);
   await sleep(1500);
-  // Second story attempt gates to the paywall.
-  await tap(driver, "~ritual-story", "story hero (gated)", 8000);
+  await scrollTo(driver, "~new-story", "ghost plate", 8);
+  await tap(driver, "~new-story", "A second dream (gated)", 8000);
   await sleep(2500);
   const gated = await exists(driver, "~paywall-buy", 10000);
-  record("PAYWALL-GATE", gated, gated ? "second intent gated to paywall" : "gate missed");
+  record("PAYWALL-GATE", gated, gated ? "second dream gated to paywall" : "gate missed");
   if (gated) {
     await shot(driver, "paywall");
     const promise = await exists(driver, "~paywall-free-promise", 4000);
-    record("FREE-PROMISE", promise, promise ? "free promise leads the paywall" : "missing");
+    record("FREE-PROMISE", promise, promise ? "free forever panel on the paywall" : "missing");
     await tap(driver, "~paywall-close", "close paywall", 6000);
   }
 

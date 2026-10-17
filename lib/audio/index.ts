@@ -14,7 +14,7 @@ export {
   splitSentences,
 } from "./narration";
 export { pickVoice, rankVoices, suggestsVoiceDownload, voiceDisplayName, voiceSubtitle } from "./voices";
-export { claimChapterSession, setAudioSession } from "./session";
+export { claimChapterSession, isAudioActive, setAudioSession } from "./session";
 export {
   SOUNDSCAPES,
   SUGGESTED_BEDS,

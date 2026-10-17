@@ -5,7 +5,7 @@
 // planQueue), templates.ts (token filling and rotation), snapshot.ts (pure
 // snapshot builder for useLoopEffects), routing.ts (deep links),
 // runtime.ts (the expo-notifications seam), useNotificationRouting.ts (the
-// root layout's tap router), bus.ts (rebuild requests), legacy.ts (1.0).
+// root layout's tap router), bus.ts (rebuild requests).
 //
 // Rules (binding):
 // N1 One-off notifications only (no DAILY triggers), planned for the next
@@ -31,9 +31,6 @@
 //   configureNotificationHandler();          // module scope or a mount effect
 //   useLoopEffects();                        // lib/loopEffects
 //   useNotificationRouting(allStoresReady && !!profile);
-
-// 1.0 API, unchanged, until the last 1.0 screen stops using it.
-export { applyReminders, clearReminders, remindersFor, type ReminderSpec } from "./legacy";
 
 export {
   emptyTemplateHistory,

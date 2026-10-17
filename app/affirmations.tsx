@@ -1,196 +1,133 @@
-// The affirmation library — browse by area, share any line. Chosen areas are
-// free; the rest ask for Plus (tap shows why, not a wall).
+// The line library. 'Yours' leads: identity lines born from the kinds of
+// proof the person has actually logged, for their dream's area. Behind it,
+// the 1.0 library (120 lines, deliberately not grown, Guideline 4.3): the
+// person's own areas are free, every area comes with Plus.
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Share,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import * as Haptics from "expo-haptics";
-import { ChevronLeft, Share2, Lock } from "lucide-react-native";
-import { FOCUS_AREAS, FocusId } from "@/lib/focus";
-import { affirmationsFor } from "@/lib/affirmations";
-import { useUser } from "@/contexts/UserContext";
+import { Lock, Share2 } from "lucide-react-native";
+import { Chip, Header, IconButton, PrimaryButton, Screen, T, haptics, useGutter, useToast } from "@/components/ui";
+import { StarProof, Vignette } from "@/components/glyphs";
+import { BORN_FROM } from "@/components/feature/rituals/YourLineBlock";
+import { earnedLines } from "@/lib/rituals";
+import { useRitualToday } from "@/components/feature/rituals/useRitualToday";
 import { usePlus } from "@/contexts/PlusContext";
-import { colors, space, radius, type, serif } from "@/constants/theme";
+import { colors, space } from "@/constants/theme";
+import { affirmationsFor } from "@/lib/affirmations";
+import { FOCUS_AREAS, type FocusId } from "@/lib/focus";
+
+type Tab = "yours" | FocusId;
 
 export default function AffirmationLibraryScreen() {
   const router = useRouter();
-  const { profile } = useUser();
-  const { isPlus } = usePlus();
-  const chosen = profile?.focusAreas ?? [];
-  const [area, setArea] = useState<FocusId>(chosen[0] ?? "love");
+  const toast = useToast();
+  const gutter = useGutter();
+  const plus = usePlus();
+  const today = useRitualToday();
+  const groups = useMemo(() => (today.focus ? earnedLines(today.proofs, today.focus) : []), [today.focus, today.proofs]);
+  const [tab, setTab] = useState<Tab>(() => (groups.length > 0 ? "yours" : today.focus ?? "love"));
 
-  const unlocked = isPlus || chosen.includes(area);
-  const pool = useMemo(() => affirmationsFor(area), [area]);
+  const unlocked = tab === "yours" || plus.canUseArea(tab);
+  const pool = useMemo(() => (tab === "yours" ? [] : affirmationsFor(tab)), [tab]);
 
   const shareLine = async (text: string) => {
-    void Haptics.selectionAsync();
+    haptics.select();
     try {
-      await Share.share({ message: `${text}\n\n— via Vela` });
+      await Share.share({ message: `${text}\n\nvia Vela` });
     } catch {
-      // user backed out of the sheet; nothing to do
+      toast.show({ message: "Sharing isn’t available here.", tone: "error" });
     }
   };
 
-  return (
-    <SafeAreaView style={s.screen}>
-      <View style={s.header}>
-        <TouchableOpacity
-          onPress={() => safeBack(router)}
-          style={s.back}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          testID="library-back"
-        >
-          <ChevronLeft color={colors.text} size={24} />
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>Affirmations</Text>
-        <View style={s.back} />
-      </View>
+  const row = (id: string, text: string, i: number) => (
+    <View key={id} style={[styles.row, i > 0 && styles.divider]}>
+      <T variant="reading" style={styles.line}>
+        {text}
+      </T>
+      <IconButton accessibilityLabel="Share this line" onPress={() => void shareLine(text)} testID={`share-${id}`}>
+        <Share2 color={colors.ink48} size={18} strokeWidth={1.75} />
+      </IconButton>
+    </View>
+  );
 
+  return (
+    <Screen testID="library-screen" header={<Header title="Line library" testID="library" />}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={s.tabs}
-        contentContainerStyle={s.tabsContent}
+        style={[styles.tabs, { marginHorizontal: -gutter }]}
+        contentContainerStyle={[styles.tabsContent, { paddingHorizontal: gutter }]}
       >
-        {FOCUS_AREAS.map((f) => {
-          const on = area === f.id;
-          const free = isPlus || chosen.includes(f.id);
-          return (
-            <TouchableOpacity
-              key={f.id}
-              style={[s.tab, on && s.tabOn]}
-              onPress={() => setArea(f.id)}
-              testID={`library-${f.id}`}
-            >
-              {!free && <Lock size={11} color={colors.textFaint} />}
-              <Text style={[s.tabText, on && s.tabTextOn]}>{f.label}</Text>
-            </TouchableOpacity>
-          );
-        })}
+        <Chip label="Yours" selected={tab === "yours"} onPress={() => setTab("yours")} role="radio" testID="library-yours" />
+        {FOCUS_AREAS.map((f) => (
+          <Chip
+            key={f.id}
+            label={f.label}
+            selected={tab === f.id}
+            onPress={() => setTab(f.id)}
+            role="radio"
+            icon={plus.canUseArea(f.id) ? undefined : <Lock color={colors.ink48} size={14} strokeWidth={1.75} />}
+            testID={`library-${f.id}`}
+          />
+        ))}
       </ScrollView>
 
-      {unlocked ? (
-        <ScrollView
-          style={s.listScroll}
-          contentContainerStyle={s.list}
-          showsVerticalScrollIndicator={false}
-        >
-          {pool.map((a) => (
-            <View key={a.id} style={s.card}>
-              <Text style={s.line}>{a.text}</Text>
-              <TouchableOpacity
-                style={s.share}
-                onPress={() => void shareLine(a.text)}
-                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                testID={`share-${a.id}`}
-              >
-                <Share2 color={colors.textMuted} size={16} />
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
+      {tab === "yours" ? (
+        groups.length > 0 ? (
+          <View style={styles.list} testID="library-yours-list">
+            <T variant="body" tone="muted">
+              Lines that are true because of what you did. A new kind of proof opens a new set.
+            </T>
+            {groups.map((g) => (
+              <View key={g.kind} style={styles.group}>
+                <View style={styles.groupHead}>
+                  <StarProof kind={g.kind} size={16} />
+                  <T variant="eyebrow">{BORN_FROM[g.kind]}</T>
+                </View>
+                <View>{g.lines.map((l, i) => row(l.id, l.text, i))}</View>
+              </View>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.empty} testID="library-yours-empty">
+            <Vignette name="sail" width={160} />
+            <T variant="title" center>
+              Your lines begin with a proof
+            </T>
+            <T variant="body" tone="muted" center>
+              Cross today’s bridge and log what happened. The lines that become true for you gather here.
+            </T>
+          </View>
+        )
+      ) : unlocked ? (
+        <View style={styles.list} testID={`library-list-${tab}`}>
+          <View>{pool.map((a, i) => row(a.id, a.text, i))}</View>
+        </View>
       ) : (
-        <View style={s.locked}>
-          <Lock color={colors.accent} size={22} />
-          <Text style={s.lockedTitle}>This pack comes with Plus</Text>
-          <Text style={s.lockedBody}>
-            Your chosen areas are free. Plus opens all six packs — 120 lines.
-          </Text>
-          <TouchableOpacity
-            style={s.cta}
-            onPress={() => router.push("/paywall")}
-            testID="library-unlock"
-          >
-            <Text style={s.ctaText}>See Vela Plus</Text>
-          </TouchableOpacity>
+        <View style={styles.empty} testID="library-locked">
+          <Vignette name="window" width={160} />
+          <T variant="title" center>
+            This area comes with Plus
+          </T>
+          <T variant="body" tone="muted" center>
+            Your own areas are always free. Plus opens all six, 120 lines in all.
+          </T>
+          <PrimaryButton label="See Vela Plus" onPress={() => router.push({ pathname: "/paywall", params: { from: "area" } })} testID="library-unlock" style={styles.unlock} />
         </View>
       )}
-    </SafeAreaView>
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: space.base,
-    paddingVertical: space.sm,
-  },
-  back: { width: 44, height: 44, alignItems: "center", justifyContent: "center" },
-  headerTitle: { ...type.title, color: colors.text, flex: 1, textAlign: "center" },
-  // The tab strip must own a fixed height and the list must own flex: 1 —
-  // without both, react-native-web lets the list size itself over the strip
-  // and paint on top of it while scrolling.
-  tabs: { flexGrow: 0, height: 56 },
-  tabsContent: {
-    paddingHorizontal: space.lg,
-    gap: space.sm,
-    alignItems: "center",
-  },
-  listScroll: { flex: 1 },
-  tab: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.xs,
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.card,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.base,
-    minHeight: 40,
-  },
-  tabOn: { borderColor: colors.accentBorder, backgroundColor: colors.accentSoft },
-  tabText: { ...type.caption, color: colors.textSecondary },
-  tabTextOn: { color: colors.accent, fontWeight: "600" },
-  list: {
-    paddingHorizontal: space.lg,
-    paddingTop: space.sm,
-    paddingBottom: space.xxl,
-    gap: space.sm,
-  },
-  card: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-  },
-  line: {
-    fontFamily: serif,
-    fontSize: 17,
-    lineHeight: 26,
-    color: colors.text,
-    flex: 1,
-  },
-  share: { width: 32, alignItems: "center" },
-  locked: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: space.xl,
-    gap: space.md,
-  },
-  lockedTitle: { fontFamily: serif, fontSize: 22, color: colors.text },
-  lockedBody: { ...type.body, color: colors.textSecondary, textAlign: "center" },
-  cta: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.md,
-    paddingHorizontal: space.xl,
-    marginTop: space.sm,
-  },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
+const styles = StyleSheet.create({
+  tabs: { flexGrow: 0, marginTop: space.sm },
+  tabsContent: { gap: space.sm, paddingVertical: space.xs },
+  list: { gap: space.lg, marginTop: space.lg },
+  group: { gap: space.sm },
+  groupHead: { flexDirection: "row", alignItems: "center", gap: space.sm },
+  row: { flexDirection: "row", alignItems: "center", gap: space.sm, paddingVertical: space.md },
+  divider: { borderTopWidth: 1, borderTopColor: colors.hairline },
+  line: { flex: 1 },
+  empty: { alignItems: "center", gap: space.md, marginTop: space.xxl, paddingHorizontal: space.sm },
+  unlock: { marginTop: space.base },
 });

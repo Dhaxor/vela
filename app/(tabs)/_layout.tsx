@@ -2,15 +2,15 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { TabIcon, type LegacyTabIconName, type TabIconName } from "@/components/glyphs";
+import { TabIcon, type TabIconName } from "@/components/glyphs";
 import { colors, space, typeScale } from "@/constants/theme";
 
-// Phase 1 keeps the four 1.0 tabs so the existing screens and e2e keep
-// working; Phase 2 switches to Today | Arc | Rituals. arc and rituals exist
-// now as hidden routes (href: null) so their screens can be built in place.
+// Today | Arc | Rituals (ELEVATE §0 Tabs). Each tab has one role in the loop:
+// Today runs it, Arc keeps it (the Memory Book), Rituals feeds it. The sky
+// is a stack route (/sky/[intentId]) and Settings opens from Today's gear.
 
 const icon =
-  (name: TabIconName | LegacyTabIconName) =>
+  (name: TabIconName) =>
   ({ focused }: { focused: boolean }) => <TabIcon name={name} focused={focused} color={focused ? colors.ink100 : colors.ink48} size={24} />;
 
 export default function TabsLayout() {
@@ -26,12 +26,9 @@ export default function TabsLayout() {
         tabBarLabelStyle: styles.label,
       }}
     >
-      <Tabs.Screen name="index" options={{ title: "Today", tabBarIcon: icon("today"), tabBarButtonTestID: "tab-today" }} />
-      <Tabs.Screen name="stories" options={{ title: "Stories", tabBarIcon: icon("stories"), tabBarButtonTestID: "tab-stories" }} />
-      <Tabs.Screen name="journal" options={{ title: "Journal", tabBarIcon: icon("journal"), tabBarButtonTestID: "tab-journal" }} />
-      <Tabs.Screen name="board" options={{ title: "Board", tabBarIcon: icon("board"), tabBarButtonTestID: "tab-board" }} />
-      <Tabs.Screen name="arc" options={{ title: "Arc", href: null, tabBarIcon: icon("arc") }} />
-      <Tabs.Screen name="rituals" options={{ title: "Rituals", href: null, tabBarIcon: icon("rituals") }} />
+      <Tabs.Screen name="index" options={{ title: "Today", tabBarIcon: icon("today"), tabBarButtonTestID: "tab-today", tabBarAccessibilityLabel: "Today" }} />
+      <Tabs.Screen name="arc" options={{ title: "Arc", tabBarIcon: icon("arc"), tabBarButtonTestID: "tab-arc", tabBarAccessibilityLabel: "Arc, your Memory Book" }} />
+      <Tabs.Screen name="rituals" options={{ title: "Rituals", tabBarIcon: icon("rituals"), tabBarButtonTestID: "tab-rituals", tabBarAccessibilityLabel: "Rituals" }} />
     </Tabs>
   );
 }

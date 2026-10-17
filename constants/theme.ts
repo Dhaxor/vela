@@ -7,8 +7,8 @@
 // one filled CTA, numerals, the user's own words), VIOLET is the bridge,
 // STARLIGHT is proof. Kind of proof is shown by tint and glyph, never by gold.
 //
-// The 1.0 token names survive as aliases at the bottom of `colors`, so screens
-// that haven't been rebuilt yet pick up the new palette without edits.
+// The 1.0 token aliases (bg, card, accent, aurora …, `type`, `serif`) were
+// removed in 1.1 once every screen was rebuilt on these tokens.
 import type { FocusId } from "@/lib/focus";
 
 /** Raw v2 palette. Components read these through `colors`. */
@@ -77,30 +77,6 @@ export const colors = {
   /** Shadows are tinted sky950, never grey. */
   shadow: "rgba(5, 4, 13, 0.6)",
   transparent: "transparent",
-
-  // ---- 1.0 aliases (keep until Phase 2 screens stop using them) ----
-  bg: palette.sky900,
-  bgRaised: "rgba(17, 15, 42, 0)",
-  surface: palette.sky800,
-  card: "rgba(25, 22, 58, 0.72)",
-  cardPressed: palette.sky600,
-  text: palette.ink100,
-  textSecondary: palette.ink80,
-  textMuted: palette.ink64,
-  textFaint: palette.ink48,
-  accent: palette.gold500,
-  accentPressed: "#D9A43C",
-  onAccent: palette.onGold,
-  /** Was a gold wash, which turns brown on indigo. Now a raised sky surface. */
-  accentSoft: "rgba(36, 31, 82, 0.72)",
-  accentBorder: palette.goldLine,
-  aurora: palette.violet400,
-  auroraSoft: palette.violetWash,
-  auroraBorder: palette.violetLine,
-  /** The success green is retired; proof is starlight. */
-  success: palette.did,
-  successSoft: "rgba(255, 243, 214, 0.06)",
-  dangerSoft: palette.dangerWash,
 } as const;
 
 export type ThemeColors = typeof colors;
@@ -184,20 +160,6 @@ export const readerSizes = {
   M: { fontSize: 19, lineHeight: 31 },
   L: { fontSize: 21, lineHeight: 34 },
 } as const;
-
-/**
- * 1.0 alias. Spreading `type.x` now sets the v2 family and size with no
- * fontWeight, so untouched screens render Newsreader / Instrument Sans.
- */
-export const type = {
-  display: typeScale.display,
-  title: typeScale.title,
-  body: typeScale.body,
-  caption: typeScale.caption,
-} as const;
-
-/** 1.0 alias: the serif voice. Georgia and the generic 'serif' are banned. */
-export const serif = fonts.serif;
 
 /** Soft ambient shadow for cards, tinted to the night (never grey). */
 export const cardShadow = { boxShadow: "0px 8px 24px rgba(5, 4, 13, 0.6)" } as const;

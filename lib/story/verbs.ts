@@ -41,7 +41,7 @@ const IRREGULAR: readonly Spec[] = [
   ["become", "became", "become"], ["begin", "began", "begun", "beginning"], ["break", "broke", "broken"],
   ["bring", "brought", "brought"], ["build", "built", "built"], ["buy", "bought", "bought"],
   ["catch", "caught", "caught"], ["choose", "chose", "chosen"], ["come", "came", "come"],
-  ["draw", "drew", "drawn"], ["drive", "drove", "driven"], ["eat", "ate", "eaten"],
+  ["draw", "drew", "drawn"], ["drink", "drank", "drunk"], ["drive", "drove", "driven"], ["eat", "ate", "eaten"],
   ["fall", "fell", "fallen"], ["feel", "felt", "felt"], ["find", "found", "found"],
   ["fly", "flew", "flown"], ["forgive", "forgave", "forgiven"], ["get", "got", "got", "getting"],
   ["give", "gave", "given"], ["go", "went", "gone"], ["grow", "grew", "grown"],

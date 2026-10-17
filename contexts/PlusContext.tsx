@@ -20,11 +20,13 @@ import {
   displayablePrice,
   FREE_SCENES,
   INAPP_SKUS,
+  numericPrice,
   ownsPlus,
   PlanId,
   PLUS_SKUS,
   PurchaseResult,
   SUBSCRIPTION_SKUS,
+  type NumericPrice,
 } from "@/lib/purchase";
 import type { BedId } from "@/lib/audio/types";
 import type { FocusId } from "@/lib/focus";
@@ -58,6 +60,8 @@ interface PlusValue {
   sceneLimit: number;
   /** Localised prices per plan, or null until the store answers. */
   prices: Record<PlanId, string | null>;
+  /** StoreKit's numeric price and currency per plan (the paywall's per-month figure), or null. */
+  priceAmounts: Record<PlanId, NumericPrice | null>;
   purchase: (plan: PlanId) => Promise<PurchaseResult>;
   restore: () => Promise<PurchaseResult>;
   /** dev/QA only — never reachable from shipped UI */
@@ -70,6 +74,11 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
   const [isPlus, setIsPlus] = useState(false);
   const [prices, setPrices] = useState<Record<PlanId, string | null>>({
+    monthly: null,
+    yearly: null,
+    lifetime: null,
+  });
+  const [priceAmounts, setPriceAmounts] = useState<Record<PlanId, NumericPrice | null>>({
     monthly: null,
     yearly: null,
     lifetime: null,
@@ -141,13 +150,20 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
           id?: string;
           productId?: string;
           displayPrice?: string;
+          price?: number | null;
+          currency?: string;
         }[];
-        const priceFor = (sku: string) =>
-          displayablePrice(all.find((x) => (x.productId ?? x.id) === sku));
+        const productFor = (sku: string) => all.find((x) => (x.productId ?? x.id) === sku);
+        const priceFor = (sku: string) => displayablePrice(productFor(sku));
         setPrices({
           monthly: priceFor(PLUS_SKUS.monthly),
           yearly: priceFor(PLUS_SKUS.yearly),
           lifetime: priceFor(PLUS_SKUS.lifetime),
+        });
+        setPriceAmounts({
+          monthly: numericPrice(productFor(PLUS_SKUS.monthly)),
+          yearly: numericPrice(productFor(PLUS_SKUS.yearly)),
+          lifetime: numericPrice(productFor(PLUS_SKUS.lifetime)),
         });
       } catch {
         // prices stay null; the paywall omits them rather than inventing any
@@ -214,13 +230,14 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
       canUseArea: (area: FocusId) => canUseArea(area, focusAreas ?? [], isPlus),
       sceneLimit: isPlus ? Number.POSITIVE_INFINITY : FREE_SCENES,
       prices,
+      priceAmounts,
       purchase,
       restore,
       setPlusForTesting: (v: boolean) => {
         setEntitlement(v);
       },
     }),
-    [ready, isPlus, focusAreas, prices, purchase, restore, setEntitlement]
+    [ready, isPlus, focusAreas, prices, priceAmounts, purchase, restore, setEntitlement]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

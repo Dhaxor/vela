@@ -9,11 +9,10 @@ import { InstrumentSans_400Regular } from "@expo-google-fonts/instrument-sans/40
 import { InstrumentSans_600SemiBold } from "@expo-google-fonts/instrument-sans/600SemiBold";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { PlusProvider } from "@/contexts/PlusContext";
-import { RitualProvider, useRitual } from "@/contexts/RitualContext";
+import { RitualProvider, useProgress } from "@/contexts/RitualContext";
 import { ArcProvider, useArc } from "@/contexts/ArcContext";
-import { StoryProvider, useStories } from "@/contexts/StoryContext";
 import { JournalProvider, useJournal } from "@/contexts/JournalContext";
-import { BoardProvider, useBoard } from "@/contexts/BoardContext";
+import { ScenesProvider, useScenes } from "@/contexts/ScenesContext";
 import { useLoopEffects } from "@/lib/loopEffects";
 import { configureNotificationHandler, useNotificationRouting } from "@/lib/notifications";
 import { setAudioSession } from "@/lib/audio";
@@ -57,11 +56,10 @@ function LoopEffects() {
 function RootNavigator() {
   const user = useUser();
   const arc = useArc();
-  const ritual = useRitual();
-  const stories = useStories();
+  const progress = useProgress();
   const journal = useJournal();
-  const board = useBoard();
-  const ready = user.ready && arc.ready && ritual.ready && stories.ready && journal.ready && board.ready;
+  const scenes = useScenes();
+  const ready = user.ready && arc.ready && progress.ready && journal.ready && scenes.ready;
   const profile = user.profile;
 
   // Cold-start notification taps route only once every store is ready and the tabs exist.
@@ -76,7 +74,7 @@ function RootNavigator() {
   return (
     <SkyProvider
       seed={skySeed(profile?.createdAt, profile?.name)}
-      focus={arc.activeDream?.focus ?? stories.intents[0]?.focus ?? profile?.focusAreas[0] ?? null}
+      focus={arc.activeDream?.focus ?? arc.dreams[0]?.focus ?? profile?.focusAreas[0] ?? null}
       dawn={profile?.ritual === "morning"}
     >
       <LoopEffects />
@@ -116,16 +114,14 @@ export default function RootLayout() {
       <PlusProvider>
         <RitualProvider>
           <ArcProvider>
-            <StoryProvider>
-              <JournalProvider>
-                <BoardProvider>
-                  <UIProvider>
-                    <StatusBar style="light" />
-                    <RootNavigator />
-                  </UIProvider>
-                </BoardProvider>
-              </JournalProvider>
-            </StoryProvider>
+            <JournalProvider>
+              <ScenesProvider>
+                <UIProvider>
+                  <StatusBar style="light" />
+                  <RootNavigator />
+                </UIProvider>
+              </ScenesProvider>
+            </JournalProvider>
           </ArcProvider>
         </RitualProvider>
       </PlusProvider>

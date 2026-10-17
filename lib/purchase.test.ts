@@ -15,6 +15,7 @@ import {
   ownsPlus,
   PLUS_SKUS,
   SUBSCRIPTION_SKUS,
+  numericPrice,
 } from "./purchase";
 
 describe("sku catalog", () => {
@@ -127,5 +128,19 @@ describe("Plus gates (1.1)", () => {
     expect(canAddScene(FREE_BOARD_CARDS - 1, false)).toBe(true);
     expect(canAddScene(FREE_BOARD_CARDS, false)).toBe(false);
     expect(canAddScene(999, true)).toBe(true);
+  });
+});
+
+describe("numericPrice", () => {
+  test("reads StoreKit's numeric price and currency", () => {
+    expect(numericPrice({ price: 29.99, currency: "usd" })).toEqual({ amount: 29.99, currency: "USD" });
+  });
+  test("null without both, or for nonsense", () => {
+    expect(numericPrice({ price: 29.99 })).toBeNull();
+    expect(numericPrice({ price: null, currency: "USD" })).toBeNull();
+    expect(numericPrice({ price: "29.99", currency: "USD" })).toBeNull();
+    expect(numericPrice({ price: 0, currency: "USD" })).toBeNull();
+    expect(numericPrice({ price: 5, currency: "dollars" })).toBeNull();
+    expect(numericPrice(undefined)).toBeNull();
   });
 });

@@ -174,8 +174,8 @@ const StaticSky = memo(function StaticSky({ seed, width, height, tint, dawn, cha
       <Ellipse cx={width / 2} cy={height * 1.02} rx={width * 1.05} ry={height * 0.36} fill={`url(#${horizonId})`} />
       {dawn && <Ellipse cx={width / 2} cy={height * 1.04} rx={width * 0.8} ry={height * 0.2} fill={`url(#${dawnId})`} />}
 
-      {chart.radii.map((r) => (
-        <Circle key={r} cx={chart.pole.x} cy={chart.pole.y} r={r} stroke={line} strokeWidth={1} fill="none" />
+      {chart.radii.map((r, i) => (
+        <Circle key={`r${i}`} cx={chart.pole.x} cy={chart.pole.y} r={r} stroke={line} strokeWidth={1} fill="none" />
       ))}
       {chart.meridians.map((m, i) => (
         <Line key={i} x1={m.x1} y1={m.y1} x2={m.x2} y2={m.y2} stroke={line} strokeWidth={1} />

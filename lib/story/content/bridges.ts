@@ -10,6 +10,9 @@
 // boss or clients carry the matching motif. Ids are explicit per row and
 // permanent: never derive them from row order.
 // Plus 3 'Write my own' starters per focus and 6 learned-retry headers.
+// Bridges never splice the desire ('…that moves your own design studio with
+// clients who trust your eye closer'): no {desire.*} token. A motif-tagged bridge
+// may name {motif.place} ('the studio'); an untagged one may not.
 // STYLE HEADER (binding for every content file; full guide: docs/CONTRACTS.md §7–§8)
 // - Original prose only. Second person, present tense. Never 'I' in narration.
 // - Template sentences ≤ 24 words (each {token} counts as one word). No parentheses,
@@ -82,7 +85,7 @@ const ABUNDANCE: readonly Row[] = [
   ["br-ab13", "2min", 5, "Check one balance and say the number out loud, without flinching."],
   ["br-ab14", "15min", 5, "Research one way to earn a little extra from a skill you already have."],
   ["br-ab15", "brave", 5, "Send the invoice, pitch or price increase you have been holding back."],
-  ["br-ab16", "2min", 6, "Move one small amount toward {desire.np} and name the transfer after it."],
+  ["br-ab16", "2min", 6, "Move one small amount toward your goal, and name the transfer after what it is for."],
   ["br-ab17", "15min", 6, "Set up a simple ten-minute money check at the same time each week."],
   ["br-ab18", "brave", 6, "Sell, return or give away one thing you no longer use."],
   ["br-ab19", "2min", 7, "Write down three things you can afford today that once felt out of reach."],
@@ -102,7 +105,7 @@ const CAREER: readonly Row[] = [
   ["br-ca03", "brave", 1, "Tell one person in your field exactly what you are working toward."],
   ["br-ca04", "2min", 2, "Leave tomorrow’s first task where you will see it when you sit down."],
   ["br-ca05", "15min", 2, "Gather the three things you need for the next big step into one place."],
-  ["br-ca06", "brave", 2, "Book the call, interview or meeting that moves {desire.np} closer."],
+  ["br-ca06", "brave", 2, "Book the call, interview or meeting that moves your plan one step closer."],
   ["br-ca07", "2min", 3, "Write down one thing that went wrong recently and what you will do next time."],
   ["br-ca08", "15min", 3, "Fix one small thing that has been quietly getting in the way of your work."],
   ["br-ca09", "brave", 3, "Ask for feedback on something you made, and listen without defending it."],
@@ -114,7 +117,7 @@ const CAREER: readonly Row[] = [
   ["br-ca15", "brave", 5, "Ask directly for the role, rate or opportunity you want."],
   ["br-ca16", "2min", 6, "Block the first hour of tomorrow for your most important work."],
   ["br-ca17", "15min", 6, "Protect twenty focused minutes for the skill this work relies on."],
-  ["br-ca18", "brave", 6, "Say no to one task that pulls you away from {desire.np}."],
+  ["br-ca18", "brave", 6, "Say no to one task that pulls you away from the work that matters most."],
   ["br-ca19", "2min", 7, "Write down one skill you have today that you didn’t have a year ago."],
   ["br-ca20", "15min", 7, "Write a short note to someone starting out, with the advice you needed."],
   ["br-ca21", "brave", 7, "Offer an hour of help to someone earlier on the same path."],
@@ -127,6 +130,9 @@ const CAREER: readonly Row[] = [
   ["br-ca28", "15min", 2, "Rewrite the top of your profile for the job you want next.", "new-job"],
   ["br-ca29", "brave", 6, "Raise your rate for the next new client, and quote it without apology.", "freelance"],
   ["br-ca30", "15min", 6, "Do one fifteen-minute study block with your phone in another room.", "study"],
+  // The motif’s own place stands in for the desire: ‘the studio’, never the whole sentence the user typed.
+  ["br-ca31", "brave", 2, "Book the call or meeting that brings {motif.place} one step closer.", "own-business"],
+  ["br-ca32", "brave", 2, "Book the call or viewing that brings {motif.place} one step closer.", "food-venture"],
 ];
 
 const HEALTH: readonly Row[] = [
@@ -228,18 +234,18 @@ export const BRIDGES: BridgeLibrary = {
   ],
   reshape: {
     love: [
-      fr("rs-lo1", "Send one message today that brings you a little closer to {desire.np}."),
+      fr("rs-lo1", "Send one message today that brings you a little closer to someone."),
       fr("rs-lo2", "Make ten minutes of real, undistracted time for someone you love."),
       fr("rs-lo3", "Do one thing today that you would do if you already felt deeply loved."),
     ],
     abundance: [
-      fr("rs-ab1", "Move one small amount toward {desire.np} before the day ends."),
+      fr("rs-ab1", "Move one small amount toward your goal before the day ends."),
       fr("rs-ab2", "Spend fifteen minutes on one money task you have been avoiding."),
       fr("rs-ab3", "Make one choice with money today that your calmest self would make."),
     ],
     career: [
       fr("rs-ca1", "Finish one visible piece of work, however small, and show it to someone."),
-      fr("rs-ca2", "Spend fifteen focused minutes on the next step toward {desire.np}."),
+      fr("rs-ca2", "Spend fifteen focused minutes on the next step of your plan."),
       fr("rs-ca3", "Send one message that could open a door for you this week."),
     ],
     health: [
@@ -260,7 +266,7 @@ export const BRIDGES: BridgeLibrary = {
   },
   learnedRetry: [
     fr("lr1", "Last time taught you something. Try the smallest piece of it today."),
-    fr("lr2", "You wrote {proof.quote}. That counts. Here is a smaller door."),
+    fr("lr2", "What you noted last time counts: {proof.quote}. Here is a smaller door."),
     fr("lr3", "Any size of step is a step, {name}. Pick the one that fits today."),
     fr("lr4", "{bridge.quote} was a big ask. Try a piece of it, sized for today."),
     fr("lr5", "What you learned is already part of the story, {name}. Choose a gentler step."),

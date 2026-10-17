@@ -1,152 +1,127 @@
-// Gratitude: three stems, three lines, done. The lightest page in the app.
+// GRATITUDE: three stems from the 48, three lines on the open sky, one seal.
+// The lightest page in the app. Any stem can be swapped for the next one in
+// today's deck; at least one line keeps the page.
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import * as Haptics from "expo-haptics";
-import { X } from "lucide-react-native";
+import { StyleSheet, View } from "react-native";
+import { RefreshCw, X } from "lucide-react-native";
+import { Dock, Header, IconButton, PrimaryButton, Screen, T, haptics, useToast } from "@/components/ui";
+import { SealedMoment } from "@/components/feature/rituals/SealedMoment";
+import { SkyWriting } from "@/components/feature/rituals/SkyWriting";
+import { dayParts } from "@/components/feature/rituals/dates";
+import { useBackToRituals } from "@/components/feature/rituals/nav";
+import { gratitudeDeck, gratitudePage, nextStem } from "@/lib/rituals";
 import { useJournal } from "@/contexts/JournalContext";
-import { useRitual } from "@/contexts/RitualContext";
-import { dailyGratitudeStems } from "@/lib/journal";
-import { dateKey } from "@/lib/streak";
-import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
+import { useProgress } from "@/contexts/RitualContext";
+import { colors, space } from "@/constants/theme";
+import { now } from "@/lib/clock";
+import { localDateKey } from "@/lib/progress";
+
+const LINE_MAX = 280;
 
 export default function GratitudeScreen() {
-  const router = useRouter();
+  const back = useBackToRituals();
+  const toast = useToast();
   const { addEntry } = useJournal();
-  const { markDone } = useRitual();
-  const stems = useMemo(() => dailyGratitudeStems(dateKey(new Date())), []);
+  const { recordAct } = useProgress();
+  const dateKey = localDateKey(now());
+  const deck = useMemo(() => gratitudeDeck(dateKey), [dateKey]);
+  const [stems, setStems] = useState(() => deck.slice(0, 3));
   const [lines, setLines] = useState(["", "", ""]);
   const [busy, setBusy] = useState(false);
+  const [sealed, setSealed] = useState(false);
 
   const filled = lines.filter((l) => l.trim().length > 0).length;
+
+  const swap = (i: number) => {
+    haptics.select();
+    setStems((cur) => cur.map((s, j) => (j === i ? nextStem(deck, cur, i) : s)));
+  };
 
   const save = async () => {
     if (filled === 0 || busy) return;
     setBusy(true);
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const text = stems
-      .map((stem, i) => (lines[i].trim() ? `${stem.text} ${lines[i].trim()}` : null))
-      .filter(Boolean)
-      .join("\n");
-    await addEntry("gratitude", stems.map((x) => x.text).join(" | "), text);
-    await markDone("script");
-    safeBack(router);
+    const page = gratitudePage(stems, lines);
+    const entry = await addEntry("gratitude", page.prompt, page.text, { promptId: page.promptId });
+    if (!entry) {
+      setBusy(false);
+      toast.show({ message: "Write one line to keep the page.", tone: "error" });
+      return;
+    }
+    recordAct("ritual-saved");
+    setSealed(true);
   };
 
+  if (sealed) {
+    return <SealedMoment meta={`Gratitude · ${dayParts(dateKey).long}`} onDone={back} />;
+  }
+
   return (
-    <SafeAreaView style={s.screen}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <View style={s.header}>
-          <Text style={s.headerTitle}>Three good things</Text>
-          <TouchableOpacity
-            onPress={() => safeBack(router)}
-            style={s.close}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            testID="gratitude-close"
-          >
-            <X color={colors.textMuted} size={22} />
-          </TouchableOpacity>
-        </View>
-
-        <ScrollView contentContainerStyle={s.content} keyboardShouldPersistTaps="handled">
-          {stems.map((stem, i) => (
-            <View key={stem.id} style={s.block}>
-              <Text style={s.stem}>{stem.text}</Text>
-              <TextInput
-                style={s.input}
-                placeholder="…"
-                placeholderTextColor={colors.textFaint}
-                value={lines[i]}
-                onChangeText={(t) =>
-                  setLines((prev) => prev.map((x, j) => (j === i ? t : x)))
-                }
-                multiline
-                testID={`gratitude-${i}`}
-              />
-            </View>
-          ))}
-        </ScrollView>
-
-        <View style={s.dock}>
-          <TouchableOpacity
-            style={[s.cta, filled === 0 && s.ctaDisabled]}
+    <Screen
+      testID="gratitude-screen"
+      header={
+        <Header
+          back={false}
+          title="Gratitude"
+          right={
+            <IconButton accessibilityLabel="Close" onPress={back} testID="gratitude-close">
+              <X color={colors.ink80} size={22} strokeWidth={1.75} />
+            </IconButton>
+          }
+        />
+      }
+      dock={
+        <Dock>
+          <PrimaryButton
+            label={filled === 0 ? "Write one line to keep the page" : filled === 3 ? "Seal all three" : `Seal ${filled === 1 ? "this line" : "these two"}`}
             onPress={() => void save()}
-            disabled={filled === 0 || busy}
-            activeOpacity={0.85}
+            disabled={filled === 0}
+            loading={busy}
             testID="gratitude-save"
-          >
-            <Text style={[s.ctaText, filled === 0 && s.ctaTextDisabled]}>
-              {filled === 0 ? "Write one line to save" : `Keep these ${filled}`}
-            </Text>
-          </TouchableOpacity>
+          />
+        </Dock>
+      }
+    >
+      <View style={styles.intro}>
+        <T variant="eyebrow">Three good things</T>
+        <T variant="body" tone="muted">
+          A line each is plenty. Small and true beats grand.
+        </T>
+      </View>
+      {stems.map((stem, i) => (
+        <View key={`${i}-${stem.id}`} style={styles.block}>
+          <View style={styles.stemRow}>
+            <T variant="eyebrow" tone="gold" numeric style={styles.numeral}>
+              {["I", "II", "III"][i]}
+            </T>
+            <T variant="title" style={styles.stem} testID={`gratitude-stem-${i}`}>
+              {stem.text}
+            </T>
+            <IconButton accessibilityLabel={`Another stem for line ${i + 1}`} onPress={() => swap(i)} testID={`gratitude-swap-${i}`}>
+              <RefreshCw color={colors.ink48} size={18} strokeWidth={1.75} />
+            </IconButton>
+          </View>
+          <SkyWriting
+            value={lines[i]}
+            onChangeText={(t) => setLines((prev) => prev.map((x, j) => (j === i ? t : x)))}
+            placeholder="In a line…"
+            maxLength={LINE_MAX}
+            minHeight={56}
+            autoFocus={i === 0}
+            accessibilityLabel={stem.text}
+            testID={`gratitude-${i}`}
+            style={styles.writing}
+          />
         </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      ))}
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingLeft: space.lg,
-    paddingRight: space.base,
-    paddingVertical: space.sm,
-  },
-  headerTitle: { ...type.title, color: colors.text },
-  close: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: { paddingHorizontal: space.lg, paddingBottom: space.xl },
-  block: { marginTop: space.lg },
-  stem: {
-    fontFamily: serif,
-    fontSize: 18,
-    lineHeight: 26,
-    color: colors.accent,
-    marginBottom: space.sm,
-  },
-  input: {
-    ...type.body,
-    color: colors.text,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-    minHeight: 56,
-    textAlignVertical: "top",
-  },
-  dock: { paddingHorizontal: space.lg, paddingBottom: space.base, paddingTop: space.sm },
-  cta: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.base,
-    alignItems: "center",
-    ...accentGlow,
-  },
-  ctaDisabled: { backgroundColor: colors.card, shadowOpacity: 0, elevation: 0 },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
-  ctaTextDisabled: { color: colors.textFaint },
+const styles = StyleSheet.create({
+  intro: { gap: space.xs, paddingTop: space.base, marginBottom: space.sm },
+  block: { marginTop: space.xl, gap: space.sm },
+  stemRow: { flexDirection: "row", alignItems: "flex-start", gap: space.md },
+  numeral: { width: 28, paddingTop: space.xs },
+  stem: { flex: 1 },
+  writing: { marginLeft: 28 + space.md },
 });

@@ -48,12 +48,20 @@ import { motifFlags, primaryMotif } from "./motifs";
 import { mulberry32, type Rng } from "./rng";
 import { shapeDesire } from "./shaper";
 import { collapse, wordCount } from "./text";
-import { proofAgo, proofDate, proofDone, proofQuote, proofsCount } from "./weave";
+import { doublesWriteVerb, proofAgo, proofDate, proofDone, proofQuote, proofsCount } from "./weave";
 
 export const ENGINE_VERSION = 2;
 
 /** At most this many older proofs are cited in the 'Previously' recall paragraph. */
 export const MAX_RECALLS = 3;
+
+/**
+ * The recall paragraph sits right after the opening, before the scene starts.
+ * Stacked recalls read like a list of quotes ('Remember October 5, when… Think
+ * back to October 6:… On October 9…'), so the paragraph stops citing once it
+ * would pass this many words: one or two proofs, never a wall of them.
+ */
+export const MAX_RECALL_WORDS = 30;
 
 /** Everything the engine reads. Defaults to the shipped content; tests inject synthetic pools. */
 export interface ContentSource {
@@ -183,12 +191,18 @@ function draw(
   pool: readonly Fragment[],
   ctx: Ctx,
   values: TokenValues = ctx.values,
-  maxWords = Number.POSITIVE_INFINITY
+  maxWords = Number.POSITIVE_INFINITY,
+  /** Soft filter: used when at least one eligible fragment passes it. */
+  prefer?: (f: Fragment) => boolean
 ): { id: string; filled: Filled } | undefined {
   let ok = pool.filter((f) => eligible(f, ctx, values));
   // An optional insert is dropped rather than repeat a line of the previous chapter.
   if (Number.isFinite(maxWords)) {
     ok = ok.filter((f) => !ctx.guard.previous.has(f.id) && wordCount(fillTemplate(f.text, values).text) <= maxWords);
+  }
+  if (prefer) {
+    const preferred = ok.filter(prefer);
+    if (preferred.length > 0) ok = preferred;
   }
   if (ctx.nowUsed >= WRITING_RULES.maxNowPerChapter) {
     const without = ok.filter((f) => !NOW_RE.test(f.text));
@@ -220,7 +234,7 @@ function baseValues(input: WriteChapterInput, motif: MotifArchetype | undefined,
     "{feeling}": { value: collapse(input.feeling).toLowerCase() || "grateful" },
     "{desire.quote}": { value: shaped.quote, span: "desire" },
     "{desire.np}": { value: shaped.np, span: "desire" },
-    "{desire.done}": { value: shaped.done, span: "desire" },
+    "{desire.done}": { value: shaped.done, span: "desire", short: shaped.doneShort },
   };
   if (!motif) return values;
   const details = motif.details.map((text, i) => ({ id: `mo-${motif.id}-d${i + 1}`, text }));
@@ -273,11 +287,14 @@ function weavePool(content: ContentSource, p: WeaveProof): readonly Fragment[] {
   return content.weave.woven[p.kind][weavePosition(p.kind)];
 }
 
+/** A proof that opens with 'Wrote…' is never framed as 'you wrote “Wrote…”' while another line fits. */
+const quoteFrameFor = (p: WeaveProof) => (f: Fragment) => !doublesWriteVerb(f.text, p.text);
+
 function drawWeave(content: ContentSource, ctx: Ctx, p: WeaveProof, todayKey: string): Piece {
   const values = proofValues(ctx.values, p, todayKey);
   const pools = [weavePool(content, p), content.weave.woven[p.kind][weavePosition(p.kind)]];
   for (const pool of pools) {
-    const d = draw(pool, ctx, values);
+    const d = draw(pool, ctx, values, Number.POSITIVE_INFINITY, quoteFrameFor(p));
     if (d) return piece("weave", d, p.id);
   }
   // No eligible line at all (broken content): the proof is still woven, in quotes.
@@ -289,15 +306,21 @@ function drawWeave(content: ContentSource, ctx: Ctx, p: WeaveProof, todayKey: st
   };
 }
 
-/** One 'Previously' paragraph citing up to MAX_RECALLS older proofs (oldest first), within a word budget. */
+/**
+ * One 'Previously' paragraph citing up to MAX_RECALLS older proofs (oldest
+ * first), within the chapter's remaining budget and never past MAX_RECALL_WORDS.
+ * When not every proof fits, the newest ones are cited: they are the freshest
+ * memory and the closest to this chapter.
+ */
 function drawRecall(content: ContentSource, ctx: Ctx, history: readonly WeaveProof[], todayKey: string, budget: number): Piece | undefined {
-  const cited = history.slice(-MAX_RECALLS);
+  const cap = Math.min(budget, MAX_RECALL_WORDS);
   const parts: { id: string; filled: Filled }[] = [];
   let words = 0;
-  for (const p of cited) {
-    const d = draw(content.weave.recall, ctx, proofValues(ctx.values, p, todayKey), budget - words);
+  // Pick newest first, so the cap drops the oldest citation; print oldest first.
+  for (const p of history.slice(-MAX_RECALLS).reverse()) {
+    const d = draw(content.weave.recall, ctx, proofValues(ctx.values, p, todayKey), cap - words, quoteFrameFor(p));
     if (!d) break;
-    parts.push(d);
+    parts.unshift(d);
     words += wordCount(d.filled.text);
   }
   if (parts.length === 0) return undefined;

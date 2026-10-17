@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { proofAgo, proofDate, proofDone, proofDoneClause, proofQuote, proofsCount } from "./weave";
+import { doublesWriteVerb, proofAgo, proofDate, proofDone, proofDoneClause, proofQuote, proofsCount, startsWithWriteVerb } from "./weave";
 import { fillTemplate } from "./fill";
 import { numberWord, toRoman } from "./text";
 
@@ -16,16 +16,47 @@ describe("{proof.done}", () => {
     ["Learned that I need more rest", "you learned that you need more rest"],
     ["Told the team I was ready", "you told the team you were ready"],
     ["Fixed the constructor in my app", "you fixed the constructor in your app"],
+    // Trailing time words go, the way leading ones do: the proof is retold days later.
+    ["Walked to work twice this week", "you walked to work twice"],
+    ["Met her for coffee again today.", "you met her for coffee"],
+    ["Went to bed before eleven tonight", "you went to bed before eleven"],
+    ["Called my sister yesterday", "you called your sister"],
+    ["Ran 5k this morning!", "you ran 5k"],
+    ["Drank more water this week", "you drank more water"],
+    ["Finished the draft today, finally", "you finished the draft today, finally"],
   ];
   for (const [raw, expected] of cases) {
     test(JSON.stringify(raw), () => expect(proofDone(raw)).toBe(expected));
   }
+
+  test("a habit over many days stays quoted: it cannot be 'the day you … every day'", () => {
+    for (const raw of ["Drank water before coffee every day this week", "Meditated each morning", "Walked the dog daily"]) {
+      expect(proofDoneClause(raw)).toBeNull();
+    }
+  });
 
   test("notes that are not a deed stay quoted", () => {
     for (const raw of ["Proof number 1: asked for feedback", "Design review went well", "Two things. First I called.", "That mornings are better", "Said I love you first.", "Told my sister you were right", "I write better at night with the phone in another room"]) {
       expect(proofDoneClause(raw)).toBeNull();
       expect(proofDone(raw)).toBe(`you wrote ${proofQuote(raw)}`);
     }
+  });
+
+  test("the fallback never doubles the proof's own verb: 'you noted “Wrote…”', never 'you wrote “Wrote…”'", () => {
+    expect(proofDone("Wrote a message to Mum. Didn't send it yet.")).toBe("you noted “Wrote a message to Mum. Didn't send it yet”");
+    expect(proofDone("Writing every morning this week, one page a day, even when the page is bad")).toMatch(/^you noted “Writing/u);
+    expect(proofDone("Design review went well")).toBe("you wrote “Design review went well”");
+    expect(startsWithWriteVerb("“Wrote it down”")).toBe(true);
+    expect(startsWithWriteVerb("Rewrote my CV")).toBe(false);
+  });
+
+  test("a quote frame that would repeat 'wrote' is flagged for the engine", () => {
+    const proof = "Wrote a message to Mum";
+    for (const t of ["On {proof.date} you wrote {proof.quote}.", "You remember writing {proof.quote}.", "You wrote it down: {proof.quote}.", "{proof.quote}, you wrote, as if it were nothing."]) {
+      expect(doublesWriteVerb(t, proof)).toBe(true);
+      expect(doublesWriteVerb(t, "Sent a message to Mum")).toBe(false);
+    }
+    expect(doublesWriteVerb("Remember {proof.date}: {proof.quote}.", proof)).toBe(false);
   });
 
   test("quotes are curly and lose the final punctuation", () => {
@@ -65,6 +96,13 @@ describe("fill", () => {
     const f = fillTemplate("Look. {proof.done}, and it shows.", v);
     expect(f.text).toBe("Look. You sent it, and it shows.");
     expect(f.text.slice(f.spans[0].start, f.spans[0].end)).toBe("You sent it");
+  });
+
+  test("a value's short form fills only a colon payoff or 'the life where'", () => {
+    const v = { "{desire.done}": { value: "self-belief is part of your life", short: "self-belief is yours" } };
+    expect(fillTemplate("It is real, Leah: {desire.done}.", v).text).toBe("It is real, Leah: self-belief is yours.");
+    expect(fillTemplate("The life where {desire.done} feels like home.", v).text).toBe("The life where self-belief is yours feels like home.");
+    expect(fillTemplate("Since {desire.done}, mornings feel different.", v).text).toBe("Since self-belief is part of your life, mornings feel different.");
   });
 
   test("dollar signs and braces in user words come through literally", () => {

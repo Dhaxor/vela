@@ -92,6 +92,12 @@ describe("bridge offers", () => {
     expect(bridgeText({ text: "Ask once. " }, "x", [])).toBe("Ask once.");
   });
 
+  test("a motif-tagged bridge names its own motif's place, not the dream's first motif", () => {
+    const entry = { text: "sketch the sign that will hang above {motif.place}", motif: "own-business" as const };
+    expect(bridgeText(entry, "my own design studio", ["freelance", "own-business"])).toBe("Sketch the sign that will hang above the studio.");
+    expect(bridgeText({ text: "tidy {motif.place}" }, "x", ["freelance", "own-business"])).toBe("Tidy the desk by the window.");
+  });
+
   test("the shipped library offers all three tiers for every focus", () => {
     for (const f of FOCUS_AREAS) {
       const offers = bridgeOffers(input({ focus: f.id }));

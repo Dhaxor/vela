@@ -140,3 +140,13 @@ describe("token values", () => {
     expect(formatRitualTime("oops")).toBe("oops");
   });
 });
+
+describe("pickTemplate: write-verb frames", () => {
+  test("a 'You wrote {proof.quote}' frame is skipped for a proof that opens with 'Wrote'", () => {
+    const pool = [nt("w", "Tonight", "You wrote {proof.quote}."), nt("p", "Tonight", "{proof.quote} counts.")];
+    const wrote = pickTemplate(pool, [], { "{proof.quote}": "“Wrote to Mum about Sunday”" }, false);
+    expect(wrote?.template.id).toBe("p");
+    const called = pickTemplate(pool, [], { "{proof.quote}": "“Called Mum about Sunday”" }, false);
+    expect(called?.template.id).toBe("w");
+  });
+});

@@ -7,7 +7,7 @@ import { describe, expect, test } from "bun:test";
 import { paragraphsForDaypart, type Chapter } from "@/contexts/arc.types";
 import { FOCUS_AREAS } from "@/lib/focus";
 import { STAGE_IDS, WRITING_RULES, type FocusContent, type Fragment, type MotifArchetype, type StageId } from "./content";
-import { writeChapter, weavePosition, type ContentSource, type WeaveProof, type WriteChapterInput } from "./engine";
+import { MAX_RECALL_WORDS, writeChapter, weavePosition, type ContentSource, type WeaveProof, type WriteChapterInput } from "./engine";
 import { wordCount } from "./text";
 
 const SENT = "Quiet light rests on the table while the room wakes.";
@@ -176,6 +176,35 @@ describe("weaving", () => {
     expect(nt.body.find((p) => p.wovenProofId)?.fragmentId).toMatch(/^wv-nt/u);
   });
 
+  test("a proof that opens with 'Wrote…' is never framed as 'you wrote “Wrote…”' while another line fits", () => {
+    const mixed: ContentSource = {
+      ...SYNTH,
+      weave: {
+        ...SYNTH.weave,
+        woven: {
+          ...SYNTH.weave.woven,
+          // moved weaves at the witness position, did at arrival (weavePosition)
+          moved: {
+            ...SYNTH.weave.woven.moved,
+            witness: [...pool("wv-m-wi", 3, (i) => `You remember writing {proof.quote}. Moved ${i}.`), ...pool("wv-m-wix", 3, (i) => `Part of the way: {proof.quote}. Moved ${i}.`)],
+          },
+          did: {
+            ...SYNTH.weave.woven.did,
+            arrival: [...pool("wv-d-ar", 3, (i) => `{proof.quote}, you wrote. Did ${i}.`), ...pool("wv-d-arx", 3, (i) => `Someone asks about {proof.quote}. Did ${i}.`)],
+          },
+        },
+        recall: [...pool("wv-rc", 6, (i) => `On {proof.date} you wrote {proof.quote}. Recall ${i}.`), ...pool("wv-rcx", 6, (i) => `Remember {proof.date}: {proof.quote}. Recall ${i}.`)],
+      },
+    };
+    const wrote = (kind: WeaveProof["kind"]) => proof("pw", kind, "Wrote a message to Mum. Didn’t send it yet.", "2026-10-12");
+    const doubled = /wr(?:ote|ite|iting)[^.!?“]{0,16}“Wrote|“Wrote[^”]*”,? you wrote/iu;
+    for (let seed = 0; seed < 80; seed += 1) {
+      const moved = writeChapter(base({ seed, woven: wrote("moved"), stage: 4, number: 4 }), mixed).chapter;
+      const did = writeChapter(base({ seed, woven: wrote("did"), history: [wrote("did")], totalProofs: 2, stage: 4, number: 4 }), mixed).chapter;
+      for (const p of [...all(moved), ...all(did)]) expect(p.text).not.toMatch(doubled);
+    }
+  });
+
   test("no proof, no weave paragraph", () => {
     expect(all(write({ woven: null }).chapter).some((p) => p.beat === "weave" || p.wovenProofId)).toBe(false);
   });
@@ -196,8 +225,29 @@ describe("recall and cumulative", () => {
     const cited = recall.spans.filter((s) => s.kind === "proof").map((s) => s.proofId);
     expect(cited.length).toBeGreaterThanOrEqual(1);
     expect(cited.length).toBeLessThanOrEqual(3);
-    expect(cited).toEqual(["h2", "h3", "h4"].slice(0, cited.length));
+    // The newest proofs are the ones cited; they print oldest first.
+    expect(cited).toEqual(["h2", "h3", "h4"].slice(-cited.length));
     expect(recall.text).toContain("September 20");
+  });
+
+  test(`recall stacking: the paragraph before the scene never passes ${MAX_RECALL_WORDS} words of past proofs`, () => {
+    const long = [
+      proof("w1", "did", "Sketched the whole logo twice on the back of an old envelope at lunch", "2026-09-01"),
+      proof("w2", "moved", "Priced the rent for three small rooms near the station and the park", "2026-09-20"),
+      proof("w3", "did", "Called a landlord about the corner unit with the big front window", "2026-10-01"),
+      proof("w4", "learned", "Mornings work better for calls than evenings, so I moved them all", "2026-10-10"),
+    ];
+    for (let seed = 0; seed < 60; seed += 1) {
+      for (const stage of [3, 5, 7] as const) {
+        const c = write({ seed, history: long, totalProofs: 5, stage, number: stage }).chapter;
+        const recall = c.body.find((p) => p.beat === "recall");
+        if (!recall) continue;
+        expect(wordCount(recall.text)).toBeLessThanOrEqual(MAX_RECALL_WORDS);
+        const cited = recall.spans.filter((s) => s.kind === "proof").map((s) => s.proofId);
+        // A capped paragraph keeps the newest proof, not the oldest.
+        expect(cited.at(-1)).toBe("w4");
+      }
+    }
   });
 
   test("no recall in Chapter I, none without history", () => {

@@ -7,6 +7,8 @@ import type { Token } from "./content/types";
 
 export interface TokenValue {
   readonly value: string;
+  /** Used instead of `value` in a SHORT_SLOT, where the full value would echo its frame. */
+  readonly short?: string;
   /** Emit a highlight span around the value. */
   readonly span?: SpanKind;
   readonly proofId?: ProofId;
@@ -30,6 +32,9 @@ export function tokensOf(template: string): string[] {
 export function canFill(template: string, values: TokenValues): boolean {
   return tokensOf(template).every((t) => values[t as Token] !== undefined);
 }
+
+/** Right after a colon (a frame's payoff) or after 'the life where': a value's short form, if it has one, reads better. */
+const SHORT_SLOT = /(?::|(?<![\p{L}])life where)\s$/iu;
 
 const atSentenceStart = (out: string) => out.length === 0 || /[.!?…]["”’)]?\s+$/u.test(out);
 
@@ -58,7 +63,7 @@ export function fillTemplate(template: string, values: TokenValues): Filled {
       const fixed = `${article[2]}${vowel ? "n" : ""} `;
       out = out.slice(0, out.length - (article[2].length + article[3].length + 1)) + fixed;
     }
-    let value = v.value;
+    let value = v.short && SHORT_SLOT.test(out) ? v.short : v.value;
     // 'the afternoon you {proof.done}' + 'you sent…' → one subject, not 'you you sent'.
     const subject = out.match(/(?<![\p{L}])(you|I) $/iu);
     if (subject && new RegExp(`^${subject[1]} `, "iu").test(value)) value = value.slice(subject[1].length + 1);

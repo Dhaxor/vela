@@ -41,6 +41,14 @@ export interface ShapedDesire {
   readonly np: string;
   /** Second person completed clause, starts with 'you'. */
   readonly done: string;
+  /**
+   * `done` for the slots where the full clause would echo its frame: right
+   * after a colon, where a frame lands its payoff ('It is real, Maya: …'), and
+   * after 'the life where'. Equal to `done` except for a bare noun phrase:
+   * 'financial freedom is part of your life' reads flat there ('the life where
+   * financial freedom is part of your life') and becomes 'financial freedom is yours'.
+   */
+  readonly doneShort: string;
   /** First person noun phrase (3·6·9 frames only). */
   readonly npMy: string;
   /** First person clause starting with 'I' (3·6·9 frames only). */
@@ -70,7 +78,8 @@ const DEADLINE_TAILS: readonly RegExp[] = [
   new RegExp(`[\\s,]*\\b(?:by|before|within|until|in|around)\\s+(?:the\\s+)?(?:end\\s+of\\s+)?(?:this\\s+|next\\s+|the\\s+)?(?:${NUMBERISH}\\s+)?${TIME_NOUN}\\b.*$`, "iu"),
   new RegExp(`[\\s,]*\\b(?:this|next)\\s+${TIME_NOUN}\\b.*$`, "iu"),
   /[\s,]*\b(?:in|within)\s+(?:the\s+)?(?:next|coming)\b.*$/iu,
-  /[\s,]*\bbefore\s+(?:i|i'm|i’m|my|we|our|the)\b.*$/iu,
+  // 'before my wedding', 'before her wedding', 'before their visit': someone's event is a deadline, not the desire.
+  /[\s,]*\bbefore\s+(?:i|i'm|i’m|my|we|our|the|her|his|their)\b.*$/iu,
   /[\s,]*\bby\s+(?:the\s+)?(?:age\s+(?:of\s+)?)?\d{1,4}\b.*$/iu,
   /[\s,]*\bby\s+the\s+time\b.*$/iu,
   /[\s,]*\b(?:soon|someday|some day|one day|asap|right now|this time|already)\s*$/iu,
@@ -405,8 +414,12 @@ function analyse(core: string): Analysis | undefined {
  * Rendering
  * ========================================================================= */
 
-/** Conjugate coordinated verbs ('find love AND BUY a house') in the same form as the head. */
-function conjugateCoordinated(tokens: readonly string[], form: (v: VerbForms) => string): string[] {
+/**
+ * Conjugate coordinated verbs ('find love AND BUY a house') in the same form as
+ * the head. `form` also gets the coordinated clause's own words (up to the next
+ * coordinator), so a clause can pick its tense by itself.
+ */
+function conjugateCoordinated(tokens: readonly string[], form: (v: VerbForms, clause: readonly string[]) => string): string[] {
   const out = [...tokens];
   for (let i = 0; i < out.length - 1; i += 1) {
     if (!COORDINATORS.has(norm(out[i]))) continue;
@@ -416,15 +429,46 @@ function conjugateCoordinated(tokens: readonly string[], form: (v: VerbForms) =>
     const v = verbByBase(w);
     if (!v || v.base === "be" || v.base === "have") continue;
     const follower = out[j + 1] ? norm(out[j + 1]) : "";
-    if (AMBIGUOUS.has(w) && !OBJECT_START.has(follower)) continue;
-    out[j] = form(v);
+    // An ambiguous word reads as a verb before an object or another -ing verb ('start LIVING').
+    if (AMBIGUOUS.has(w) && !OBJECT_START.has(follower) && !/^[a-z]{2,}ing$/u.test(follower)) continue;
+    let end = j + 1;
+    while (end < out.length && !COORDINATORS.has(norm(out[end]))) end += 1;
+    out[j] = form(v, [...out.slice(i + 1, j), ...out.slice(j + 1, end)]);
   }
   return out;
+}
+
+/**
+ * After 'stop …ing', a coordinated verb is a second wish, not part of what
+ * stopped: 'Stop overthinking every message AND JUST TRUST myself more'. The
+ * noun phrase takes the gerund ('… and just trusting yourself more'); the done
+ * clause keeps a habit in the present ('… and just trust yourself more') and
+ * puts a one-off in the past ('stop smoking and get fit' → '… and got fit').
+ */
+const cessationNp = (v: VerbForms) => v.gerund;
+const cessationDone = (v: VerbForms, clause: readonly string[]) => (habitualFor(v, clause, []) ? v.base : v.past);
+
+/**
+ * True when a clause after 'and/or/then' opens with 'be' or 'have', which the
+ * conjugation never touches ('stop overthinking and just BE myself'). Such a
+ * cessation is unshapeable, so the slots fall back to the quote. (An ambiguous
+ * word with no object, 'stop worrying about money and WORK', is a noun.)
+ */
+function hasBareCoordinatedVerb(tokens: readonly string[]): boolean {
+  for (let i = 0; i < tokens.length - 1; i += 1) {
+    if (!COORDINATORS.has(norm(tokens[i]))) continue;
+    let j = i + 1;
+    while (j < tokens.length - 1 && LEADING_ADVERBS.has(norm(tokens[j]))) j += 1;
+    const base = verbByBase(norm(tokens[j]))?.base;
+    if (base === "be" || base === "have") return true;
+  }
+  return false;
 }
 
 interface Rendered {
   readonly np: string;
   readonly done: string;
+  readonly doneShort?: string;
 }
 
 function renderVerb(a: Extract<Analysis, { kind: "verb" }>, person: 1 | 2): Rendered {
@@ -433,7 +477,7 @@ function renderVerb(a: Extract<Analysis, { kind: "verb" }>, person: 1 | 2): Rend
   const restFor = (form: (v: VerbForms) => string) => swap(conjugateCoordinated(a.rest, form));
   const subj = person === 2 ? "you" : "I";
   const npHead = a.cessation ? ["no", "longer"] : [a.verb.gerund];
-  const npRest = a.cessation ? swap(a.rest) : restFor((v) => v.gerund);
+  const npRest = a.cessation ? swap(conjugateCoordinated(a.rest, cessationNp)) : restFor((v) => v.gerund);
   const np = [...adv, ...npHead, ...npRest].join(" ");
   let done: string[];
   switch (a.tense) {
@@ -447,7 +491,7 @@ function renderVerb(a: Extract<Analysis, { kind: "verb" }>, person: 1 | 2): Rend
       done = [subj, person === 2 ? "are" : "am", ...adv, a.verb.gerund, ...restFor((v) => v.gerund)];
       break;
     default:
-      done = [subj, ...adv, a.verb.past, ...(a.cessation ? swap(a.rest) : restFor((v) => v.past))];
+      done = [subj, ...adv, a.verb.past, ...(a.cessation ? swap(conjugateCoordinated(a.rest, cessationDone)) : restFor((v) => v.past))];
   }
   return { np, done: done.join(" ") };
 }
@@ -479,7 +523,8 @@ function render(a: Analysis, person: 1 | 2): Rendered {
   if (a.kind === "state") return { np: `being ${phrase}`, done: `${subj} ${person === 2 ? "are" : "am"} ${phrase}` };
   if (DETERMINER.test(phrase)) return { np: phrase, done: `${subj} have ${phrase}` };
   const life = person === 2 ? "your life" : "my life";
-  return { np: phrase, done: `${phrase} ${bareNounIsPlural(a.tokens) ? "are" : "is"} part of ${life}` };
+  const verb = bareNounIsPlural(a.tokens) ? "are" : "is";
+  return { np: phrase, done: `${phrase} ${verb} part of ${life}`, doneShort: `${phrase} ${verb} ${person === 2 ? "yours" : "mine"}` };
 }
 
 const SHAPE_OF: Readonly<Record<Analysis["kind"], DesireShape>> = { noun: "noun", state: "state", verb: "imperative" };
@@ -510,6 +555,7 @@ export function shapeDesire(raw: string): ShapedDesire {
     quote,
     np: NP_FALLBACK,
     done: doneFallback(quote),
+    doneShort: doneFallback(quote),
     npMy: NP_MY_FALLBACK,
     doneI: doneIFallback(quote),
     fallback: true,
@@ -518,8 +564,18 @@ export function shapeDesire(raw: string): ShapedDesire {
   if (!core || /[.!?;]\s*\S/u.test(core)) return fallback;
   const a = analyse(core);
   if (!a) return fallback;
+  if (a.kind === "verb" && a.cessation && hasBareCoordinatedVerb(a.rest)) return fallback;
   const second = render(a, 2);
   const first = render(a, 1);
   if (!usable(second.np, MAX_SHAPED_WORDS) || !usable(second.done, MAX_SHAPED_WORDS + 4)) return fallback;
-  return { shape: shapeOf(a, core), quote, np: second.np, done: second.done, npMy: first.np, doneI: first.done, fallback: false };
+  return {
+    shape: shapeOf(a, core),
+    quote,
+    np: second.np,
+    done: second.done,
+    doneShort: second.doneShort ?? second.done,
+    npMy: first.np,
+    doneI: first.done,
+    fallback: false,
+  };
 }

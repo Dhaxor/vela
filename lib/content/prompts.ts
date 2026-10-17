@@ -119,7 +119,7 @@ export const RITUAL_PROMPTS: RitualPrompts = {
     fr("sp-arc2", "Write the next morning, the one that comes after {chapter.title}."),
     fr("sp-arc3", "Your story has reached {stage.name}. Write the hour just before it begins."),
     fr("sp-arc4", "You chose {bridge.quote}. Write the moment just after you cross it."),
-    fr("sp-arc5", "You wrote {proof.quote}. Script what happened next, as if telling a friend."),
+    fr("sp-arc5", "Start from your own words, {proof.quote}, and script what happened next, as if telling a friend."),
     fr("sp-arc6", "Write Chapter {chapter.numeral} again, through the eyes of someone who loves you."),
     fr("sp-arc7", "Imagine {bridge.quote} is done. Write how the rest of that day feels."),
     fr("sp-arc8", "Write the chapter after {chapter.title} in five sentences."),

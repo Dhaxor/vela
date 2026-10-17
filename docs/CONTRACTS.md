@@ -368,7 +368,10 @@ The engine (A2) fills these rules. Writers write to them.
   the bridge*, and evening variants to hand them *into rest*. The scene itself
   may be any time of day.
 - **Recall** lines appear from stage II when older, already-woven proofs
-  exist. **Cumulative** lines appear only when the dream has 3 or more proofs.
+  exist. The recall paragraph is capped at `MAX_RECALL_WORDS` (30, in
+  `lib/story/engine.ts`); when not every proof fits, it cites the newest ones
+  and still prints them oldest first. **Cumulative** lines appear only when
+  the dream has 3 or more proofs.
 - **Motif gating:** a fragment containing any `{motif.*}` token is eligible
   only when a motif matched. Every pool therefore needs motif-free fragments.
   `requires` / `excludes` flags filter fragments against the matched motifs'
@@ -451,6 +454,13 @@ the index doesn't import. Don't import between content files.
   rather than assuming.
 - Stage III (The Hard Day) is a realistic setback handled steadily, never a
   catastrophe. No outcome guarantees anywhere.
+- **Cadences** (`CADENCES` in `types.ts`, 43 stock opening and closing moves
+  such as 'Good morning, {name}', 'Let the day close', 'give it a time'): each
+  family lives in ONE stage only, and inside that stage in its openings or its
+  closings, never both. Chapter I scripts count as stage I. A season reads one
+  chapter per stage, so no season repeats a cadence.
+  `lib/story/content/cadence.test.ts` enforces the static rule and renders 42
+  seasons to check it.
 - Self-check before reporting: `bun test lib/story/content`.
 
 Good fragments, one per kind:
@@ -474,20 +484,20 @@ so the token may not open a sentence.
 | Token | Value | Example | Case | Span | Personal | Allowed in |
 |---|---|---|---|---|---|---|
 | `{name}` | name as typed; 'friend' if empty; TTS speaks the pronunciation | Maya | as typed | name | | beat, weave, seed, notToday, recall, cumulative, motifLine, learnedRetry, notification, arcPrompt |
-| `{feeling}` | feeling chip, adjective ('you feel {feeling}') | proud | lower | | | beat, weave, seed, notToday, motifLine, frame369 |
+| `{feeling}` | feeling chip, adjective ('you feel {feeling}') | proud | lower | | | beat, weave, seed, notToday, frame369 (not motifLine: the shared reflection already names it) |
 | `{desire.quote}` | exact words in curly quotes, trailing .!? removed | “my own design studio” | quote | desire | yes | beat, weave, seed, notToday, motifLine, notification, scriptPrompt |
-| `{desire.np}` | noun phrase, 2nd person | your own design studio / finding your soulmate | lower | desire | yes | beat, weave, seed, notToday, cumulative, motifLine, bridge, reshape, notification, scriptPrompt, arcPrompt |
-| `{desire.done}` | completed clause, 2nd person | you opened your bakery / you are debt free | lower | desire | yes | beat, weave, seed, notToday, motifLine |
+| `{desire.np}` | noun phrase, 2nd person | your own design studio / finding your soulmate | lower | desire | yes | beat, weave, seed, notToday, cumulative, motifLine, notification, scriptPrompt, arcPrompt (never bridge or reshape: a long desire reads clunky inside a step) |
+| `{desire.done}` | completed clause, 2nd person; right after a colon or 'the life where', a bare noun phrase takes the short form '<np> is yours' (`ShapedDesire.doneShort`) | you opened your bakery / you are debt free / financial freedom is yours | lower | desire | yes | beat, weave, seed, notToday, motifLine |
 | `{desire.np.my}` | 1st-person noun phrase | my own design studio | lower | | yes | frame369 |
 | `{desire.done.i}` | 1st-person clause | I opened my bakery | 'I' | | yes | frame369 |
 | `{proof.quote}` | proof in curly quotes | “Sent my portfolio to two studios” | quote | proof | yes | weave, seed, notToday, recall, learnedRetry, notification, arcPrompt |
-| `{proof.done}` | 2nd-person past clause; fallback `you wrote {proof.quote}` | you sent your portfolio to two studios | lower | proof | yes | weave, seed, notToday, recall |
+| `{proof.done}` | 2nd-person past clause; trailing time words dropped ('this week', 'tonight'); fallback `you wrote {proof.quote}`, or `you noted {proof.quote}` for a proof that opens with 'Wrote…'; a habit ('every day', 'daily') always stays quoted | you sent your portfolio to two studios | lower | proof | yes | weave, seed, notToday, recall |
 | `{proof.ago}` | relative day in words | yesterday / twelve days ago | lower | | | weave, seed, notToday, recall, notification |
 | `{proof.date}` | month and day in words | October 14 | Capital | | | weave, seed, notToday, recall |
 | `{proofs.count}` | number word, guaranteed ≥ 3 in cumulative and ≥ 2 in notifications | four | lower | | | cumulative, notification |
 | `{proofs.phrase}` | plural noun phrase | four proofs | lower | | | cumulative, notification |
 | `{nights.count}` / `{nights.phrase}` | number word ≥ 2 / plural phrase | twelve / twelve nights | lower | | | notification |
-| `{motif.place}` | archetype place, with its article | the studio | lower | | | beat, weave, seed, notToday, motifLine, bridge |
+| `{motif.place}` | archetype place, with its article; a motif-tagged bridge names ITS motif's place (`lib/futureMemory` bridgeText) | the studio | lower | | | beat, weave, seed, notToday, motifLine, bridge |
 | `{motif.detail}` | sensory noun phrase | fabric swatches pinned above the desk | lower | | | beat, weave, seed, notToday, motifLine |
 | `{bridge.quote}` | bridge in curly quotes, final period removed | “Send one piece of work …” | quote | | yes | learnedRetry, notification, arcPrompt |
 | `{ifthen.when}` | cue label | 9am / lunch / after work | lower | | yes | notification |
@@ -648,10 +658,10 @@ still compile.
   pins `lib/clock` and freezes motion.
 - Fonts load with `useFonts` in `app/_layout.tsx`, and first render is gated on
   them. No expo-font plugin embedding.
-- Phase 1 keeps the visible tabs as they are (Today, Stories, Journal, Board),
-  so the 1.0 screens and e2e keep working. A1 restyles the tab bar and may add
-  `arc.tsx` / `rituals.tsx` stub routes hidden with `href: null`. Phase 2 (S5,
-  S6) swaps in the 3-tab layout Today | Arc | Rituals.
+- Phase 1 kept the visible tabs as they were (Today, Stories, Journal, Board).
+  Phase 2 (S5, S6) swapped in the 3-tab layout **Today | Arc | Rituals**
+  (`tab-today`, `tab-arc`, `tab-rituals`); `stories.tsx`, `journal.tsx` and
+  `board.tsx` are deleted.
 
 ## 15. Provider tree and legacy adapters
 
@@ -674,7 +684,12 @@ PlusProvider and RitualProvider have no dependencies, so moving them up is
 safe. Until A2 lands, StoryProvider keeps serving the 1.0 screens from
 `vela.stories.v1` exactly as today.
 
-**Adapters A2 keeps until the Phase 2 screens stop importing them:**
+**Phase 3 (integration, 2026-10-16):** every adapter below is deleted. The
+tree is now `UserProvider > PlusProvider > RitualProvider > ArcProvider >
+JournalProvider > ScenesProvider > UIProvider > RootNavigator` (§20.1). The
+table is kept as a record of what the adapters did.
+
+**Adapters A2 kept until the Phase 2 screens stopped importing them:**
 
 | 1.0 hook | Adapter over v2 |
 |---|---|
@@ -695,7 +710,12 @@ An adapter is deleted only after a grep shows no importer under `app/**`
 | `/story/[id]` | ChapterId | reader; prev/next from `arc.chapters(dreamId)`; `vela://story/<chapterId>` |
 | `/evidence/[intentId]` | DreamId | proof form → Star Birth → Weave; `vela://evidence/<dreamId>` |
 | `/sky/[intentId]` | DreamId | ConstellationView (stack route, not a tab) |
-| `/story/new` | none | additional dream (createDream) |
+| `/story/new` | none | additional dream (createDream); free without room → `/paywall?from=second-dream` once, then a locked state |
+| `/weave/[chapterId]` | ChapterId (or `first-light`) | the Weave interstitial; ends with `router.replace('/story/<id>')`; still mode waits for a tap on `weave-stage` |
+| `/story/[id]?at=bridge` | | opens the reader at the bridge chooser |
+| `/evidence/[intentId]?born=<proofId>` | | reopens a saved proof's Star Birth (replays only within 2 minutes, once per session) |
+| `/sky/[intentId]?season=&star=` | | opens that season and that star's sheet |
+| `/paywall?from=` | `second-dream` `bed` `area` `scenes` `nudge` `lapsed` (`reader` reads as `nudge`) | copy and featured benefit per entry point |
 
 Every deep-linked screen uses `safeBack` (`lib/nav.ts`). Cold-start routing
 waits for every store to be `ready`.
@@ -771,8 +791,14 @@ waits for every store to be `ready`.
 - 2026-10-15 A2: content engine notes for writers: fillTemplate collapses a doubled subject ('the afternoon you {proof.done}' renders 'the afternoon you sent…', not 'you you'); {desire.done} for a bare noun phrase is '<np> is/are part of your life' ('you have <np>' when it starts with a determiner); bridge text is filled and sentence-cased by lib/futureMemory bridgeText. Golden matrix + rendered-chapter style lint live in lib/story/content/golden.test.ts, so `bun test lib/story/content` runs them.
 - 2026-10-15 integrator: STORAGE_KEYS.arcsUnreadable ('vela.arcs.v2.unreadable', device-local, not backed up). ArcProvider copies an arc index it cannot read there before anything can overwrite it, and collects orphan chapter keys only from an index it read and never while a quarantine exists (new pure lib/store/indexLoad: classifyIndexRead, orphanChapterKeys; contexts/persist adds writeRaw). Before this, an unreadable index deleted every chapter key and was overwritten with an empty index on launch.
 - 2026-10-15 integrator: lib/loopEffects imports useProgress directly. The 1.0 Settings reminder buttons now set profile.remindersEnabled, which the v2 queue reads. Neutral 'ritual-bridge' copy (nt-rb2/3/6/7/9) now reads right when the heard chapter has no bridge chosen yet. ios-release.yml refuses a build with EXPO_PUBLIC_STILL set. The §7.3 example is 'the afternoon {proof.done}'.
+- 2026-10-16 S8: content contract. Bridges and reshape starters no longer allow {desire.np}; motif lines no longer allow {feeling} (ALLOWED_TOKENS, contract-tested). {desire.done} gains a short form after a colon or 'the life where' ('<np> is yours'; ShapedDesire.doneShort, TokenValue.short). {proof.done} drops trailing time words, keeps habit proofs quoted and falls back to 'you noted …' for a 'Wrote…' proof (new export doublesWriteVerb in lib/story/weave). The recall paragraph is capped at MAX_RECALL_WORDS = 30 (newest proofs cited). CADENCES in content/types.ts puts each stock opening/closing move in one stage only (cadence.test.ts).
+- 2026-10-16 integrator (Phase 3): the 1.0 adapters are gone. Deleted contexts/StoryContext.tsx (useStories, StoryProvider), contexts/BoardContext.tsx (useBoard, BoardProvider), useRitual() and the Practice type from RitualContext, lib/store/legacy.ts (+test), lib/notifications/legacy.ts (+test; applyReminders/clearReminders/remindersFor and their re-export from @/lib/notifications), lib/streak.ts (+test), and the 1.0 colour, `type` and `serif` aliases in constants/theme.ts. Root tree mounts ScenesProvider directly and gates on useProgress().ready and useScenes().ready.
+- 2026-10-16 integrator: new pure modules lib/dreams.ts (dreamGivenName, dreamName), lib/rituals.ts (moved from components/feature/rituals/ritualContent.ts, same exports, re-exports the names), lib/ritualTime.ts (nextRitualMoment, saveForLabel, whenLabel, parseRitualHHmm, RITUAL_GRACE_MS), each with tests. Today's ArcSwitcher, the sky header and Arc share the dream-name rule; Today's rituals row, Rituals and /affirmation share the picks; Today, the Star Birth dock and the sealed card share 'Save for …' / 'Opens …'.
+- 2026-10-16 integrator: additive fields. PlusValue.priceAmounts (Record<PlanId, {amount, currency} | null>, from StoreKit's numeric price; lib/purchase numericPrice). ProfileV2.bedOn?: false (the reader's 'Silence'; stored only when chosen, so other profiles keep their exact shape). lib/audio isAudioActive() (AudioSession.active()). Dock `dense` (the reader's denser scrim). ScreenProps.scrollProps accepts `ref`.
+- 2026-10-16 integrator: behaviour. SkyBackdrop keys chart circles by index and Screen ignores 0×0 layouts (the 'two children with the same key' error on every push over a tab). Disabled filled buttons are opaque (sky700). lib/futureMemory bridgeText names a motif-tagged entry's own place. Notification picking skips 'You wrote {proof.quote}' frames for a 'Wrote…' proof (doublesWriteVerb). The Plus nudge after a Star Birth counts logged proofs, not the onboarding seed. The reader's open bridge offers 'Not today' (NotTodaySheet); its season-complete card goes straight to the Named Sky when the sky is unnamed. Paywall entry points pass from=area|scenes|nudge|lapsed. /story/new's screen testID is new-story-screen (new-story stays on Arc's ghost plate and empty state).
+- 2026-10-16 integrator: tooling. scripts/shots/audit.mjs is the 1.1 fresh-install walk (exit 1 on a failed step or app error); new scripts/shots/gallery.mjs; persona maya-unseeded-eve; seed routes @script @m369 @gratitude @affirmation @affirmations @born replace @stories @journal @board. e2e/walkthrough.mjs follows the 1.1 review path.
 
-## 20. Integration notes (Phase 1 complete)
+## 20. Integration notes (Phase 1 complete; Phase 3 updates inline)
 
 Phase 1 is integrated on `elevate-1.1`. This section is the Phase 2 cheat
 sheet. Where it and the code disagree, the code wins. The barrels and
@@ -782,6 +808,13 @@ contract files named here are the source of truth.
 - `npx tsc --noEmit`: 0 errors.
 - `bun test`: every test passes.
 - `node scripts/lint-ui.mjs`: 88 violations, all in the fifteen 1.0 screens (fontWeight 35, fontSize 26, a11y 17, alert 10). Every screen you rewrite must leave 0.
+
+**Gates after Phase 3 (integration, 2026-10-16):**
+- `npx tsc --noEmit`: 0 errors. `bun test`: 801 pass, 0 fail (51 files).
+- `node scripts/lint-ui.mjs app components/feature`: 0 violations in 129 files.
+- `node scripts/shots/audit.mjs --sizes 430x932,375x667`: 59 screens per size, 0 failed steps, 0 app errors (still mode); `--live` also green.
+- `node scripts/shots/gallery.mjs`: 202 screens across the 11 personas, 0 app errors, no key rewritten on load. `bun scripts/shots/seed.ts --check`: up to date.
+- v1 migration of all five real fixtures (plus `plus-two-dreams` with Plus): every 1.1 screen renders, 0 app errors, the v1 keys stay byte-identical.
 
 Every `*_IS_STUB` flag is `false`: ARC, AUDIO, PROGRESS, NOTIFICATIONS and ASKS.
 
@@ -796,28 +829,29 @@ Every `*_IS_STUB` flag is `false`: ARC, AUDIO, PROGRESS, NOTIFICATIONS and ASKS.
 stays up until the fonts AND every store are ready.
 
 ```
-UserProvider > PlusProvider > RitualProvider > ArcProvider > StoryProvider (adapter)
-  > JournalProvider > BoardProvider (= ScenesProvider) > UIProvider > RootNavigator
+UserProvider > PlusProvider > RitualProvider > ArcProvider
+  > JournalProvider > ScenesProvider > UIProvider > RootNavigator
 ```
 
 `RootNavigator`:
-- Waits for user, arc, ritual, stories, journal and board to be `ready`.
+- Waits for user, arc, progress (`useProgress().ready`), journal and scenes to be `ready`.
 - Calls `useNotificationRouting(ready && !!profile)`. This is A6's hook around `useLastNotificationResponse`; it is web-safe and cold-start safe.
 - Mounts `useLoopEffects()` once.
-- Feeds `SkyProvider` (seed from the profile; focus = active dream, then the first story, then the profile's focus; dawn for morning-ritual users).
+- Feeds `SkyProvider` (seed from the profile; focus = active dream, then the newest dream, then the profile's focus; dawn for morning-ritual users).
 - Wraps the Stack in a Night Atlas navigation theme. `Stack.Protected` shows `(tabs)` with a profile and `onboarding` without one.
 
 `RootLayout` also calls `configureNotificationHandler()` and `setAudioSession('idle')` once.
 
-**When Phase 2 deletes the adapters** (only after a grep shows no `app/**` importer of `useStories`, `useRitual` or `useBoard`):
-- Drop `StoryProvider`.
-- Mount `ScenesProvider` in place of `BoardProvider`.
-- Remove `stories.ready` from the ready gate and `stories.intents[0]?.focus` from the sky-focus fallback.
-- Delete `lib/store/legacy.ts` and `lib/notifications/legacy.ts` (with its test) once Settings v2 stops calling `applyReminders` / `clearReminders`.
+**Done in Phase 3 (integration):** `StoryProvider`/`useStories`
+(`contexts/StoryContext.tsx`), `BoardProvider`/`useBoard`
+(`contexts/BoardContext.tsx`), `useRitual()`, `lib/store/legacy.ts` (+ test),
+`lib/notifications/legacy.ts` (+ test; `applyReminders`, `clearReminders`,
+`remindersFor`) and `lib/streak.ts` (+ test) are deleted; `ScenesProvider` is
+mounted directly. The 1.0 colour aliases in `constants/theme.ts` (`bg`,
+`card`, `accent`, `aurora`, `success` …) and the `type` / `serif` aliases are
+gone too: use the v2 tokens.
 
-The tabs are still Today | Stories | Journal | Board, with hidden `arc` and
-`rituals` stubs (`href: null`). S5/S6 swap in Today | Arc | Rituals in
-`app/(tabs)/_layout.tsx`.
+The tabs are Today | Arc | Rituals (S5/S6, Phase 2).
 
 ### 20.2 Rules every Phase 2 screen follows
 
@@ -960,7 +994,15 @@ await arc.saveProofAndWeave({ dreamId, kind: "learned", text: lesson, origin: "n
 | `usePlus()` | `isPlus`, `prices`, `purchase(plan)`, `restore()`, `canAddDream(n)`, `canUseBed(bedId)`, `canUseArea(focus)`, `sceneLimit`. The second-dream gate is `arc.canCreateDream`. |
 | `useBackup()` (`@/contexts/useBackup`) | `exportToFile()` ('shared' \| 'downloaded' \| 'unavailable'), `readFromFile()` (null = cancelled, else `{ ok, backup, summary }` or `{ ok: false, error }`; show `BACKUP_ERROR_COPY[error]` from `@/lib/backup`), `plan(backup)` (`{ needsChoice, recommended, nothingNew, current, incoming }`), `apply(backup, 'merge' \| 'replace')`. Offer merge (recommended) or replace only when `needsChoice` is true. |
 
-Adapters kept for the 1.0 screens: `useStories()`, `useRitual()` and `useBoard()`. Don't use them in new code.
+The 1.0 adapters (`useStories()`, `useRitual()`, `useBoard()`) are deleted (§20.1).
+
+More shared helpers (Phase 3):
+- `@/lib/dreams`: `dreamGivenName(dream)` (label, else the newest Named Sky, else null) and `dreamName(dream, maxWords = 4)` (given name, else the first words of the desire). Every pill, filter and header names a dream with these.
+- `@/lib/rituals` (moved from `components/feature/rituals/ritualContent.ts`): `scriptPrompts`, `scriptPromptById`, `identityLineFor`, `earnedLines`, `suggestions369`, `gratitudeDeck`, `nextStem`, `gratitudePage`, `gratitudeLines`, `pagePreview`, `dayOrder`. Today's rituals row (`useTodayRituals`), the Rituals tab, `/journal/*` and `/affirmation` use the same picks; before the first proof all three offer the library's line for the day in the dream's own area.
+- `@/lib/ritualTime`: `nextRitualMoment(ritual, times, now)` (strictly after now, one minute of grace; 'both' picks the earlier), `saveForLabel(moment)` ('Save for tomorrow, 21:00') and `whenLabel(iso, now)` ('21:00', 'tomorrow, 21:00', '24 October, 08:00'). Every 'Save for …' and 'Opens at …' uses them.
+- `usePlus().priceAmounts`: StoreKit's numeric `{ amount, currency }` per plan (null on web), for the paywall's per-month figure (`lib/purchase` `numericPrice`).
+- `ProfileV2.bedOn?: false` stores the reader's 'Silence' (absent = a bed plays).
+- `isAudioActive()` from `@/lib/audio`: true while a chapter session is claimed (narration or a bed); the Star Birth chime only joins audio already on.
 
 ### 20.7 Story and content helpers
 
@@ -971,7 +1013,7 @@ Adapters kept for the 1.0 screens: `useStories()`, `useRitual()` and `useBoard()
   - `reshapeStarters(focus, desire)`: 3 'Write my own' starters
   - `learnedRetryLine({ chapterId, name, bridgeText, proofText })`: the chooser header after a learned proof
   - `suggestedTier(kind)`
-- `shapeDesire(desire)` from `@/lib/story/shaper` returns `{ quote, np, done, npMy, doneI, fallback }`. Use `npMy`/`doneI` for the 3·6·9 suggestions, and treat `fallback: true` as unshaped. `canFill(template, values)` is in `@/lib/story/fill`.
+- `shapeDesire(desire)` from `@/lib/story/shaper` returns `{ quote, np, done, doneShort?, npMy, doneI, fallback }` (`doneShort` is the '<np> is yours' form used after a colon). Use `npMy`/`doneI` for the 3·6·9 suggestions, and treat `fallback: true` as unshaped. `canFill(template, values)` is in `@/lib/story/fill`.
 - `@/lib/story/content`:
   - `ONBOARDING_CHIPS.desires[focus]` (4 tap-in phrases) and `.feelings` (the six 1.0 ids)
   - `IDENTITY_LINES[kind][focus]` (Your lines; pick by the kind of the latest proof)
@@ -1037,8 +1079,10 @@ if (ask === "plus-nudge") showNudge();
 ```
 
 Priority is notifications, then plus-nudge, then review. A session renews after
-30 minutes in the background. Settled asks never return. The 1.0
-`maybeRequestStoreReview(actions)` stays only until S4 replaces the evidence screen.
+30 minutes in the background. Settled asks never return. The Plus nudge counts
+proofs the person logged after First Light (the onboarding seed is not a
+step), so a brand-new user's first real Star Birth carries no Plus mention.
+The 1.0 `maybeRequestStoreReview(actions)` has no caller left (only its tests).
 
 ### 20.11 Notifications (`@/lib/notifications`)
 
@@ -1066,7 +1110,7 @@ Six slots:
 
 - `now()` / `setClock()` from `@/lib/clock`. Still mode is web-only: `?still=1`, or `EXPO_PUBLIC_STILL=1` in a dev bundle. It pins 2026-10-21 21:04 local and freezes motion. `ios-release.yml` fails a build that sets it.
 - `/dev/kitchen-sink` shows every primitive, glyph, figure and sky; `/dev/audio` is the reference reader-audio wiring. Both are `__DEV__` only.
-- `node scripts/shots/audit.mjs <outDir>` walks the 1.0 flow. It takes CDP_PORT, APP_URL, W, H and SCALE; give each parallel agent its own CDP_PORT. `cdp.mjs` clicks the first VISIBLE match, because navigators keep hidden duplicates mounted.
+- `node scripts/shots/audit.mjs <outDir> [--sizes 430x932,375x667] [--live] [--port N]` walks the whole 1.1 flow on a fresh install (First Light with a seed → the Weave → Chapter I → bridge → proof → Star Birth → Chapter II → Today, sky, Arc, Rituals, Scenes, Your lines, every paywall entry point, Settings, 'Save for' → sealed) and fails on a broken step or any app error. `node scripts/shots/gallery.mjs <outDir> [persona …]` captures every persona's key screens at both sizes. Both are documented in docs/SHOTS.md. `cdp.mjs` clicks the first VISIBLE match, because navigators keep hidden duplicates mounted.
 - `node scripts/lint-ui.mjs [paths] [--summary|--json]`.
 
 ### 20.13 Owner checks that only a device can answer (TestFlight)

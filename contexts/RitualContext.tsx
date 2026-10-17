@@ -3,14 +3,12 @@
 // under 'vela.progress.v2'; the 1.0 ritual days migrate once from
 // 'vela.ritual.v1' (read-only) into lifetime counters.
 //
-// useProgress() is the v2 API. useRitual() is the 1.0 adapter the current
-// screens still use (streak chip, practice checkmarks).
+// useProgress() is the API screens use.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ArcCtx } from "./arcCtx";
 import { createStoreQueue, parseJson, readRaw } from "./persist";
 import { STORAGE_KEYS, V1_KEYS } from "@/lib/storageKeys";
 import { now } from "@/lib/clock";
-import { computeStreak } from "@/lib/streak";
 import {
   emptyProgress,
   localDateKey,
@@ -26,11 +24,6 @@ import {
   type ProgressSummary,
 } from "@/lib/progress";
 import type { DateKey } from "./arc.types";
-
-/** 1.0 practices, mapped onto loop acts. */
-export type Practice = "story" | "affirmation" | "script";
-const ACT_FOR: Readonly<Record<Practice, LoopAct>> = { story: "chapter-heard", affirmation: "line-carried", script: "ritual-saved" };
-const PRACTICE_FOR: Partial<Record<LoopAct, Practice>> = { "chapter-heard": "story", "line-carried": "affirmation", "ritual-saved": "script" };
 
 interface RitualStore {
   ready: boolean;
@@ -52,14 +45,6 @@ export interface ProgressValue {
   setRhythmTarget(target: number): void;
   pauseUntil(until: DateKey): void;
   resume(): void;
-}
-
-interface RitualValue {
-  ready: boolean;
-  /** 1.0 streak chip only. New UI uses useProgress().summary. */
-  streak: number;
-  doneToday: readonly Practice[];
-  markDone: (p: Practice) => Promise<void>;
 }
 
 const Ctx = createContext<RitualStore | null>(null);
@@ -123,7 +108,7 @@ export function RitualProvider({ children }: { children: React.ReactNode }) {
 
 function useStore(): RitualStore {
   const v = useContext(Ctx);
-  if (!v) throw new Error("useRitual/useProgress must be used inside RitualProvider");
+  if (!v) throw new Error("useProgress must be used inside RitualProvider");
   return v;
 }
 
@@ -142,16 +127,4 @@ export function useProgress(): ProgressValue {
     () => ({ ready: s.ready, state: s.state, summary, recordAct: s.recordAct, setRhythmTarget: s.setRhythmTarget, pauseUntil: s.pauseUntil, resume: s.resume }),
     [s, summary]
   );
-}
-
-/** 1.0 adapter (CONTRACTS §15). */
-export function useRitual(): RitualValue {
-  const s = useStore();
-  const { recordAct } = s;
-  const markDone = useCallback(async (p: Practice) => recordAct(ACT_FOR[p]), [recordAct]);
-  return useMemo(() => {
-    const at = now();
-    const doneToday = summarize(s.state, 0, at).doneToday.flatMap((a) => (PRACTICE_FOR[a] ? [PRACTICE_FOR[a]!] : []));
-    return { ready: s.ready, streak: computeStreak(new Set(s.state.days), at), doneToday, markDone };
-  }, [s.ready, s.state, markDone]);
 }

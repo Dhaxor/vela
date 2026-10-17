@@ -42,7 +42,7 @@ export const WEAVE: WeaveLibrary = {
         fr("wv-d-ar3", "Here is what nobody sees when they look at this life: {proof.quote}. You wrote that {proof.ago}, after you had done it. It is part of how you got here."),
         fr("wv-d-ar4", "The road here is made of steps, and you know exactly where one of them is. It is the day {proof.done}. You did it before you felt ready, which is how most real things get done."),
         fr("wv-d-ar5", "Some of this is luck, and some of it is you. The part that is you has a date on it: the day {proof.done}. You can still remember how your hands felt afterwards."),
-        fr("wv-d-ar6", "This life has your fingerprints on it. One of the clearest is from {proof.date}, the day {proof.done}. Small, plain, and unmistakably yours."),
+        fr("wv-d-ar6", "This life has your fingerprints on it. One of the clearest is from {proof.date}, the day {proof.done}. Small, plain, and unmistakably yours. You would know it anywhere."),
       ],
       witness: [
         fr("wv-d-wi1", "Someone asks how you got here. You think for a second, then tell them about the day {proof.done}. They look surprised it was something so small. You are not."),

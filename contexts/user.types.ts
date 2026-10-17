@@ -48,6 +48,8 @@ export interface ProfileV2 {
   readonly textSize: TextSize;
   /** Default bed in the reader. A Plus bed falls back to 'night' when Plus is not active. */
   readonly bed: BedId;
+  /** false = 'Silence' (the voice alone) in the reader. Absent means a bed plays. Additive (1.1 Phase 3). */
+  readonly bedOn?: boolean;
   readonly createdAt: string;
   /** 1.0 onboarding mood. Kept for backups; never read. */
   readonly mood?: string;

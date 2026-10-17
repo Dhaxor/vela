@@ -1,5 +1,4 @@
-// FORGIVING PROGRESS. Replaces lib/streak.ts (which stays, deprecated, until
-// the last 1.0 screen stops importing it).
+// FORGIVING PROGRESS. Replaced the 1.0 lib/streak.ts (deleted in 1.1).
 //
 // OWNER: A6 (with lib/progress.test.ts).
 // PERSISTENCE: RitualContext (A2) stores ProgressState under

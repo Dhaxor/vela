@@ -367,11 +367,11 @@ export const TOKEN_REFERENCE = {
   "{feeling}": { value: "The feeling chip, lowercase adjective. Use as a predicate: 'you feel {feeling}'.", example: "proud" },
   "{desire.quote}": { value: "The user's exact words in curly quotes, trailing .!? removed. Always grammatical as a quotation.", example: "“my own design studio”", span: "desire", personal: true },
   "{desire.np}": { value: "Noun phrase, second person, lowercase first letter. Unshapeable desire → 'the life you described'.", example: "your own design studio · finding your soulmate · being debt free", span: "desire", personal: true },
-  "{desire.done}": { value: "Completed clause, second person, lowercase first letter. Never sentence-initial. Unshapeable desire → 'you found your way to {desire.quote}'.", example: "you opened your bakery · you are debt free", span: "desire", personal: true },
+  "{desire.done}": { value: "Completed clause, second person, lowercase first letter. Never sentence-initial. Unshapeable desire → 'you found your way to {desire.quote}'. A bare noun reads '… is part of your life', and '… is yours' right after a colon or 'the life where'.", example: "you opened your bakery · you are debt free", span: "desire", personal: true },
   "{desire.np.my}": { value: "First-person noun phrase. Rituals only, never narration.", example: "my own design studio", personal: true },
   "{desire.done.i}": { value: "First-person completed clause. Rituals only, never narration. Lowercase for noun desires, so it never opens a sentence.", example: "I opened my bakery · slow, quiet mornings are part of my life", personal: true },
   "{proof.quote}": { value: "The proof sentence in curly quotes, trailing punctuation removed.", example: "“Sent my portfolio to two studios”", span: "proof", personal: true },
-  "{proof.done}": { value: "The proof as a second-person past clause, lowercase. Falls back to 'you wrote {proof.quote}'.", example: "you sent your portfolio to two studios", span: "proof", personal: true },
+  "{proof.done}": { value: "The proof as a second-person past clause, lowercase, without its own 'today' or 'this week'. Falls back to 'you wrote {proof.quote}' ('you noted …' when the proof opens with 'Wrote'), and always for a habit ('every day').", example: "you sent your portfolio to two studios", span: "proof", personal: true },
   "{proof.ago}": { value: "Relative day in words, lowercase.", example: "earlier today · yesterday · twelve days ago" },
   "{proof.date}": { value: "Month and day in English words for TTS.", example: "October 14" },
   "{proofs.count}": { value: "Number word for the dream's proofs. Only offered when ≥ 3 (cumulative) or ≥ 2 (notifications): write plural.", example: "four" },
@@ -433,10 +433,13 @@ export const ALLOWED_TOKENS: Readonly<Record<ContentKind, readonly Token[]>> = {
   notToday: [...STORY, ...PROOF],
   recall: ["{name}", ...PROOF],
   cumulative: ["{name}", "{desire.np}", "{proofs.count}", "{proofs.phrase}"],
-  motifLine: STORY,
+  // No {feeling} in motif lines: the shared reflection names it, and a motif line beside it doubled the word.
+  motifLine: STORY.filter((t) => t !== "{feeling}"),
   motifPhrase: [],
-  bridge: ["{desire.np}", "{motif.place}"],
-  reshape: ["{desire.np}"],
+  // Bridges never splice the desire: a long one reads clunky inside a step (‘Book the call that moves your own
+  // design studio with clients who trust your eye closer’). A motif-tagged bridge may name {motif.place}.
+  bridge: ["{motif.place}"],
+  reshape: [],
   learnedRetry: ["{name}", "{bridge.quote}", "{proof.quote}"],
   notification: [
     "{name}", "{desire.quote}", "{desire.np}", "{bridge.quote}", "{ifthen.when}", "{ifthen.then}",
@@ -520,6 +523,67 @@ export const BANNED_PATTERNS: readonly { readonly id: string; readonly source: s
   { id: "double-stop", source: "\\.\\.(?!\\.)|!\\.|\\?\\.", why: "doubled punctuation" },
   { id: "to-to", source: "\\b(?:in)?to to\\b", why: "broken frame around a 'to'-verb desire" },
   { id: "straight-quotes", source: "\"", why: "use curly quotes “ ” in copy" },
+];
+
+/**
+ * Opening and closing CADENCES: the stock moves a listener hears as a formula
+ * when they come round again ('Let your breathing slow…', 'Come back…', 'give
+ * it a time', 'Good morning, Maya.'). A season reads one chapter per stage, so
+ * each family lives in ONE stage only, and inside that stage in its openings
+ * or its closings, never both. Then no season repeats a cadence, whatever the
+ * dice roll. Chapter I scripts count as stage I. Regex sources (flags 'iu'),
+ * tested on the template text. Enforced by golden.test.ts.
+ */
+export const CADENCES: readonly { readonly id: string; readonly source: string }[] = [
+  // greetings and settling in
+  { id: "good-morning", source: "^good morning\\b" },
+  { id: "morning-name", source: "^morning, " },
+  { id: "get-comfortable", source: "\\bget comfortable\\b" },
+  { id: "settle-in", source: "\\bsettle in\\b" },
+  { id: "start-here", source: "^start (?:here|the day)\\b" },
+  { id: "here-is", source: "^here is\\b" },
+  { id: "head-out", source: "\\bbefore you head\\b" },
+  { id: "few-minutes", source: "\\bfew (?:quiet )?minutes\\b" },
+  { id: "day-wait", source: "\\b(?:the|your(?: own)?) day (?:wait|hold off)\\b|\\bday a few minutes to wait\\b|\\bhold the day off\\b" },
+  { id: "before-the-day", source: "\\bbefore the day\\b" },
+  { id: "somewhere-ahead", source: "\\bsomewhere ahead of you\\b" },
+  { id: "scene-ahead", source: "\\bthe scene ahead\\b" },
+  { id: "further-on", source: "\\ba little further on\\b" },
+  { id: "than-you-think", source: "\\bthan you think\\b" },
+  // putting the day down
+  { id: "let-day-close", source: "\\blet the day close\\b|\\bclose the day\\b" },
+  { id: "let-day-go", source: "\\blet the (?:work of )?(?:day|today) go\\b|\\blet go of the day\\b" },
+  { id: "let-day-end", source: "\\blet (?:the day|today) end\\b" },
+  { id: "let-tonight", source: "\\blet tonight go\\b" },
+  { id: "let-evening", source: "\\blet the evening\\b" },
+  { id: "leave-day", source: "\\bleave the day\\b|\\bset the day aside\\b" },
+  { id: "room-quiet", source: "\\blet the room\\b|\\bthe room around you\\b" },
+  // the body
+  { id: "breath-let", source: "\\blet your breath(?:ing)?\\b" },
+  { id: "breathe-out", source: "\\bbreathe out\\b" },
+  { id: "long-breath", source: "\\btake (?:a|one) (?:slow|long|deep) breath\\b" },
+  { id: "close-eyes", source: "\\bclose your eyes\\b" },
+  { id: "open-eyes", source: "\\bopen your eyes\\b" },
+  { id: "shoulders-drop", source: "\\blet your shoulders\\b|\\bshoulders drop\\b" },
+  { id: "hands-loose", source: "\\bhands (?:go|fall) (?:heavy|loose|open)\\b|\\blet your hands (?:rest|go|fall)\\b" },
+  { id: "jaw", source: "\\byour jaw\\b" },
+  { id: "stretch", source: "\\bstretch\\b" },
+  // leaving the scene
+  { id: "come-back", source: "\\bcome back\\b(?! to it)|\\breturn (?:slowly|to)\\b|(?:^|[.!?]\\s)back to your\\b" },
+  { id: "chapter-go", source: "\\blet the (?:chapter|scene|evening scene|story)\\b[^.!?]{0,20}?\\b(?:go|fade|close)\\b|\\bset the chapter down\\b|\\blet go of the scene\\b" },
+  { id: "that-is", source: "^that is\\b" },
+  { id: "before-you-go", source: "^before you go\\b" },
+  { id: "when-ready", source: "\\bwhen(?:ever)? you are ready\\b" },
+  // the step below (morning closings)
+  { id: "give-a-time", source: "\\bgive (?:it|one small step|the thing you make) (?:a )?(?:little )?(?:time|place|moment)\\b" },
+  { id: "just-below", source: "\\bjust below\\b" },
+  { id: "under-this-page", source: "\\bunder this page\\b" },
+  // into sleep (evening closings)
+  { id: "nothing-left", source: "\\bnothing left to\\b" },
+  { id: "dark-come", source: "\\blet the dark come\\b" },
+  { id: "let-sleep", source: "\\blet sleep\\b|\\bsleep (?:is allowed to|comes easier)\\b" },
+  { id: "sleep-well", source: "\\b(?:sleep|rest) well\\b" },
+  { id: "rest-imperative", source: "^rest\\b|(?:^|[.!?]\\s)rest\\.\\s*$" },
 ];
 
 /* =========================================================================

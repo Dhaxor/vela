@@ -45,7 +45,7 @@ export interface ScreenProps {
   dock?: React.ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
   /** Passed to the ScrollView (refs, onScroll, refreshControl …). */
-  scrollProps?: Omit<ScrollViewProps, "contentContainerStyle" | "children">;
+  scrollProps?: Omit<ScrollViewProps, "contentContainerStyle" | "children"> & { ref?: React.Ref<ScrollView> };
   testID?: string;
 }
 
@@ -93,6 +93,8 @@ export function Screen({
         testID={testID}
         onLayout={(e) => {
           const { width, height } = e.nativeEvent.layout;
+          // A screen hidden under a pushed route measures 0x0 on web; keep the last real size.
+          if (width < 1 || height < 1) return;
           if (Math.round(width) !== Math.round(size.width) || Math.round(height) !== Math.round(size.height)) setSize({ width, height });
         }}
       >

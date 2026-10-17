@@ -1,251 +1,169 @@
-// Story intake: focus → desire (their words) → feeling. Three light steps,
-// then the engine renders instantly — no spinner theater, no server.
-import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Redirect, useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import * as Haptics from "expo-haptics";
+// A new dream (the additional-dream intake). The first dream is made in First
+// Light; this screen is reused for every dream after it, with the same fields:
+// where it lives → in your own words → how it feels → the Weave → Chapter I.
+//
+// Free keeps one dream weaving at a time, so without room for another the
+// paywall opens once (from=second-dream). Coming back without Plus shows a
+// calm locked state instead of bouncing to the paywall again; coming back
+// with Plus unlocks the intake in place.
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
 import { X } from "lucide-react-native";
-import { FOCUS_AREAS, FocusId } from "@/lib/focus";
+import { useArc } from "@/contexts/ArcContext";
+import { isArcError } from "@/contexts/arc.types";
 import { useUser } from "@/contexts/UserContext";
-import { useStories } from "@/contexts/StoryContext";
-import { usePlus } from "@/contexts/PlusContext";
-import { canCreateIntent } from "@/lib/purchase";
-import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
+import { safeBack } from "@/lib/nav";
+import type { FocusId } from "@/lib/focus";
+import { Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, T, useToast } from "@/components/ui";
+import { Vignette } from "@/components/glyphs";
+import { DesireField, FeelingChips, FocusChips, StepIntro } from "@/components/feature/onboarding";
+import { colors, space } from "@/constants/theme";
 
-const FEELINGS = ["grateful", "peaceful", "alive", "proud", "free", "loved"] as const;
+const PAYWALL = { pathname: "/paywall", params: { from: "second-dream" } } as const;
 
-export default function NewStoryScreen() {
+export default function NewDreamScreen() {
   const router = useRouter();
+  const arc = useArc();
   const { profile } = useUser();
-  const { createIntent, intents } = useStories();
-  const { isPlus } = usePlus();
+  const toast = useToast();
 
-  const preferred = profile?.focusAreas ?? [];
-  // The user's chosen areas come first — personalization by user stage.
-  const ordered = useMemo(
-    () =>
-      [...FOCUS_AREAS].sort(
-        (a, b) => Number(preferred.includes(b.id)) - Number(preferred.includes(a.id))
-      ),
+  const preferred = useMemo(() => profile?.focusAreas ?? [], [profile?.focusAreas]);
+  // Suggest the user's own areas, starting with one no living dream holds yet.
+  const initialFocus = useMemo<FocusId | null>(() => {
+    const taken = new Set(arc.dreams.filter((d) => d.status !== "released").map((d) => d.focus));
+    return preferred.find((f) => !taken.has(f)) ?? preferred[0] ?? null;
+    // Only on first render: later dreams must not move the user's pick.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [profile?.focusAreas?.join(",")]
-  );
+  }, []);
 
-  const [focus, setFocus] = useState<FocusId | null>(preferred[0] ?? null);
+  const [focus, setFocus] = useState<FocusId | null>(initialFocus);
   const [desire, setDesire] = useState("");
-  const [feeling, setFeeling] = useState<(typeof FEELINGS)[number] | null>(null);
+  const [feeling, setFeeling] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Creating a dream fills the free slot mid-flow; never show the lock for our own dream.
+  const creating = useRef(false);
 
+  const locked = !arc.canCreateDream && !creating.current;
   const canWeave = focus !== null && desire.trim().length >= 3 && feeling !== null;
 
-  // The free tier holds one living intent; every door to a second one leads
-  // through the paywall — which says out loud what stays free.
-  //
-  // The busy guard matters: creating the FIRST story bumps intents.length
-  // mid-render, and without it this Redirect races (and beats) the
-  // navigation to the new story — a paywall slam on first use, the exact
-  // thing this app exists to not do.
-  if (!busy && !canCreateIntent(intents.length, isPlus)) {
-    return <Redirect href="/paywall" />;
-  }
+  // Open the paywall once per visit; afterwards the locked state offers it again.
+  const offered = useRef(false);
+  useEffect(() => {
+    if (!locked || offered.current) return;
+    offered.current = true;
+    // A frame later, so a cold start onto /story/new has a mounted stack to push onto.
+    const frame = requestAnimationFrame(() => router.push(PAYWALL));
+    return () => cancelAnimationFrame(frame);
+  }, [locked, router]);
+
+  const close = () => safeBack(router);
 
   const weave = async () => {
-    if (!canWeave || busy) return;
+    if (!canWeave || busy || !focus || !feeling) return;
     setBusy(true);
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    const story = await createIntent({
-      focus: focus!,
-      desire: desire.trim(),
-      feeling: feeling!,
-    });
-    router.replace({ pathname: "/story/[id]", params: { id: story.id, reveal: "1" } });
+    creating.current = true;
+    try {
+      const chapter = await arc.createDream({ focus, desire: desire.trim(), feeling });
+      router.replace({ pathname: "/weave/[chapterId]", params: { chapterId: chapter.id } });
+    } catch (e) {
+      creating.current = false;
+      setBusy(false);
+      if (isArcError(e) && e.code === "plan-limit") router.push(PAYWALL);
+      else toast.show({ message: "That dream couldn’t be woven. Check the words and try again.", tone: "error" });
+    }
   };
 
-  return (
-    <SafeAreaView style={s.screen}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+  const header = (
+    <Header
+      title="A new dream"
+      back={false}
+      testID="new-story-header"
+      right={
+        <IconButton accessibilityLabel="Close" onPress={close} testID="new-story-close">
+          <X color={colors.ink80} size={24} strokeWidth={1.75} />
+        </IconButton>
+      }
+    />
+  );
+
+  if (locked) {
+    return (
+      <Screen
+        testID="new-story-locked"
+        header={header}
+        dock={
+          <Dock>
+            <PrimaryButton label="See Vela Plus" onPress={() => router.push(PAYWALL)} testID="intake-plus" />
+            <GhostButton label="Not now" onPress={close} testID="intake-locked-back" />
+          </Dock>
+        }
       >
-        <View style={s.header}>
-          <TouchableOpacity
-            onPress={() => safeBack(router)}
-            style={s.close}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            testID="new-story-close"
-          >
-            <X color={colors.textMuted} size={22} />
-          </TouchableOpacity>
+        <View style={styles.locked}>
+          <Vignette name="door" width={176} />
+          <T variant="title" center style={styles.lockedTitle} accessibilityRole="header">
+            Your sky holds one dream at a time.
+          </T>
+          <T center style={styles.lockedBody}>
+            Vela Plus lets more than one dream weave at once. Or rest the dream you have from the Arc, and begin this one free.
+          </T>
+          <T variant="caption" center style={styles.lockedNote}>
+            Every chapter you have stays readable either way.
+          </T>
         </View>
+      </Screen>
+    );
+  }
 
-        <ScrollView
-          contentContainerStyle={s.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <Text style={s.h1}>Manifest a story</Text>
-
-          <Text style={s.label}>Where does it live?</Text>
-          <View style={s.chips}>
-            {ordered.map((f) => {
-              const on = focus === f.id;
-              return (
-                <TouchableOpacity
-                  key={f.id}
-                  style={[s.chip, on && s.chipOn]}
-                  onPress={() => {
-                    void Haptics.selectionAsync();
-                    setFocus(f.id);
-                  }}
-                  testID={`intake-focus-${f.id}`}
-                >
-                  <Text style={[s.chipText, on && s.chipTextOn]}>{f.label}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-
-          <Text style={s.label}>What are you calling in? Your words.</Text>
-          <TextInput
-            style={s.input}
-            placeholder="e.g. a home that feels like rest"
-            placeholderTextColor={colors.textFaint}
-            value={desire}
-            onChangeText={setDesire}
-            maxLength={120}
-            multiline
-            testID="intake-desire"
-          />
-
-          <Text style={s.label}>And when it's yours, you feel…</Text>
-          <View style={s.chips}>
-            {FEELINGS.map((fe) => {
-              const on = feeling === fe;
-              return (
-                <TouchableOpacity
-                  key={fe}
-                  style={[s.chip, on && s.chipOn]}
-                  onPress={() => {
-                    void Haptics.selectionAsync();
-                    setFeeling(fe);
-                  }}
-                  testID={`intake-feeling-${fe}`}
-                >
-                  <Text style={[s.chipText, on && s.chipTextOn]}>{fe}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </ScrollView>
-
-        <View style={s.dock}>
-          <TouchableOpacity
-            style={[s.cta, !canWeave && s.ctaDisabled]}
-            disabled={!canWeave || busy}
+  return (
+    <Screen
+      testID="new-story-screen"
+      focus={focus}
+      header={header}
+      dock={
+        <Dock>
+          <PrimaryButton
+            label="Weave Chapter I"
             onPress={() => void weave()}
-            activeOpacity={0.85}
+            disabled={!canWeave}
+            loading={busy}
             testID="intake-weave"
-          >
-            <Text style={[s.ctaText, !canWeave && s.ctaTextDisabled]}>
-              Step inside
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            accessibilityHint={canWeave ? undefined : "Choose where it lives, write a few words and choose a feeling first"}
+          />
+        </Dock>
+      }
+    >
+      <StepIntro title="What else is calling?" lead="Each dream gets its own sky, its own chapters and its own stars." />
+
+      <T variant="eyebrow" style={styles.label}>
+        Where it lives
+      </T>
+      <FocusChips value={focus} onChange={setFocus} preferred={preferred} testIDPrefix="intake-focus-" />
+
+      <View style={styles.group}>
+        <DesireField
+          label="In your own words"
+          focus={focus}
+          value={desire}
+          onChangeText={setDesire}
+          testID="intake-desire"
+          suggestionPrefix="intake-suggestion-"
+        />
+      </View>
+
+      <T variant="eyebrow" style={[styles.label, styles.group]}>
+        When it’s real, you feel
+      </T>
+      <FeelingChips value={feeling} onChange={setFeeling} testIDPrefix="intake-feeling-" />
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: space.base,
-    paddingTop: space.sm,
-  },
-  close: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  content: {
-    paddingHorizontal: space.lg,
-    paddingBottom: space.huge,
-  },
-  h1: {
-    fontFamily: serif,
-    fontSize: 30,
-    lineHeight: 38,
-    color: colors.text,
-    marginBottom: space.lg,
-  },
-  label: {
-    ...type.caption,
-    color: colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    marginTop: space.lg,
-    marginBottom: space.md,
-  },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  chip: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.card,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.base,
-    minHeight: 44,
-    justifyContent: "center",
-  },
-  chipOn: {
-    borderColor: colors.accentBorder,
-    backgroundColor: colors.accentSoft,
-  },
-  chipText: { ...type.body, color: colors.textSecondary },
-  chipTextOn: { color: colors.accent, fontWeight: "600" },
-  input: {
-    ...type.title,
-    fontFamily: serif,
-    color: colors.text,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    paddingHorizontal: space.base,
-    paddingTop: space.base,
-    paddingBottom: space.base,
-    minHeight: 96,
-    textAlignVertical: "top",
-  },
-  dock: {
-    paddingHorizontal: space.lg,
-    paddingBottom: space.base,
-    paddingTop: space.sm,
-  },
-  cta: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.base,
-    alignItems: "center",
-    ...accentGlow,
-  },
-  ctaDisabled: { backgroundColor: colors.card, shadowOpacity: 0, elevation: 0 },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
-  ctaTextDisabled: { color: colors.textFaint },
+const styles = StyleSheet.create({
+  label: { marginBottom: space.md },
+  group: { marginTop: space.xl },
+  locked: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: space.xl },
+  lockedTitle: { marginTop: space.lg },
+  lockedBody: { marginTop: space.md, maxWidth: 340 },
+  lockedNote: { marginTop: space.lg },
 });

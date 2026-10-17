@@ -1,156 +1,114 @@
-// The day's affirmation — one line, full screen, serif, no clutter. Marking
-// it carried is the smallest possible ritual and counts toward the streak.
-import React, { useMemo, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// YOUR LINE, full screen on the open sky. After the first proof it is an
+// identity line born from what the person did (kind × focus), with the proof
+// it came from underneath; before that, the day's line from the library.
+// Carrying it is the smallest ritual there is ('line-carried').
+import React, { useMemo } from "react";
+import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import * as Haptics from "expo-haptics";
-import { X, Check, Quote } from "lucide-react-native";
+import { Check, X } from "lucide-react-native";
+import { Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, SecondaryButton, T, UserWords, haptics } from "@/components/ui";
+import { StarProof } from "@/components/glyphs";
+import { BORN_FROM } from "@/components/feature/rituals/YourLineBlock";
+import { dayParts } from "@/components/feature/rituals/dates";
+import { useRitualToday } from "@/components/feature/rituals/useRitualToday";
+import { useProgress } from "@/contexts/RitualContext";
 import { useUser } from "@/contexts/UserContext";
-import { useRitual } from "@/contexts/RitualContext";
+import { colors, space } from "@/constants/theme";
 import { dailyAffirmation } from "@/lib/affirmations";
-import { dateKey } from "@/lib/streak";
 import { focusById } from "@/lib/focus";
-import { colors, space, radius, type, serif, accentGlow } from "@/constants/theme";
+import { safeBack } from "@/lib/nav";
 
 export default function AffirmationScreen() {
   const router = useRouter();
   const { profile } = useUser();
-  const { markDone, doneToday } = useRitual();
-  const [carried, setCarried] = useState(doneToday.includes("affirmation"));
+  const { summary, recordAct } = useProgress();
+  const today = useRitualToday();
+  const carried = summary.doneToday.includes("line-carried");
+  const close = () => safeBack(router);
 
-  const affirmation = useMemo(
-    () => dailyAffirmation(dateKey(new Date()), profile?.focusAreas ?? []),
-    [profile?.focusAreas]
-  );
-  const area = focusById(affirmation.focus);
+  const fallback = useMemo(() => {
+    if (today.line) return null;
+    const a = dailyAffirmation(today.dateKey, today.focus ? [today.focus] : profile?.focusAreas ?? []);
+    return { text: a.text, area: focusById(a.focus)?.label ?? "" };
+  }, [today.line, today.dateKey, today.focus, profile?.focusAreas]);
 
-  const carry = async () => {
-    if (carried) {
-      safeBack(router);
-      return;
-    }
-    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setCarried(true);
-    await markDone("affirmation");
+  const line = today.line;
+  const text = line?.text ?? fallback?.text ?? "";
+
+  const carry = () => {
+    if (carried) return close();
+    haptics.success();
+    recordAct("line-carried");
   };
 
   return (
-    <SafeAreaView style={s.screen}>
-      <View style={s.header}>
-        <TouchableOpacity
-          onPress={() => safeBack(router)}
-          style={s.close}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          testID="affirmation-close"
-        >
-          <X color={colors.textMuted} size={22} />
-        </TouchableOpacity>
+    <Screen
+      scroll={false}
+      testID="affirmation-screen"
+      header={
+        <Header
+          back={false}
+          right={
+            <IconButton accessibilityLabel="Close" onPress={close} testID="affirmation-close">
+              <X color={colors.ink80} size={22} strokeWidth={1.75} />
+            </IconButton>
+          }
+        />
+      }
+      dock={
+        <Dock>
+          {carried ? (
+            <SecondaryButton
+              label="Carried. See you tomorrow."
+              icon={<Check color={colors.gold300} size={18} strokeWidth={2.25} />}
+              onPress={close}
+              testID="affirmation-carry"
+            />
+          ) : (
+            <PrimaryButton label="I’ll carry this today" onPress={carry} testID="affirmation-carry" />
+          )}
+          <GhostButton label="Browse the library" onPress={() => router.push("/affirmations")} testID="affirmation-browse" tone="muted" />
+        </Dock>
+      }
+    >
+      <View style={styles.center}>
+        {line ? (
+          <View style={styles.kind}>
+            <StarProof kind={line.kind} size={28} />
+            <T variant="eyebrow" tone="muted" center>
+              {`Your line · ${BORN_FROM[line.kind].toLowerCase()}`}
+            </T>
+          </View>
+        ) : (
+          <T variant="eyebrow" tone="muted" center>
+            {`${fallback?.area ?? ""} · today`}
+          </T>
+        )}
+        <T variant="display" center testID="affirmation-text" style={styles.line}>
+          {text}
+        </T>
+        {line ? (
+          <View style={styles.source}>
+            <T variant="caption" tone="faint" center numeric>
+              {`From your proof of ${dayParts(line.proof.dateKey).long}`}
+            </T>
+            <UserWords variant="body" center numberOfLines={2}>
+              {line.proof.text}
+            </UserWords>
+          </View>
+        ) : (
+          <T variant="caption" tone="muted" center style={styles.source}>
+            Your own lines are born from your first proof.
+          </T>
+        )}
       </View>
-
-      <View style={s.body}>
-        <View style={s.halo}>
-          <Quote color={colors.accent} size={24} />
-        </View>
-        <Text style={s.tag}>{area?.label ?? ""} · today</Text>
-        <Text style={s.line} testID="affirmation-text">
-          {affirmation.text}
-        </Text>
-        <TouchableOpacity
-          onPress={() => router.push("/affirmations")}
-          style={s.browse}
-          testID="affirmation-browse"
-        >
-          <Text style={s.browseText}>Browse the whole library</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={s.dock}>
-        <TouchableOpacity
-          style={[s.cta, carried && s.ctaDone]}
-          onPress={() => void carry()}
-          activeOpacity={0.85}
-          testID="affirmation-carry"
-        >
-          {carried && <Check color={colors.success} size={18} />}
-          <Text style={[s.ctaText, carried && s.ctaTextDone]}>
-            {carried ? "Carried. See you tomorrow." : "I'll carry this today"}
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    paddingHorizontal: space.base,
-    paddingTop: space.sm,
-  },
-  close: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  body: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: space.xl,
-  },
-  halo: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accentSoft,
-    borderWidth: 1,
-    borderColor: colors.accentBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: space.lg,
-  },
-  tag: {
-    ...type.caption,
-    color: colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    marginBottom: space.base,
-  },
-  line: {
-    fontFamily: serif,
-    fontSize: 28,
-    lineHeight: 40,
-    color: colors.text,
-    textAlign: "center",
-  },
-  browse: { marginTop: space.lg, minHeight: 44, justifyContent: "center" },
-  browseText: { ...type.caption, color: colors.aurora },
-  dock: {
-    paddingHorizontal: space.lg,
-    paddingBottom: space.base,
-  },
-  cta: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: space.sm,
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.base,
-    ...accentGlow,
-  },
-  ctaDone: {
-    backgroundColor: colors.successSoft,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
-  ctaTextDone: { color: colors.success },
+const styles = StyleSheet.create({
+  center: { flex: 1, justifyContent: "center", alignItems: "center", gap: space.lg, paddingBottom: space.xl },
+  kind: { alignItems: "center", gap: space.md },
+  line: { maxWidth: 520 },
+  source: { alignItems: "center", gap: space.xs, maxWidth: 420, marginTop: space.sm },
 });

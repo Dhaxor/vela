@@ -164,7 +164,7 @@ export const PEACE: FocusContent = {
       ],
       closing: {
         morning: fr("pe-one-calm-cl-m", "Return slowly, at your own pace. Your mind can be this kind to you today, in small moments. Find one of them, {name}, and stay in it a little longer."),
-        evening: fr("pe-one-calm-cl-e", "Let your thoughts go quiet with the room. There is nothing left to figure out tonight. Breathe out slowly, and let that calm morning wait for you on the other side of sleep."),
+        evening: fr("pe-one-calm-cl-e", "Let your thoughts go quiet with the room. There is nothing left to figure out tonight. Exhale slowly, and let that calm morning wait for you on the other side of sleep."),
       },
     },
     {

@@ -1,442 +1,316 @@
-// Onboarding — a six-beat arc, each beat one decision or one feeling:
+// FIRST LIGHT (ELEVATE §0.4): from install to a chapter written from your own
+// words in six short steps, each one decision, with back on every step:
 //
-//   welcome → what you're calling in → how the wanting feels → your name
-//   → when we meet → the practice → (straight into the first story)
+//   1 welcome (the free promise) → 2 focus → 3 in your words (+ feeling)
+//   → 4 name (+ how to say it) → 5 ritual and time → 6 one thing you've
+//   already done (optional seed proof) → the Weave → Chapter I
 //
-// The Stella playbook's good parts, kept: an emotional frame before any
-// questions, light investment-building, momentum into the first value
-// moment. Its bad part — the paywall slam at the end — is deliberately
-// absent; the ask comes later, softly, after the first story has landed.
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// Progress is six stars connecting into the Vela sail; the Weave lights the
+// seventh. No account, no paywall, no permission prompt: reminders are only
+// explained here (the ask comes when the first bridge is chosen).
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { BackHandler, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
-import Animated, { FadeInDown, FadeIn } from "react-native-reanimated";
-import * as Haptics from "expo-haptics";
+import Animated, { FadeIn, FadeInLeft, FadeInRight, useAnimatedStyle, useSharedValue, withDelay, withTiming } from "react-native-reanimated";
+import type { RitualTime } from "@/contexts/user.types";
+import { useUser } from "@/contexts/UserContext";
+import { focusById, type FocusId } from "@/lib/focus";
+import { Dock, PrimaryButton, Screen, T, TextField, drift, useMotion } from "@/components/ui";
+import { AreaSign } from "@/components/glyphs";
 import {
-  Heart,
-  Gem,
-  Briefcase,
-  HeartPulse,
-  Flame,
-  Leaf,
-  Sunrise,
-  MoonStar,
-  Stars,
-  Sparkles,
-  ScrollText,
-  Footprints,
-} from "lucide-react-native";
-import { FOCUS_AREAS, FocusId } from "@/lib/focus";
-import { RitualTime, useUser } from "@/contexts/UserContext";
-import {
-  colors,
-  space,
-  radius,
-  type,
-  serif,
-  accentGlow,
-} from "@/constants/theme";
+  DEFAULT_PRESET,
+  DesireField,
+  DrawnVelaMark,
+  FIRST_LIGHT_ID,
+  FeelingChips,
+  FocusGrid,
+  RitualPicker,
+  SeedField,
+  StepIntro,
+  StepTopBar,
+  stageFirstLight,
+  toHHmm,
+  type RitualSlot,
+} from "@/components/feature/onboarding";
+import { colors, motion, space } from "@/constants/theme";
 
-const FOCUS_ICONS: Record<FocusId, React.ComponentType<{ color?: string; size?: number }>> = {
-  love: Heart,
-  abundance: Gem,
-  career: Briefcase,
-  health: HeartPulse,
-  confidence: Flame,
-  peace: Leaf,
-};
-
-const MOODS = [
-  { id: "hopeful", label: "Hopeful", body: "Something good feels close." },
-  { id: "stuck", label: "A little stuck", body: "Same place, too long." },
-  { id: "tired", label: "Tired of waiting", body: "Ready for it to be real." },
-  { id: "certain", label: "Quietly certain", body: "It's coming. You know." },
-] as const;
-
-const RITUALS: { id: RitualTime; label: string; body: string; Icon: typeof Sunrise }[] = [
-  { id: "morning", label: "Morning", body: "Set the day before it sets you.", Icon: Sunrise },
-  { id: "evening", label: "Evening", body: "Drift off inside the life you're building.", Icon: MoonStar },
-  { id: "both", label: "Both", body: "Bookend the day with intention.", Icon: Stars },
-];
-
-const PRACTICE = [
-  { Icon: ScrollText, tint: colors.accent, title: "Enter a future memory", body: "A sensory chapter built from the future you named." },
-  { Icon: Footprints, tint: colors.aurora, title: "Cross one bridge", body: "One small, observable action brings the chapter into today." },
-  { Icon: Sparkles, tint: colors.success, title: "Leave proof", body: "What happened becomes part of the chapter Vela writes next." },
-] as const;
-
-const TOTAL_STEPS = 6;
+const STEPS = 6;
+const WELCOME = 0;
+const FOCUS = 1;
+const WORDS = 2;
+const NAME = 3;
+const RITUAL = 4;
+const SEED = 5;
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const { saveProfile } = useUser();
-  const [step, setStep] = useState(0);
-  const [selected, setSelected] = useState<FocusId[]>([]);
-  const [mood, setMood] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [ritual, setRitual] = useState<RitualTime | null>(null);
+  const policy = useMotion();
+  const scroll = useRef<ScrollView>(null);
+  const sayIt = useRef<TextInput>(null);
 
+  const [step, setStep] = useState(WELCOME);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [focusAreas, setFocusAreas] = useState<FocusId[]>([]);
+  const [desire, setDesire] = useState("");
+  const [feeling, setFeeling] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [pronunciation, setPronunciation] = useState("");
+  const [ritual, setRitual] = useState<RitualTime | null>(null);
+  const [times, setTimes] = useState<Record<RitualSlot, string>>({ ...DEFAULT_PRESET });
+  const [seed, setSeed] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const primary = focusAreas[0] ?? null;
   const canContinue =
-    step === 1
-      ? selected.length > 0
-      : step === 2
-        ? mood !== null
-        : step === 3
+    step === FOCUS
+      ? primary !== null
+      : step === WORDS
+        ? desire.trim().length >= 3 && feeling !== null
+        : step === NAME
           ? name.trim().length > 0
-          : step === 4
+          : step === RITUAL
             ? ritual !== null
             : true;
 
-  const toggle = (id: FocusId) => {
-    void Haptics.selectionAsync();
-    setSelected((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
-  };
+  const goTo = useCallback((next: number) => {
+    setDirection(next > step ? 1 : -1);
+    setStep(next);
+    scroll.current?.scrollTo({ y: 0, animated: false });
+  }, [step]);
 
-  const next = async () => {
-    if (!canContinue) return;
-    void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (step < TOTAL_STEPS - 1) {
-      setStep(step + 1);
-      return;
-    }
-    await saveProfile({
-      name: name.trim(),
-      focusAreas: selected,
-      ritual: ritual ?? "both",
-      ...(mood ? { mood } : {}),
+  const back = useCallback(() => {
+    if (step > WELCOME) goTo(step - 1);
+  }, [step, goTo]);
+
+  // Android back walks the steps instead of leaving the app.
+  useEffect(() => {
+    if (step === WELCOME) return;
+    const sub = BackHandler.addEventListener("hardwareBackPress", () => {
+      back();
+      return true;
     });
-    // Momentum: the first thing after onboarding is the first story.
-    router.replace("/story/new");
+    return () => sub.remove();
+  }, [step, back]);
+
+  const finish = () => {
+    if (busy || !primary || !feeling || !ritual) return;
+    setBusy(true);
+    stageFirstLight({ focus: primary, desire: desire.trim(), feeling, seed: seed.trim() });
+    // Same tick: leave onboarding for the Weave, then commit the profile. The
+    // Weave writes Chapter I once the profile (and the name in it) is live.
+    router.replace({ pathname: "/weave/[chapterId]", params: { chapterId: FIRST_LIGHT_ID } });
+    void saveProfile({
+      name: name.trim(),
+      pronunciation: pronunciation.trim() || null,
+      focusAreas,
+      ritual,
+      ritualTimes: { morning: toHHmm(times.morning), evening: toHHmm(times.evening) },
+    });
   };
 
-  const ctaLabel =
-    step === 0 ? "Begin" : step === TOTAL_STEPS - 1 ? "Create my future-memory arc" : "Continue";
+  const next = () => {
+    if (!canContinue) return;
+    if (step < SEED) goTo(step + 1);
+    else finish();
+  };
+
+  // The one requirement that can sit below the fold on a small phone gets a word above the button.
+  const nudge = step === WORDS && desire.trim().length >= 3 && feeling === null ? "Choose how it feels to continue" : null;
+
+  const cta = step === WELCOME ? "Begin" : step === SEED ? "Weave Chapter I" : "Continue";
+
+  // FIRST LIGHT: the sky fades in under the self-drawing mark; the promise follows.
+  const sky = useSharedValue(policy.transitions ? 0 : 1);
+  const promise = useSharedValue(policy.transitions ? 0 : 1);
+  useEffect(() => {
+    if (!policy.transitions) return;
+    sky.value = withTiming(1, { duration: motion.reveal });
+    promise.value = withDelay(1500, withTiming(1, { duration: motion.reveal, easing: drift }));
+    // Mount-only: the welcome plays once per launch of onboarding.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const skyStyle = useAnimatedStyle(() => ({ opacity: sky.value }));
+  const promiseStyle = useAnimatedStyle(() => ({ opacity: promise.value, transform: [{ translateY: (1 - promise.value) * 8 }] }));
+
+  const entering = !policy.transitions
+    ? undefined
+    : (direction === 1 ? FadeInRight : FadeInLeft).duration(motion.enter);
+
+  const area = primary ? focusById(primary) : undefined;
+  const areaEyebrow = area ? (
+    <>
+      <AreaSign focus={area.id} size={20} color={colors.gold300} />
+      <T variant="eyebrow" tone="gold">
+        {area.label}
+      </T>
+    </>
+  ) : undefined;
 
   return (
-    <SafeAreaView style={s.screen}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+    <Animated.View style={[styles.fill, skyStyle]}>
+      <Screen
+        focus={primary}
+        testID="onboarding"
+        scrollProps={{ ref: scroll }}
+        header={<StepTopBar step={step} total={STEPS} onBack={step > WELCOME ? back : undefined} />}
+        dock={
+          <Dock>
+            {nudge ? (
+              <T variant="caption" tone="secondary" center testID="onboarding-nudge">
+                {nudge}
+              </T>
+            ) : null}
+            <PrimaryButton
+              label={cta}
+              onPress={next}
+              disabled={!canContinue}
+              loading={busy}
+              testID={step === SEED ? "onboarding-done" : "onboarding-next"}
+              accessibilityHint={canContinue ? undefined : HINTS[step]}
+            />
+          </Dock>
+        }
       >
-        <View style={s.dots}>
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <View key={i} style={[s.dot, i <= step && s.dotActive]} />
-          ))}
-        </View>
+        <Animated.View key={step} entering={step === WELCOME ? (policy.transitions ? FadeIn.duration(motion.enter) : undefined) : entering} style={styles.fill}>
+          {step === WELCOME ? (
+            <View style={styles.welcome}>
+              <DrawnVelaMark size={112} testID="onboarding-mark" />
+              <Animated.View style={[styles.promise, promiseStyle]}>
+                <T variant="eyebrow" tone="gold" center>
+                  Vela
+                </T>
+                <T variant="display" center style={styles.promiseTitle} accessibilityRole="header">
+                  {"Your story is written\non this phone."}
+                </T>
+                <T center style={styles.promiseBody}>
+                  Unlimited listens. No account.
+                </T>
+                <View style={styles.loop} testID="onboarding-loop">
+                  <LoopLine numeral="I" text="A chapter written from your own words" />
+                  <LoopLine numeral="II" text="One real step to take toward it" />
+                  <LoopLine numeral="III" text="What you do becomes a star, and the next chapter" />
+                </View>
+              </Animated.View>
+            </View>
+          ) : null}
 
-        <ScrollView
-          contentContainerStyle={s.content}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          {step === 0 && (
-            <Animated.View entering={FadeIn.duration(600)} style={s.welcome}>
-              <View style={s.welcomeHalo}>
-                <Sparkles color={colors.accent} size={30} />
-              </View>
-              <Text style={s.brand}>Vela</Text>
-              <Text style={s.welcomeLine}>
-                Imagine the future.{"\n"}Act once in its direction.{"\n"}Let reality rewrite the story.
-              </Text>
-              <Text style={s.welcomeSub}>
-                An evolving private memory—not another feed of quotes.
-              </Text>
-            </Animated.View>
-          )}
+          {step === FOCUS ? (
+            <>
+              <StepIntro title="What are you calling in?" lead="Your first story begins with the first one you choose. Add others if they pull at you too." />
+              <FocusGrid value={focusAreas} onChange={setFocusAreas} testIDPrefix="focus-" />
+            </>
+          ) : null}
 
-          {step === 1 && (
-            <Animated.View entering={FadeInDown.duration(400)}>
-              <Text style={s.h1}>What are you{"\n"}calling in?</Text>
-              <Text style={s.lead}>Choose everything that pulls at you.</Text>
-              <View style={s.grid}>
-                {FOCUS_AREAS.map((f) => {
-                  const Icon = FOCUS_ICONS[f.id];
-                  const on = selected.includes(f.id);
-                  return (
-                    <TouchableOpacity
-                      key={f.id}
-                      style={[s.chip, on && s.chipOn]}
-                      onPress={() => toggle(f.id)}
-                      activeOpacity={0.85}
-                      testID={`focus-${f.id}`}
-                    >
-                      <View style={[s.chipIcon, on && s.chipIconOn]}>
-                        <Icon color={on ? colors.accent : colors.textMuted} size={20} />
-                      </View>
-                      <Text style={[s.chipLabel, on && s.chipLabelOn]}>{f.label}</Text>
-                      <Text style={s.chipBody} numberOfLines={2}>
-                        {f.invitation}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </View>
-            </Animated.View>
-          )}
+          {step === WORDS ? (
+            <>
+              <StepIntro eyebrow={areaEyebrow} title="In your own words." lead="Your first chapter is written from these words." />
+              <DesireField
+                focus={primary}
+                value={desire}
+                onChangeText={setDesire}
+                testID="onboarding-desire"
+                suggestionPrefix="onboarding-suggestion-"
+              />
+              <T variant="eyebrow" style={styles.groupLabel}>
+                When it’s real, you feel
+              </T>
+              <FeelingChips value={feeling} onChange={setFeeling} testIDPrefix="onboarding-feeling-" />
+            </>
+          ) : null}
 
-          {step === 2 && (
-            <Animated.View entering={FadeInDown.duration(400)}>
-              <Text style={s.h1}>And how does the{"\n"}wanting feel, today?</Text>
-              <Text style={s.lead}>
-                There's no wrong answer. The stories meet you where you are.
-              </Text>
-              {MOODS.map((m) => {
-                const on = mood === m.id;
-                return (
-                  <TouchableOpacity
-                    key={m.id}
-                    style={[s.ritualRow, on && s.chipOn]}
-                    onPress={() => {
-                      void Haptics.selectionAsync();
-                      setMood(m.id);
-                    }}
-                    testID={`mood-${m.id}`}
-                  >
-                    <View style={{ flex: 1 }}>
-                      <Text style={[s.chipLabel, on && s.chipLabelOn]}>{m.label}</Text>
-                      <Text style={s.chipBody}>{m.body}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </Animated.View>
-          )}
-
-          {step === 3 && (
-            <Animated.View entering={FadeInDown.duration(400)}>
-              <Text style={s.h1}>What should the{"\n"}stories call you?</Text>
-              <Text style={s.lead}>
-                Your name is woven into every story you manifest.
-              </Text>
-              <TextInput
-                style={s.input}
-                placeholder="Your first name"
-                placeholderTextColor={colors.textFaint}
+          {step === NAME ? (
+            <>
+              <StepIntro title="What should we call you?" lead="Your name is woven into every chapter." />
+              <TextField
+                label="Your first name"
                 value={name}
                 onChangeText={setName}
+                placeholder="First name"
                 maxLength={40}
-                autoFocus
+                autoFocus={policy.transitions}
                 autoCorrect={false}
-                returnKeyType="done"
-                onSubmitEditing={() => void next()}
+                autoComplete="given-name"
+                textContentType="givenName"
+                returnKeyType="next"
+                onSubmitEditing={() => sayIt.current?.focus()}
                 testID="name-input"
               />
-            </Animated.View>
-          )}
+              <TextField
+                ref={sayIt}
+                label="How to say it"
+                value={pronunciation}
+                onChangeText={setPronunciation}
+                placeholder={name.trim() ? `Spell ${name.trim()} the way it sounds` : "Spell it the way it sounds"}
+                hint="Optional. The narrator says your name this way, for example MY-uh."
+                maxLength={40}
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={next}
+                style={styles.second}
+                testID="pronunciation-input"
+              />
+            </>
+          ) : null}
 
-          {step === 4 && (
-            <Animated.View entering={FadeInDown.duration(400)}>
-              <Text style={s.h1}>When do we{"\n"}meet?</Text>
-              <Text style={s.lead}>A ritual works because it has a time.</Text>
-              {RITUALS.map(({ id, label, body, Icon }) => {
-                const on = ritual === id;
-                return (
-                  <TouchableOpacity
-                    key={id}
-                    style={[s.ritualRow, on && s.chipOn]}
-                    onPress={() => {
-                      void Haptics.selectionAsync();
-                      setRitual(id);
-                    }}
-                    activeOpacity={0.85}
-                    testID={`ritual-${id}`}
-                  >
-                    <View style={[s.chipIcon, on && s.chipIconOn]}>
-                      <Icon color={on ? colors.accent : colors.textMuted} size={20} />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[s.chipLabel, on && s.chipLabelOn]}>{label}</Text>
-                      <Text style={s.chipBody}>{body}</Text>
-                    </View>
-                  </TouchableOpacity>
-                );
-              })}
-            </Animated.View>
-          )}
+          {step === RITUAL ? (
+            <>
+              <StepIntro title="When shall we meet?" lead="A chapter is easier to keep when it has a time." />
+              <RitualPicker ritual={ritual} onRitual={setRitual} times={times} onTime={(slot, p) => setTimes((t) => ({ ...t, [slot]: p }))} />
+            </>
+          ) : null}
 
-          {step === 5 && (
-            <Animated.View entering={FadeInDown.duration(400)}>
-              <Text style={s.h1}>Your practice,{"\n"}{name.trim() || "friend"}.</Text>
-              <Text style={s.lead}>A simple loop from imagination to observable proof.</Text>
-              {PRACTICE.map(({ Icon, tint, title, body }, i) => (
-                <Animated.View
-                  key={title}
-                  entering={FadeInDown.delay(200 + i * 180).duration(500)}
-                  style={s.practiceRow}
-                >
-                  <View style={s.chipIcon}>
-                    <Icon color={tint} size={20} />
-                  </View>
-                  <View style={{ flex: 1 }}>
-                    <Text style={s.chipLabel}>{title}</Text>
-                    <Text style={s.chipBody}>{body}</Text>
-                  </View>
-                </Animated.View>
-              ))}
-            </Animated.View>
-          )}
-        </ScrollView>
-
-        <View style={s.dock}>
-          <TouchableOpacity
-            style={[s.cta, !canContinue && s.ctaDisabled]}
-            onPress={() => void next()}
-            disabled={!canContinue}
-            activeOpacity={0.85}
-            testID={step === TOTAL_STEPS - 1 ? "onboarding-done" : "onboarding-next"}
-          >
-            <Text style={[s.ctaText, !canContinue && s.ctaTextDisabled]}>
-              {ctaLabel}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          {step === SEED ? (
+            <>
+              <StepIntro eyebrow={areaEyebrow} title="One thing you’ve already done toward this." lead="Optional, and anything counts: a search, a message, a first sketch." />
+              <SeedField focus={primary} value={seed} onChangeText={setSeed} testID="onboarding-seed" />
+            </>
+          ) : null}
+        </Animated.View>
+      </Screen>
+    </Animated.View>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  dots: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: space.sm,
-    paddingTop: space.base,
+const HINTS: Record<number, string> = {
+  [FOCUS]: "Choose an area first",
+  [WORDS]: "Write a few words and choose a feeling first",
+  [NAME]: "Enter your name first",
+  [RITUAL]: "Choose morning, evening or both first",
+};
+
+function LoopLine({ numeral, text }: { numeral: string; text: string }) {
+  return (
+    <View style={styles.loopLine}>
+      <T variant="caption" tone="gold" numeric style={styles.loopNumeral}>
+        {numeral}
+      </T>
+      <T variant="caption" tone="secondary" style={styles.loopText}>
+        {text}
+      </T>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  fill: { flex: 1 },
+  welcome: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: space.xl },
+  promise: { alignItems: "center", marginTop: space.lg, alignSelf: "stretch" },
+  promiseTitle: { marginTop: space.md },
+  promiseBody: { marginTop: space.md },
+  loop: {
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 340,
+    marginTop: space.xl,
+    paddingTop: space.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.hairline,
+    gap: space.md,
   },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: radius.pill,
-    backgroundColor: colors.hairline,
-  },
-  dotActive: { backgroundColor: colors.accent },
-  content: {
-    paddingHorizontal: space.lg,
-    paddingTop: space.xl,
-    paddingBottom: space.huge,
-    flexGrow: 1,
-  },
-  welcome: { flex: 1, alignItems: "center", justifyContent: "center", gap: space.base },
-  welcomeHalo: {
-    width: 88,
-    height: 88,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accentSoft,
-    borderWidth: 1,
-    borderColor: colors.accentBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    ...accentGlow,
-  },
-  brand: {
-    fontFamily: serif,
-    fontSize: 44,
-    color: colors.text,
-    letterSpacing: 2,
-    marginTop: space.sm,
-  },
-  welcomeLine: {
-    fontFamily: serif,
-    fontSize: 22,
-    lineHeight: 34,
-    color: colors.textSecondary,
-    textAlign: "center",
-    marginTop: space.sm,
-  },
-  welcomeSub: {
-    ...type.caption,
-    color: colors.textMuted,
-    textAlign: "center",
-    marginTop: space.md,
-  },
-  h1: { ...type.display, color: colors.text },
-  lead: {
-    ...type.body,
-    color: colors.textSecondary,
-    marginTop: space.md,
-    marginBottom: space.xl,
-  },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: space.md },
-  chip: {
-    width: "47%",
-    flexGrow: 1,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-  },
-  chipOn: { borderColor: colors.accentBorder, backgroundColor: colors.accentSoft },
-  chipIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: space.md,
-  },
-  chipIconOn: { backgroundColor: "rgba(233, 180, 76, 0.16)" },
-  chipLabel: { ...type.body, fontWeight: "600", color: colors.textSecondary },
-  chipLabelOn: { color: colors.text },
-  chipBody: { ...type.caption, color: colors.textMuted, marginTop: space.xs },
-  input: {
-    ...type.title,
-    color: colors.text,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    paddingHorizontal: space.lg,
-    paddingVertical: space.base,
-  },
-  ritualRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.base,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-    marginBottom: space.md,
-  },
-  practiceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.base,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-    marginBottom: space.md,
-  },
-  dock: {
-    paddingHorizontal: space.lg,
-    paddingBottom: space.base,
-    paddingTop: space.sm,
-  },
-  cta: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.base,
-    alignItems: "center",
-    ...accentGlow,
-  },
-  ctaDisabled: { backgroundColor: colors.card, shadowOpacity: 0, elevation: 0 },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
-  ctaTextDisabled: { color: colors.textFaint },
+  loopLine: { flexDirection: "row", alignItems: "baseline", gap: space.md },
+  loopNumeral: { width: space.lg, textAlign: "right" },
+  loopText: { flex: 1 },
+  groupLabel: { marginTop: space.xl, marginBottom: space.md },
+  second: { marginTop: space.lg },
 });

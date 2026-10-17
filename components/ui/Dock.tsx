@@ -14,19 +14,22 @@ export interface DockProps {
   progress?: number | null;
   /** Add the home-indicator inset. Default true (false inside tab screens). */
   inset?: boolean;
+  /** A denser scrim for tall docks (the reader's player): text fades out above it, never through it. */
+  dense?: boolean;
   style?: StyleProp<ViewStyle>;
   testID?: string;
 }
 
 const SCRIM = [colors.transparent, "rgba(5, 4, 13, 0.82)", colors.chrome] as const;
+const DENSE = [colors.transparent, colors.chrome, colors.sky950] as const;
 
-export function Dock({ children, progress, inset = true, style, testID }: DockProps) {
+export function Dock({ children, progress, inset = true, dense = false, style, testID }: DockProps) {
   const insets = useSafeAreaInsets();
   const gutter = useGutter();
   const p = progress == null ? null : Math.max(0, Math.min(1, progress));
   return (
     <View testID={testID} style={style}>
-      <LinearGradient colors={SCRIM} locations={[0, 0.42, 1]} style={styles.scrim} />
+      <LinearGradient colors={dense ? DENSE : SCRIM} locations={dense ? [0, 0.3, 1] : [0, 0.42, 1]} style={styles.scrim} />
       {p !== null ? (
         <View
           style={[styles.track, { marginHorizontal: gutter }]}

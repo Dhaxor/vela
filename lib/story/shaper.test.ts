@@ -37,6 +37,11 @@ const TABLE: readonly (readonly [string, string, string, string, string])[] = [
   ["a home, a garden and a dog", "noun", "a home, a garden and a dog", "you have a home, a garden and a dog", "I have a home, a garden and a dog"],
   ["Travel, art and good friends", "noun", "travel, art and good friends", "travel, art and good friends are part of your life", "travel, art and good friends are part of my life"],
   ["peace and quiet", "noun", "peace and quiet", "peace and quiet are part of your life", "peace and quiet are part of my life"],
+  // A coordinated verb after 'stop …ing' is a second wish: gerund in np, present for a habit, past for a one-off.
+  ["Stop overthinking every message and just trust myself more", "imperative", "no longer overthinking every message and just trusting yourself more", "you stopped overthinking every message and just trust yourself more", "I stopped overthinking every message and just trust myself more"],
+  ["Stop smoking and get fit", "imperative", "no longer smoking and getting fit", "you stopped smoking and got fit", "I stopped smoking and got fit"],
+  ["Stop comparing myself and start living", "imperative", "no longer comparing yourself and starting living", "you stopped comparing yourself and started living", "I stopped comparing myself and started living"],
+  ["Heal things with my sister before her wedding", "imperative", "healing things with your sister", "you healed things with your sister", "I healed things with my sister"],
 ];
 
 describe("desire shapes", () => {
@@ -71,8 +76,40 @@ describe("normalisation", () => {
     expect(desireCore("Lose 10 pounds within 6 months")).toBe("Lose 10 pounds");
   });
 
+  test("someone else's event is a deadline too: 'before her wedding', 'before his move', 'before their visit'", () => {
+    expect(desireCore("Heal things with my sister before her wedding")).toBe("Heal things with my sister");
+    expect(desireCore("Make peace with my brother before his move")).toBe("Make peace with my brother");
+    expect(desireCore("Be close to my parents before their anniversary")).toBe("Be close to my parents");
+  });
+
   test("an unknown capitalised word after 'to' is a place, never a verb", () => {
     expect(shapeDesire("To Paris").fallback).toBe(true);
+  });
+});
+
+describe("cessation with a coordinated 'be' or 'have'", () => {
+  test("'stop … and just be myself' cannot be shaped, so it falls back to the quote", () => {
+    for (const raw of ["Stop overthinking and just be myself", "Stop worrying and have fun again"]) {
+      const s = shapeDesire(raw);
+      expect(s.fallback).toBe(true);
+      expect(s.done).toBe(`you found your way to ${s.quote}`);
+    }
+  });
+
+  test("an ambiguous word with no object after 'and' stays a noun", () => {
+    expect(shapeDesire("Stop worrying about money and work").np).toBe("no longer worrying about money and work");
+  });
+});
+
+describe("the short done form (after a colon, after 'the life where')", () => {
+  test("a bare noun reads 'is yours' there; every other shape keeps its done clause", () => {
+    expect(shapeDesire("financial freedom").doneShort).toBe("financial freedom is yours");
+    expect(shapeDesire("Travel, art and good friends").doneShort).toBe("travel, art and good friends are yours");
+    expect(shapeDesire("self-belief").doneShort).toBe("self-belief is yours");
+    for (const raw of ["Find my soulmate", "I am debt free", "my own design studio", "To Paris"]) {
+      const s = shapeDesire(raw);
+      expect(s.doneShort).toBe(s.done);
+    }
   });
 });
 

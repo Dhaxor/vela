@@ -51,6 +51,8 @@ export function normalizeProfile(input: Record<string, unknown>, fallbackCreated
     rate: (rate ?? PROFILE_V2_DEFAULTS.rate) as NarrationRate,
     textSize: SIZES.includes(input.textSize as TextSize) ? (input.textSize as TextSize) : PROFILE_V2_DEFAULTS.textSize,
     bed: BED_IDS.includes(input.bed as BedId) ? (input.bed as BedId) : PROFILE_V2_DEFAULTS.bed,
+    // Only 'Silence' is stored, so a profile that never chose it keeps its exact shape.
+    ...(input.bedOn === false ? { bedOn: false } : {}),
     createdAt,
     ...(typeof input.mood === "string" && input.mood ? { mood: input.mood.slice(0, 40) } : {}),
   };

@@ -7,6 +7,7 @@
 
 import type { FocusId } from "@/lib/focus";
 import { MOTIFS, MOTIF_IDS, type MotifArchetype, type MotifFlag, type MotifId } from "./content";
+import { desireCore } from "./shaper";
 
 /** At most this many motifs per dream; the first is the primary (place, details, Chapter I script). */
 export const MAX_MOTIFS = 3;
@@ -47,6 +48,12 @@ export function motifScore(desire: string, archetype: MotifArchetype): number {
 /**
  * Motifs for a desire, best first: score, then archetypes of the dream's own
  * focus, then catalogue order. Deterministic.
+ *
+ * Matching runs on the desire's core (lib/story/shaper desireCore: no
+ * want-verb, no deadline tail), so a deadline never sets a motif: 'Heal things
+ * with my sister before her wedding' is about the sister, not a wedding, and
+ * must not raise the romance flag. A desire that is nothing but a deadline
+ * (empty core) is matched as typed.
  */
 export function matchMotifs(
   desire: string,
@@ -54,8 +61,9 @@ export function matchMotifs(
   motifs: readonly MotifArchetype[] = MOTIFS
 ): MotifId[] {
   const order = (id: MotifId) => MOTIF_IDS.indexOf(id);
+  const core = desireCore(desire) || desire;
   return motifs
-    .map((m) => ({ m, score: motifScore(desire, m) }))
+    .map((m) => ({ m, score: motifScore(core, m) }))
     .filter((x) => x.score > 0)
     .sort(
       (a, b) =>

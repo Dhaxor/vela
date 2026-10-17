@@ -31,6 +31,16 @@ describe("profile v2", () => {
     expect(q).toMatchObject({ pronunciation: "MY-uh", rate: 0.8, textSize: "L", ritualTimes: { morning: "06:45", evening: "21:00" }, createdAt: p.createdAt });
     expect(patchProfile(p, { name: "   " })).toBe(p);
   });
+
+  test("'Silence' is stored only when chosen, so other profiles keep their exact shape", () => {
+    const p = profileFromV1({ name: "Maya", focusAreas: ["career"], ritual: "both" }, NOW)!;
+    expect("bedOn" in p).toBe(false);
+    const quiet = patchProfile(p, { bedOn: false });
+    expect(quiet.bedOn).toBe(false);
+    const on = patchProfile(quiet, { bed: "rain", bedOn: true });
+    expect("bedOn" in on).toBe(false);
+    expect(on.bed).toBe("rain");
+  });
 });
 
 describe("scenes", () => {
@@ -79,7 +89,9 @@ describe("ceremony gate", () => {
     const ran: string[] = [];
     holdForCeremony(20);
     whenNoCeremony(() => ran.push("write"));
-    await new Promise((r) => setTimeout(r, 60));
+    expect(ran).toEqual([]);
+    // Poll rather than sleep a fixed 60ms: under a loaded full-suite run the timers can land late.
+    for (let waited = 0; ran.length === 0 && waited < 3000; waited += 10) await new Promise((r) => setTimeout(r, 10));
     expect(ran).toEqual(["write"]);
   });
 });

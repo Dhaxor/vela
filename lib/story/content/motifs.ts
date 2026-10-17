@@ -5,6 +5,8 @@
 // noun phrases, no final punctuation, readable mid-sentence), 3 living moments
 // and 2 witness lines. Lines are stage-neutral present-tense moments, so they
 // read correctly in any chapter and next to any focus's beats.
+// Motif lines never use {feeling}: the chapter's shared reflection already
+// names the feeling, and a second 'you feel proud' in the same chapter doubles it.
 // Keywords avoid bare words that collide across archetypes or desires
 // ('run' in 'run my own business', 'home' in 'at home in my body', 'raise' in
 // 'raise my kids'); phrases carry those meanings instead.
@@ -53,10 +55,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
     living: [
       fr("mo-own-business-li1", "You let yourself in before anyone else arrives. Your name is on the window, slightly crooked, and you still haven’t fixed it. You like it crooked. It looks like a beginning that stuck."),
       fr("mo-own-business-li2", "An enquiry lands while you are eating lunch at your own desk. You read it, grin, and reply before the sandwich is finished. Nobody signs off on your answer. It is yours to give."),
-      fr("mo-own-business-li3", "At closing time you switch off the lights and pause in the doorway, looking back at the room you built. It still hums with the day. You feel {feeling}, {name}, and you take your time locking up."),
+      fr("mo-own-business-li3", "At closing time you switch off the lights and pause in the doorway, looking back at the room you built. It still hums with the day. You take your time locking up, {name}, because you can."),
       fr("mo-own-business-li4", "A delivery arrives with your business name printed on the label, spelled right for once. You sign for it at the door and carry the box in like a trophy. It is printer paper. You are thrilled anyway."),
       fr("mo-own-business-li5", "Someone asks for a discount, and you hold your price, kindly and plainly. There is a pause. Then they say yes. You put the kettle on at {motif.place} and let yourself enjoy that."),
-      fr("mo-own-business-li6", "You send the month’s invoices one by one, each with your name at the top. Every one is a small sign that people trust you with their work. You press send on the last, {name}, feeling {feeling}."),
+      fr("mo-own-business-li6", "You send the month’s invoices one by one, each with your name at the top. Every one is a small sign that people trust you with their work. You press send on the last one, {name}, and sit back."),
     ],
     witness: [
       fr("mo-own-business-wi1", "A first client lingers at the door on the way out and says the place feels exactly like you. After they have gone you stay very still for a moment, smiling at the floor."),
@@ -90,7 +92,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-food-venture-li3", "At closing you wipe the counter, count the till and turn the sign. Your hands smell of butter and coffee. You have never been happier to be this tired."),
       fr("mo-food-venture-li4", "A child presses their nose to the glass, pointing at the biggest thing on the counter. Their grown-up laughs and gives in. You wrap it with extra care, because it is someone’s whole afternoon."),
       fr("mo-food-venture-li5", "You try a new recipe on the regulars before it goes on the board. Three of them come back for seconds. You chalk it up at {motif.place}, smiling at your own handwriting."),
-      fr("mo-food-venture-li6", "In a quiet hour you sit on an upturned crate out the back with a coffee you made yourself. The day aches in the honest way. You feel {feeling}, {name}, and would not trade this tiredness for anything."),
+      fr("mo-food-venture-li6", "In a quiet hour you sit on an upturned crate out the back with a coffee you made yourself. The day aches in the honest way. You would not trade this tiredness for anything, {name}."),
     ],
     witness: [
       fr("mo-food-venture-wi1", "A customer takes one bite, closes their eyes and says it tastes like a holiday. You laugh and wrap another one for later, on the house, because it is your house to give from."),
@@ -122,7 +124,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
     living: [
       fr("mo-creative-work-li1", "You sit at the work table before checking anything and pick up where you left off. The first hour goes by like a minute. When you look up, the tea beside you is stone cold."),
       fr("mo-creative-work-li2", "A sentence, a phrase of melody, a stroke of colour lands exactly right, and you sit back and laugh out loud. Nobody else heard it. You did, and it carries you through the whole day."),
-      fr("mo-creative-work-li3", "You finish a piece and set it where you can see it from across the room. You will fix things tomorrow. For a while you just look at it, {name}, and let yourself feel {feeling}."),
+      fr("mo-creative-work-li3", "You finish a piece and set it where you can see it from across the room. You will fix things tomorrow. For a while you just look at it, {name}, and let it be finished."),
       fr("mo-creative-work-li4", "Someone asks what you are working on, and for once you tell them properly, without shrinking it. They ask a second question, then a third. You notice how much you love talking about it."),
       fr("mo-creative-work-li5", "You cut a whole afternoon’s work and feel lighter for it. The next version is already clearer in your head. You start again at {motif.place}, unbothered, humming."),
       fr("mo-creative-work-li6", "A parcel arrives with the finished thing inside. You open it slowly and hold it in both hands. It has weight. You made something that has weight, and it is out in the world."),
@@ -158,7 +160,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-promotion-li3", "Before leaving, you write a short note thanking someone on your team by name. You know what that kind of note means. Someone once sent you one, and you kept it for years."),
       fr("mo-promotion-li4", "Someone brings you a problem they are scared to admit. You listen without a flicker, then help them find the next step. They leave lighter. That, you are learning, is most of the job."),
       fr("mo-promotion-li5", "You decline a meeting you do not need, politely, and spend the hour thinking instead. Nobody minds. Your calendar answers to you these days, and you guard it kindly."),
-      fr("mo-promotion-li6", "At the end of a long week you send the team home early and stay ten minutes to tidy your desk. The floor goes quiet around you. You feel {feeling}, {name}, and tired in exactly the right way."),
+      fr("mo-promotion-li6", "At the end of a long week you send the team home early and stay ten minutes to tidy your desk. The floor goes quiet around you. You are tired, {name}, in exactly the right way."),
     ],
     witness: [
       fr("mo-promotion-wi1", "Someone you used to report to stops by and says, without ceremony, that you were the obvious choice. After they leave you sit for a second and let the word obvious land."),
@@ -190,7 +192,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-new-job-li2", "Someone shows you around and you notice how much you already understand. The questions you would once have hidden, you ask out loud. People answer kindly. By lunch you have made your first small contribution."),
       fr("mo-new-job-li3", "On the way home you realise the old dread is gone. Tomorrow is just tomorrow. You are looking forward to work, {name}, a sentence you once thought belonged to other people."),
       fr("mo-new-job-li4", "You learn three new names before lunch and use them all by the afternoon. Someone saves you a seat without being asked. The place is starting to feel like somewhere you work, rather than somewhere you visit."),
-      fr("mo-new-job-li5", "Your first real task lands in your inbox, and you know exactly how to start it. You open a new document at the desk that is slowly becoming yours. You get to work, {name}, feeling {feeling}."),
+      fr("mo-new-job-li5", "Your first real task lands in your inbox, and you know exactly how to start it. You open a new document at the desk that is slowly becoming yours. You get to work, {name}, humming under your breath."),
       fr("mo-new-job-li6", "Someone says see you tomorrow on the way out, and you realise you are looking forward to it. You leave with your new pass still clipped on and do not take it off until you are home."),
     ],
     witness: [
@@ -225,7 +227,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-freelance-li3", "At four you close the laptop because the work is done and nobody can make you stay. You head out while it is still light. The freedom tastes like fresh air."),
       fr("mo-freelance-li4", "A client asks if you can start sooner. You check the calendar you built and give them the honest date. They wait for you. Your time, it turns out, is worth waiting for."),
       fr("mo-freelance-li5", "On a slow day you take a long lunch without asking anyone. You walk to the park and eat on a bench in the sun. The work will be there at two, and so will you."),
-      fr("mo-freelance-li6", "An invoice is paid within the hour. You move the client folder into the done pile and sit back at {motif.place}, {name}, feeling {feeling}."),
+      fr("mo-freelance-li6", "An invoice is paid within the hour. You move the client folder into the done pile and sit back at {motif.place}, {name}, with your hands behind your head."),
     ],
     witness: [
       fr("mo-freelance-wi1", "A client writes that you are the easiest person they have ever worked with and asks if you have room for more. You read it twice, then raise your rate on the next quote, smiling."),
@@ -259,7 +261,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-study-li3", "You close the book at the time you promised yourself and go home to rest. The knowledge stays where you put it. Tomorrow you will build on it, {name}, one page at a time."),
       fr("mo-study-li4", "You open a past paper and recognise every question. Some are hard. All of them are familiar. You start at the top and keep going, steady as a ticking clock."),
       fr("mo-study-li5", "A study group forms around your table without anyone planning it. You explain one idea, someone else explains another. Halfway through, you all start laughing at nothing, giddy with understanding."),
-      fr("mo-study-li6", "You pack up your notes at {motif.place}, highlighters back in their row. Your head is full in the good way. You walk out, {name}, feeling {feeling}, with tomorrow already planned."),
+      fr("mo-study-li6", "You pack up your notes at {motif.place}, highlighters back in their row. Your head is full in the good way. You walk out, {name}, with tomorrow already planned and the evening free."),
     ],
     witness: [
       fr("mo-study-wi1", "Someone who knew how hard you worked sends a message the moment they hear: so proud of you, never doubted it. You read it with your hand over your mouth and let yourself believe them."),
@@ -291,10 +293,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
     living: [
       fr("mo-debt-free-li1", "The post arrives and you open every envelope at the kitchen table without bracing. Nothing in there can frighten you. Then you sort it in two minutes and put the kettle on."),
       fr("mo-debt-free-li2", "You check your account the way you check the weather, briefly and without fear. What is there is yours, owed to nobody. You close the app and get on with your day."),
-      fr("mo-debt-free-li3", "You pay for something small with no mental arithmetic and no tightening in your chest. The cashier hands you the receipt and you fold it into your pocket, {name}, feeling {feeling}."),
+      fr("mo-debt-free-li3", "You pay for something small with no mental arithmetic and no tightening in your chest. The cashier hands you the receipt and you fold it into your pocket, {name}, without a second look."),
       fr("mo-debt-free-li4", "A letter from the bank arrives, and you open it at the door, curious instead of afraid. It is a routine update. You read it, fold it and recycle it, amused by how boring it is."),
       fr("mo-debt-free-li5", "You buy a round without doing sums under the table. Someone thanks you. You say it is nothing, and for once it really is, because what you have is yours."),
-      fr("mo-debt-free-li6", "On the first of the month, nothing leaves your account except what you chose. You notice it the way you notice a quiet house. You feel {feeling}, {name}, and very calm."),
+      fr("mo-debt-free-li6", "On the first of the month, nothing leaves your account except what you chose. You notice it the way you notice a quiet house. You make a cup of tea, {name}, and enjoy the calm."),
     ],
     witness: [
       fr("mo-debt-free-wi1", "A friend who knew the whole story asks how things are with money. You tell them that you owe nothing to anyone. They put down their cup and hug you there in the café."),
@@ -326,10 +328,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
     living: [
       fr("mo-savings-li1", "Payday arrives and the first thing that happens is the transfer to savings, automatic, no decision needed. You barely notice. The balance grows like a plant on the windowsill while you get on with life."),
       fr("mo-savings-li2", "The washing machine breaks, and for once it is just an annoyance. You pay for the repair from the fund you built for exactly this. Your heart rate doesn’t change. That steadiness took years."),
-      fr("mo-savings-li3", "At the end of the month you look at the balance and let yourself really see it. Safety, built with your own hands, one small transfer at a time. You feel {feeling}, {name}."),
+      fr("mo-savings-li3", "At the end of the month you look at the balance and let yourself really see it. Safety, built with your own hands, one small transfer at a time. You sit with that for a moment, {name}."),
       fr("mo-savings-li4", "You see a coat you love and buy it from the money set aside for exactly this. No guilt follows you home. It just hangs in the hall, looking good."),
       fr("mo-savings-li5", "A friend mentions a trip next spring. You check the fund, nod and tell them you are in. It takes ten seconds. It used to take a week of worry."),
-      fr("mo-savings-li6", "Once a month you sit down with tea and good music and look at your money on purpose. It has become a small ritual you enjoy. You feel {feeling}, {name}, looking at what you have built."),
+      fr("mo-savings-li6", "Once a month you sit down with tea and good music and look at your money on purpose. It has become a small ritual you enjoy, {name}, a quiet look at what you have built."),
     ],
     witness: [
       fr("mo-savings-wi1", "When a friend is in a tight spot, you are able to help without it costing you sleep. They thank you again and again. You remember being on the other side of that call."),
@@ -363,7 +365,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-home-li3", "On a slow morning you sit with a coffee in the room with the best light and plan nothing. The rooms tick and settle around you like something breathing. You are home, all the way."),
       fr("mo-home-li4", "You cook something slow while the windows fog up. The music is up as loud as you like. The whole place smells of onions and of being home."),
       fr("mo-home-li5", "You paint one wall a colour nobody else would have chosen. It takes all afternoon, and some of it ends up on your elbows. Standing back, you love it immediately."),
-      fr("mo-home-li6", "Friends come round and you give them the tour, which takes about a minute. They stay for hours. When they leave, you stand in the hall and listen to your own quiet, {name}, feeling {feeling}."),
+      fr("mo-home-li6", "Friends come round and you give them the tour, which takes about a minute. They stay for hours. When they leave, you stand in the hall and listen to your own quiet, {name}, smiling at nothing."),
     ],
     witness: [
       fr("mo-home-wi1", "Your first guest pauses in the doorway, looks around and says it already feels like you. You make them tea in your own kitchen and give them the good chair, delighted."),
@@ -432,10 +434,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-travel-li3", "At the end of a long day exploring, your face hurts from smiling. Before sleep you write three lines in the travel notebook, {name}, so you never forget this one."),
       fr("mo-travel-li4", "You get lost on purpose and find a tiny square with one café and two people playing chess under a tree. You order by pointing. It turns out to be the best thing you eat all trip."),
       fr("mo-travel-li5", "Rain catches you without a coat, so you shelter in a doorway with strangers and laugh about it in two languages. When it stops, the streets shine. You walk on, soaked and delighted."),
-      fr("mo-travel-li6", "You buy a postcard of somewhere you never thought you would stand. You write three lines and run out of space. You post it home, {name}, feeling {feeling}."),
+      fr("mo-travel-li6", "You buy a postcard of somewhere you never thought you would stand. You write three lines and run out of space. You post it home anyway, {name}, grinning at the stamp."),
     ],
     witness: [
-      fr("mo-travel-wi1", "A stranger at the next table asks where you are from and how long you are staying. When you tell them, they say you have chosen well. You raise your cup to them, feeling {feeling}."),
+      fr("mo-travel-wi1", "A stranger at the next table asks where you are from and how long you are staying. When you tell them, they say you have chosen well. You raise your cup to them and agree."),
       fr("mo-travel-wi2", "Back home, a friend flicks through your photos and stops on one of you mid-laugh under a foreign sky. They say they have never seen you look so free. You decide to frame that one."),
     ],
   },
@@ -467,10 +469,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
     living: [
       fr("mo-partner-li1", "Someone who loves you hands you a cup made how you like it, without asking. You lean against each other at the counter, barely talking. It is the best part of the day."),
       fr("mo-partner-li2", "You come home to music in the kitchen and someone singing along badly. They look up and smile as if you are the day’s good news. You put your bag down and join in."),
-      fr("mo-partner-li3", "On an ordinary evening you sit close on the sofa, each reading your own book. Every so often one of you reads a line out loud. You feel {feeling}, {name}, and entirely at home."),
+      fr("mo-partner-li3", "On an ordinary evening you sit close on the sofa, each reading your own book. Every so often one of you reads a line out loud. It is quiet, {name}, and entirely like home."),
       fr("mo-partner-li4", "You fall asleep halfway through a film and wake to find a blanket over you and the volume turned right down. Someone has been looking after you while you slept."),
       fr("mo-partner-li5", "You have a whole conversation across a crowded room using only your eyebrows. On the walk home you both laugh about it, and you reach for their hand without thinking."),
-      fr("mo-partner-li6", "You make plans for an ordinary weekend: the market, a walk, nothing fancy. You are as excited about the walk as you once were about anything. You feel {feeling}, {name}, and settled."),
+      fr("mo-partner-li6", "You make plans for an ordinary weekend: the market, a walk, nothing fancy. You are as excited about the walk as you once were about anything. It is a settled kind of happy, {name}."),
     ],
     witness: [
       fr("mo-partner-wi1", "A friend watches the two of you laughing at a private joke and catches your eye. Later they say it is lovely to see you this happy. You know it is true."),
@@ -503,7 +505,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-wedding-li3", "At the venue the music starts and the room turns toward you. Every face you love is there. You take a breath, {name}, and make your way toward the person waiting for you."),
       fr("mo-wedding-li4", "You practise your vows in the shower, getting the hard line wrong every time. You laugh at yourself and start again. By the fifth try, your voice holds."),
       fr("mo-wedding-li5", "Someone sends a photo from the day: the two of you mid-laugh, slightly out of focus, perfect. You make it your lock screen and look at it more than is reasonable."),
-      fr("mo-wedding-li6", "In the middle of an ordinary day you catch the person you love humming the song you chose for the first dance. You join in, off key. You feel {feeling}, {name}."),
+      fr("mo-wedding-li6", "In the middle of an ordinary day you catch the person you love humming the song you chose for the first dance. You join in, off key, {name}, and neither of you stops."),
     ],
     witness: [
       fr("mo-wedding-wi1", "An old friend finds you in a quiet corner and says they have never seen you look so sure of anything. You hug them hard. Over their shoulder, the dance floor is full."),
@@ -535,11 +537,11 @@ export const MOTIFS: readonly MotifArchetype[] = [
     ],
     living: [
       fr("mo-family-li1", "Small footsteps come down the hallway before your alarm, and a warm, sleepy person climbs into your lap. You breathe in the smell of their hair. The day can wait a minute."),
-      fr("mo-family-li2", "The living room is a mess of toys and blankets, and you don’t mind. Someone small is building a tower and narrating it seriously. You sit on the floor to help, {name}, feeling {feeling}."),
+      fr("mo-family-li2", "The living room is a mess of toys and blankets, and you don’t mind. Someone small is building a tower and narrating it seriously. You sit on the floor to help, {name}, and take instructions."),
       fr("mo-family-li3", "At dinner the table is loud with talk and spilled water and someone refusing peas. You catch the eye of the person beside you and laugh. This noise is what you used to wish for."),
       fr("mo-family-li4", "Bath time turns into a flood, and everyone is laughing too hard to stop it. You mop up with every towel you own. Afterwards the house is quiet and smells of soap, and you are still smiling."),
       fr("mo-family-li5", "Someone small asks you a question you cannot answer, about worms or clouds or why. You look it up together, heads bent over the screen. Being asked like that is a kind of trust."),
-      fr("mo-family-li6", "You stand in a doorway at the end of the day and listen to slow, even breathing. The hallway light is on. You feel {feeling}, {name}, all the way through."),
+      fr("mo-family-li6", "You stand in a doorway at the end of the day and listen to slow, even breathing. The hallway light is on. You stay a minute longer than you need to, {name}."),
     ],
     witness: [
       fr("mo-family-wi1", "An old friend visits and watches you with the little one for a while, then says you are a natural. You wave it away. They say it again, slower, until you hear it."),
@@ -560,6 +562,10 @@ export const MOTIFS: readonly MotifArchetype[] = [
       "with my family", "close to my family", "closer to my family", "relationship with my family", "relationship with my mum",
       "relationship with my mom", "relationship with my mother", "relationship with my dad", "relationship with my father",
       "relationship with my parents", "relationship with my brother", "relationship with my sister",
+      // 'Heal things with my sister': the phrase outscores healing's bare 'heal'.
+      "heal things", "mend things", "fix things with", "make things right", "patch things up", "things right with",
+      "closer to my mum", "closer to my mom", "closer to my mother", "closer to my dad", "closer to my father",
+      "closer to my parents", "closer to my brother", "closer to my sister",
       "reconect", "reconsile", "estrainged", "forgivness", "familiy",
     ],
     flags: ["family"],
@@ -578,7 +584,7 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-family-repair-li3", "Over a long, ordinary lunch you laugh at an old family joke, and nobody has to pretend. Some of the old ache is still there. So is the warmth, {name}, and the warmth is louder."),
       fr("mo-family-repair-li4", "A message arrives with a photo of an old recipe card in familiar handwriting. Underneath it says: thought you might want this. You call to say thank you, and the call runs long."),
       fr("mo-family-repair-li5", "You disagree about something small over dinner, and it stays small. Nobody storms off. Someone changes the subject with a joke, and you both laugh. That, more than anything, is the repair."),
-      fr("mo-family-repair-li6", "You put an old photo back on the shelf where it used to be. The faces in it look younger and less sure. You feel {feeling}, {name}, looking at how far you have all come."),
+      fr("mo-family-repair-li6", "You put an old photo back on the shelf where it used to be. The faces in it look younger and less sure. You look at it for a while, {name}, and see how far you have all come."),
     ],
     witness: [
       fr("mo-family-repair-wi1", "Someone else in the family pulls you aside and says everyone feels lighter since you two started talking again. You didn’t know anyone had noticed. You carry that carefully all the way home."),
@@ -612,11 +618,11 @@ export const MOTIFS: readonly MotifArchetype[] = [
       fr("mo-friendship-li3", "On the way home you are still laughing at something someone said. You feel known, {name}, by people who chose you back. That feeling stays with you all the way to your door."),
       fr("mo-friendship-li4", "A friend turns up with soup when you are ill, and stays to wash the pan. You never asked. That is the whole point of them."),
       fr("mo-friendship-li5", "A voice note arrives from a friend in another city, eleven minutes long and mostly about their terrible neighbour. You listen to all of it, laughing, then record one back while you walk."),
-      fr("mo-friendship-li6", "Your name is on the list for a birthday dinner before you even knew there was a dinner. Someone assumed you would come. You feel {feeling}, {name}, and very much expected."),
+      fr("mo-friendship-li6", "Your name is on the list for a birthday dinner before you even knew there was a dinner. Someone assumed you would come. It is a lovely thing, {name}, to be this expected."),
     ],
     witness: [
       fr("mo-friendship-wi1", "A friend raises a glass at dinner and says the group was never quite complete until you came along. Everyone cheers. You go red, and you let yourself enjoy every second of it."),
-      fr("mo-friendship-wi2", "Someone new to the group tells you that you made them feel welcome from the first night. You remember being new. You remember who did that for you, and you feel {feeling}."),
+      fr("mo-friendship-wi2", "Someone new to the group tells you that you made them feel welcome from the first night. You remember being new. You remember who did that for you, and you pass it on gladly."),
     ],
   },
 

@@ -40,7 +40,7 @@ export const CONFIDENCE: FocusContent = {
       arrival: [
         fr("co1-ar1", "You wake and reach for your phone out of habit, then stop. There is nothing to brace for in it. No reply to dread, no conversation to rehearse. You lie back and listen to a car door outside. You wrote {desire.quote}, and this is the quiet it made."),
         fr("co1-ar2", "In the bathroom mirror you meet your own eyes and don’t look away. Such a small thing. For years you checked your face for flaws before anyone else could find them. You wrote {desire.quote}, and this is what it looks like at seven in the morning."),
-        fr("co1-ar3", "You choose what to wear in under a minute: the jacket you used to save for a braver version of yourself. It fits the version who is here. You put it on and stand differently without trying. It is true, and your body knew first: {desire.done}."),
+        fr("co1-ar3", "You choose what to wear in under a minute: the jacket you used to save for a braver version of yourself. It fits the version who is here. You put it on and stand differently without trying. Your body knew before you did that {desire.done}."),
         fr("co1-ar4", "Your phone lights up with a message you would once have answered with three apologies and a joke. Today you write one clear sentence and press send. Your pulse doesn’t even flicker. This is what {desire.np} looks like over breakfast: ordinary, and enormous."),
       ],
       living: [
@@ -103,9 +103,9 @@ export const CONFIDENCE: FocusContent = {
     5: {
       arrival: [
         fr("co5-ar1", "The last sentence leaves your mouth and the room is silent for one long second. Then the applause starts, loose and real. Your hands are shaking, your face is hot, and you are smiling so hard it aches. The words you wrote, {desire.quote}, just stopped being a wish."),
-        fr("co5-ar2", "Mid-sentence, you notice something strange. Your voice is steady, your hands are still, and the fear you packed for never came. Somebody across the room is nodding slowly, pen in hand. You finish the sentence anyway, then stand there a second longer, stunned: {desire.done}."),
+        fr("co5-ar2", "Mid-sentence, you notice something strange. Your voice is steady, your hands are still, and the fear you packed for never came. Somebody across the room is nodding slowly, pen in hand. You finish the sentence anyway, then stand there a second longer, stunned that {desire.done}."),
         fr("co5-ar3", "You press send on the thing you have been too afraid to share, and for sixty seconds nothing happens. Your heart pounds. Then the first reply arrives, then a second, warm and specific. You close your eyes and breathe out. Your words are out in the world, {name}, and the world is answering."),
-        fr("co5-ar4", "You walk out of the conversation you avoided for years, and the hallway looks brighter than when you went in. You said everything you meant to. Nobody fell apart, least of all you. Your whole body feels light. It is real, {name}: {desire.done}."),
+        fr("co5-ar4", "You walk out of the conversation you avoided for years, and the hallway looks brighter than when you went in. You said everything you meant to. Nobody fell apart, least of all you. Your whole body feels light. It sinks in slowly, {name}, that {desire.done}."),
       ],
       living: [
         fr("co5-li1", "You call the one person who knew how scared you were. They pick up and you can’t get the words out for laughing. When you finally do, they go quiet, then say they always knew. You lean your head against the window and let that sentence warm you through."),
@@ -209,7 +209,7 @@ export const CONFIDENCE: FocusContent = {
       ],
       closing: {
         morning: fr("co-one-default-cl-m", "Open your eyes when you are ready. That morning is made of small, brave sentences, and today has room for one of them. Say it plainly, {name}, and let it count."),
-        evening: fr("co-one-default-cl-e", "Stay in that easy morning as you rest. You don’t have to prove anything tonight, to anyone. Let your jaw soften and your hands go heavy. The story will be here when you wake."),
+        evening: fr("co-one-default-cl-e", "Stay in that easy morning as you rest. You don’t have to prove anything tonight, to anyone. Let your jaw soften and your breathing deepen. The story will be here when you wake."),
       },
     },
   ],

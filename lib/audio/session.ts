@@ -21,6 +21,8 @@ export interface AudioSession {
   claim(): () => void;
   /** Mode the platform last accepted, null before the first success. */
   applied(): AudioSessionMode | null;
+  /** True while any claim is held (narration speaking or a bed playing). */
+  active(): boolean;
   /** Resolves when every requested change has been attempted. */
   settled(): Promise<void>;
 }
@@ -63,6 +65,7 @@ export function createAudioSession(apply: ApplyAudioMode): AudioSession {
       };
     },
     applied: () => applied,
+    active: () => claims > 0,
     settled: () => chain,
   };
 }
@@ -77,3 +80,6 @@ export const setAudioSession: SetAudioSession = (mode) => session.set(mode);
 
 /** Hold the chapter session while our audio plays. Call the returned function to release. */
 export const claimChapterSession = (): (() => void) => session.claim();
+
+/** True while Vela's own audio plays (a chapter session is claimed). The Star Birth chime only joins audio already on. */
+export const isAudioActive = (): boolean => session.active();

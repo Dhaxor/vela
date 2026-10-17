@@ -20,6 +20,45 @@ export function proofQuote(text: string): string {
 }
 
 const LEADING_TIME = /^(?:today|tonight|yesterday|earlier|this (?:morning|afternoon|evening)|at last|so)[,\s]+/iu;
+/**
+ * The same time words at the end ('Walked to work twice THIS WEEK'). The proof
+ * is retold days later ('twelve days ago, you walked to work twice'), so its
+ * own 'today' or 'this week' would be wrong in the woven line. The quote keeps them.
+ */
+const TRAILING_TIME =
+  /[\s,]+(?:again\s+)?(?:today|tonight|yesterday|earlier(?:\s+today)?|this\s+(?:morning|afternoon|evening|week|weekend|month)|last\s+night)$/iu;
+
+/**
+ * A habit kept over many days ('Drank water before coffee EVERY DAY') cannot be
+ * retold as one day ('the day you drank water before coffee every day'), so
+ * it stays quoted: 'the day you wrote “…”' is true.
+ */
+const FREQUENCY = /(?<![\p{L}])(?:(?:every|each)\s+(?:single\s+)?(?:day|morning|night|evening|week|weekday)|daily|all\s+week|nightly)(?![\p{L}])/iu;
+
+/** Forms of 'write': a quote frame must not repeat the proof's own first verb. */
+const WRITE_FORMS = /^(?:write|writes|wrote|writing|written)$/iu;
+
+const firstWord = (text: string) => (collapse(text).replace(/^["“”'‘’]+/u, "").split(" ")[0] ?? "").replace(/[^\p{L}]/gu, "");
+
+/** True when the proof opens with a form of 'write' ('Wrote a message to Mum…'). */
+export function startsWithWriteVerb(text: string): boolean {
+  return WRITE_FORMS.test(firstWord(text));
+}
+
+/**
+ * A template that puts 'wrote' (or 'writing', 'wrote it down:', 'wrote on
+ * {proof.date}:') shortly before the quote, or 'you wrote' right after it.
+ */
+const WRITE_FRAME =
+  /\b(?:wrote|write|writing|written)\b(?:[^.!?{}]|\{proof\.(?:date|ago)\}){0,36}?\{proof\.quote\}|\{proof\.quote\},?\s+you\s+wrote\b/iu;
+
+/**
+ * True when filling `template` with this proof would double the verb: 'the day
+ * you wrote “Wrote a message…”'. The engine then prefers another frame.
+ */
+export function doublesWriteVerb(template: string, proofText: string): boolean {
+  return startsWithWriteVerb(proofText) && WRITE_FRAME.test(template);
+}
 
 // A Map, so a word like 'constructor' never resolves to an Object.prototype member.
 const SWAP: ReadonlyMap<string, string> = new Map([
@@ -55,8 +94,10 @@ const OBJECTISH = /^(?:a|an|the|my|our|me|us|myself|it|them|one|two|three|four|f
  */
 export function proofDoneClause(text: string): string | null {
   const core = stripTrailingPunct(stripPictographs(collapse(text)));
-  if (!core || /[.!?;]\s*\S/u.test(core) || /["“”]/u.test(core)) return null;
-  let tokens = core.replace(LEADING_TIME, "").split(" ").filter(Boolean);
+  if (!core || /[.!?;]\s*\S/u.test(core) || /["“”]/u.test(core) || FREQUENCY.test(core)) return null;
+  let trimmed = core.replace(LEADING_TIME, "");
+  for (let guard = 0; guard < 2; guard += 1) trimmed = trimmed.replace(TRAILING_TIME, "");
+  let tokens = trimmed.split(" ").filter(Boolean);
   if (tokens.length === 0 || tokens.length > MAX_PROOF_DONE_WORDS) return null;
   const lower = (i: number) => (tokens[i] ?? "").toLowerCase().replace(/’/gu, "'");
 
@@ -102,9 +143,15 @@ export function proofDoneClause(text: string): string | null {
   return lowerFirst(`you ${verb}${rest ? ` ${rest}` : ""}`);
 }
 
-/** {proof.done}: the clause, or the always-safe fallback. */
+/**
+ * {proof.done}: the clause, or the always-safe fallback 'you wrote “…”'. When
+ * the proof itself opens with 'Wrote…', the fallback says 'you noted “…”' so
+ * the line never reads 'you wrote “Wrote a message…”'.
+ */
 export function proofDone(text: string): string {
-  return proofDoneClause(text) ?? `you wrote ${proofQuote(text)}`;
+  const clause = proofDoneClause(text);
+  if (clause) return clause;
+  return `you ${startsWithWriteVerb(text) ? "noted" : "wrote"} ${proofQuote(text)}`;
 }
 
 /** Whole LOCAL days between two 'YYYY-MM-DD' keys (b − a). */

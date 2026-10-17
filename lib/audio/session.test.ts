@@ -62,15 +62,18 @@ describe("createAudioSession", () => {
 
   test("overlapping claims (narration + bed) release only when both let go; release is idempotent", async () => {
     const session = createAudioSession(recorder().apply);
+    expect(session.active()).toBe(false);
     const narration = session.claim();
     const bed = session.claim();
     narration();
     narration();
     await session.settled();
     expect(session.applied()).toBe("chapter");
+    expect(session.active()).toBe(true);
     bed();
     await session.settled();
     expect(session.applied()).toBe("idle");
+    expect(session.active()).toBe(false);
   });
 
   test("a failing platform call never throws and is retried on the next change", async () => {

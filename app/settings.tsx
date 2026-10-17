@@ -1,235 +1,407 @@
-// Settings — deliberately small. Restore/paywall arrive in P4; this exists so
-// the gear always leads somewhere real.
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+// Settings v2 (ELEVATE §0.12). Opens from the gear on Today. Seven groups, in
+// the order people reach for them:
+//   You · Ritual · Listening · Lock Screen privacy · Your data · Vela Plus · About
+// Everything saves as it changes (no Save button on the page); edits that need
+// typing or precision open a sheet with its own single action. Notifications
+// are never scheduled here: the root loop effects rebuild the queue from the
+// profile and progress this screen updates (CONTRACTS §11).
+//
+// testIDs kept from 1.0: settings-back, settings-focus-*, settings-reminders-on
+// / -off (now on the reminders Switch: '-on' while off, '-off' while on, so a
+// tap does what the id says), settings-upgrade, settings-restore.
+import React, { useEffect, useMemo, useState } from "react";
+import { Linking, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import { Alert } from "react-native";
-import { ChevronLeft, Sparkles, RotateCcw } from "lucide-react-native";
 import Constants from "expo-constants";
+import { daypartAt } from "@/contexts/arc.types";
+import { useProgress } from "@/contexts/RitualContext";
 import { useUser } from "@/contexts/UserContext";
-import { usePlus } from "@/contexts/PlusContext";
-import { FOCUS_AREAS } from "@/lib/focus";
-import { colors, space, radius, type } from "@/constants/theme";
+import type { HHmm, RitualTime, TextSize } from "@/contexts/user.types";
+import { NARRATION_RATES, pickVoice, resolveBed, useNarration, voiceDisplayName, type BedId, type NarrationRate } from "@/lib/audio";
+import { now } from "@/lib/clock";
+import { FOCUS_AREAS, type FocusId } from "@/lib/focus";
+import { getPermission, requestPermissionAtCommitment, type PermissionState } from "@/lib/notifications";
+import { RHYTHM_TARGET } from "@/lib/progress";
+import { ChipGroup, Header, ProgressStars, Screen, Segmented, T, useToast, type StarState } from "@/components/ui";
+import { VelaMark } from "@/components/glyphs";
+import { LEGAL_URLS, usePlusActions } from "@/components/feature/plus";
+import {
+  AboutPanel,
+  BedPicker,
+  ControlRow,
+  ImportSheet,
+  PauseSheet,
+  ProfileSheet,
+  SettingsGroup,
+  SettingsRow,
+  SwitchRow,
+  TimeSheet,
+  VoiceSheet,
+  formatClock,
+  pauseOptions,
+  resumesLabel,
+  ritualTimesLabel,
+  slotsFor,
+  useDataActions,
+  SLOT_LABEL,
+  type RitualSlot,
+} from "@/components/feature/settings";
+import { colors, space } from "@/constants/theme";
+
+const RITUALS: { value: RitualTime; label: string }[] = [
+  { value: "morning", label: "Morning" },
+  { value: "evening", label: "Evening" },
+  { value: "both", label: "Both" },
+];
+
+const TEXT_SIZES: { value: TextSize; label: string; accessibilityLabel: string }[] = [
+  { value: "S", label: "Small", accessibilityLabel: "Small text" },
+  { value: "M", label: "Medium", accessibilityLabel: "Medium text" },
+  { value: "L", label: "Large", accessibilityLabel: "Large text" },
+];
+
+const RHYTHM_OPTIONS = Array.from({ length: RHYTHM_TARGET.max - RHYTHM_TARGET.min + 1 }, (_, i) => {
+  const n = RHYTHM_TARGET.min + i;
+  return { value: String(n), label: String(n), accessibilityLabel: `${n} nights a week` };
+});
+
+const RATE_OPTIONS = NARRATION_RATES.map((r) => ({ value: r.toFixed(1), label: `${r.toFixed(1)}×`, accessibilityLabel: `Speed ${r.toFixed(1)}` }));
+
+const DAY_STAR: Record<string, StarState> = { "shown-up": "lit", "today-open": "current", rest: "rest", future: "upcoming", paused: "rest" };
+
+type SheetName = null | "name" | "pronunciation" | "voice" | "pause" | RitualSlot;
 
 export default function SettingsScreen() {
   const router = useRouter();
+  const toast = useToast();
   const { profile, updateProfile } = useUser();
-  const { isPlus, restore } = usePlus();
+  const progress = useProgress();
+  const plusActions = usePlusActions();
+  const data = useDataActions();
+  const [sheet, setSheet] = useState<SheetName>(null);
+  const [permission, setPermission] = useState<PermissionState | null>(null);
+  // Below ~400pt the week's stars move under the caption so the label never wraps.
+  const wide = useWindowDimensions().width >= 400;
 
-  const runRestore = async () => {
-    const result = await restore();
-    if (result === "purchased") {
-      Alert.alert("Welcome back", "Vela Plus is restored on this device.");
-    } else if (result === "unavailable") {
-      Alert.alert(
-        "Not available yet",
-        "Restore becomes available with the App Store release."
-      );
-    } else {
-      Alert.alert(
-        "Nothing to restore",
-        "No previous Vela Plus purchase was found for this Apple Account."
-      );
+  // Voices for the Listening group (an idle narration controller: it never speaks here).
+  const narration = useNarration(null, { daypart: daypartAt(now()), rate: profile?.rate ?? 0.9, voiceId: profile?.voiceId ?? null });
+  const voice = pickVoice(narration.voices, profile?.voiceId ?? null);
+
+  useEffect(() => {
+    let live = true;
+    void getPermission().then((p) => {
+      if (live) setPermission(p);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
+
+  const version = useMemo(() => Constants.expoConfig?.version ?? null, []);
+
+  if (!profile) {
+    return <Screen header={<Header title="Settings" testID="settings" />} testID="settings-screen" />;
+  }
+
+  const save = (patch: Parameters<typeof updateProfile>[0]) => void updateProfile(patch);
+  const times = ritualTimesLabel(profile.ritual, profile.ritualTimes);
+  const summary = progress.summary;
+  const bed = resolveBed(profile.bed, plusActions.isPlus);
+  const close = () => setSheet(null);
+
+  /* ---------------------------------------------------------- reminders */
+  const setReminders = async (on: boolean) => {
+    await updateProfile({ remindersEnabled: on });
+    if (!on) {
+      toast.show("Reminders off. Your sky waits quietly.");
+      return;
     }
+    // Turning reminders on is a commitment moment: ask the OS once (N6).
+    const result = await requestPermissionAtCommitment();
+    setPermission(result);
+    if (result === "granted") toast.show({ message: `Reminders at ${times}.`, tone: "proof" });
+    else if (result === "denied") toast.show({ message: "Notifications are off for Vela in iOS Settings, so reminders can't arrive yet.", tone: "error", duration: 5000 });
+    else if (result === "unavailable") toast.show("Reminders arrive on iPhone. This preview can't send them.");
   };
 
-  const toggleFocus = (id: (typeof FOCUS_AREAS)[number]["id"]) => {
-    if (!profile) return;
-    const has = profile.focusAreas.includes(id);
-    const next = has
-      ? profile.focusAreas.filter((x) => x !== id)
-      : [...profile.focusAreas, id];
-    if (next.length === 0) return; // always keep at least one anchor
-    void updateProfile({ focusAreas: next });
+  const allowNow = async () => {
+    const result = await requestPermissionAtCommitment();
+    setPermission(result);
+    if (result === "granted") toast.show({ message: `Reminders at ${times}.`, tone: "proof" });
+    else if (result === "denied") toast.show({ message: "Notifications stay off. You can allow them any time in iOS Settings.", duration: 4500 });
   };
+
+  const reminderDetail = !profile.remindersEnabled
+    ? "Off. Your sky waits quietly."
+    : summary.paused
+      ? `At ${times}, after the pause.`
+      : permission === "denied"
+        ? `At ${times}. Allow notifications for Vela in iOS Settings.`
+        : `At ${times}.`;
+
+  /* -------------------------------------------------------------- pause */
+  const options = pauseOptions(now());
+  const onPauseSwitch = (on: boolean) => {
+    if (on) {
+      setSheet("pause");
+      return;
+    }
+    progress.resume();
+    toast.show({ message: "Your sky is back. Welcome home.", tone: "proof" });
+  };
+
+  /* -------------------------------------------------------------- areas */
+  const setAreas = (next: FocusId[]) => {
+    if (next.length === 0) {
+      toast.show("Keep at least one area.");
+      return;
+    }
+    save({ focusAreas: next });
+  };
+
+  const weekStates = summary.week.days.map((d) => DAY_STAR[d.state] ?? "upcoming");
+  const weekStars = (
+    <ProgressStars states={weekStates} accessibilityLabel={`This week: ${summary.week.shownUp} of ${summary.week.target} nights`} testID="settings-week" />
+  );
 
   return (
-    <SafeAreaView style={s.screen}>
-      <View style={s.header}>
-        <TouchableOpacity
-          onPress={() => safeBack(router)}
-          style={s.back}
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          testID="settings-back"
+    <Screen header={<Header title="Settings" testID="settings" />} testID="settings-screen">
+      {/* ------------------------------------------------------------ You */}
+      <SettingsGroup title="You" first testID="settings-you">
+        <SettingsRow label="Name" value={profile.name} onPress={() => setSheet("name")} testID="settings-name-row" accessibilityHint="Edit your name" />
+        <SettingsRow
+          label="Say my name as"
+          value={profile.pronunciation ?? "As written"}
+          detail="For the narrator only."
+          onPress={() => setSheet("pronunciation")}
+          testID="settings-pronunciation-row"
+        />
+        <ControlRow label="Your areas" detail="Lines and prompts for these areas are always free.">
+          <ChipGroup
+            multiple
+            options={FOCUS_AREAS.map((f) => ({ value: f.id, label: f.label }))}
+            value={profile.focusAreas}
+            onChange={setAreas}
+            testIDPrefix="settings-focus-"
+            accessibilityLabel="Your areas"
+          />
+        </ControlRow>
+      </SettingsGroup>
+
+      {/* --------------------------------------------------------- Ritual */}
+      <SettingsGroup title="Ritual" testID="settings-ritual">
+        <ControlRow label="When you read">
+          <Segmented options={RITUALS} value={profile.ritual} onChange={(ritual) => save({ ritual })} testID="settings-ritual-time" accessibilityLabel="Ritual" />
+        </ControlRow>
+        {slotsFor(profile.ritual).map((slot) => (
+          <SettingsRow
+            key={slot}
+            label={`${SLOT_LABEL[slot]} chapter`}
+            value={formatClock(profile.ritualTimes[slot])}
+            onPress={() => setSheet(slot)}
+            testID={`settings-time-${slot}`}
+          />
+        ))}
+        <SwitchRow
+          label="Reminders"
+          detail={reminderDetail}
+          value={profile.remindersEnabled}
+          onValueChange={(on) => void setReminders(on)}
+          switchTestID={profile.remindersEnabled ? "settings-reminders-off" : "settings-reminders-on"}
+          testID="settings-reminders"
+        />
+        {profile.remindersEnabled && permission === "undetermined" ? (
+          <SettingsRow
+            label="Allow notifications"
+            detail="So reminders can reach you. iOS asks once."
+            onPress={() => void allowNow()}
+            testID="settings-reminders-allow"
+          />
+        ) : null}
+        <ControlRow
+          label="Weekly rhythm"
+          detail={`${summary.week.target} nights a week. Rest nights never count against you.`}
+          aside={wide ? weekStars : undefined}
         >
-          <ChevronLeft color={colors.text} size={24} />
-        </TouchableOpacity>
-        <Text style={s.headerTitle}>Settings</Text>
-        <View style={s.back} />
-      </View>
+          {wide ? null : weekStars}
+          <Segmented
+            options={RHYTHM_OPTIONS}
+            value={String(summary.week.target)}
+            onChange={(v) => progress.setRhythmTarget(Number(v))}
+            testID="settings-rhythm"
+            accessibilityLabel="Nights a week"
+          />
+        </ControlRow>
+        <SwitchRow
+          label="Pause my sky"
+          detail={summary.paused && summary.pausedUntil ? `Paused. ${resumesLabel(summary.pausedUntil)}.` : "Rest up to 30 nights. Every star stays."}
+          value={summary.paused}
+          onValueChange={onPauseSwitch}
+          switchTestID="settings-pause"
+          testID="settings-pause-row"
+        />
+      </SettingsGroup>
 
-      <ScrollView contentContainerStyle={s.content}>
-        <Text style={s.section}>Focus areas</Text>
-        <View style={s.chips}>
-          {FOCUS_AREAS.map((f) => {
-            const on = profile?.focusAreas.includes(f.id) ?? false;
-            return (
-              <TouchableOpacity
-                key={f.id}
-                style={[s.chip, on && s.chipOn]}
-                onPress={() => toggleFocus(f.id)}
-                testID={`settings-focus-${f.id}`}
-              >
-                <Text style={[s.chipText, on && s.chipTextOn]}>{f.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      {/* ------------------------------------------------------ Listening */}
+      <SettingsGroup title="Listening" testID="settings-listening">
+        <SettingsRow
+          label="Voice"
+          value={voice ? voiceDisplayName(voice) : "This device's voice"}
+          onPress={() => setSheet("voice")}
+          testID="settings-voice"
+        />
+        <ControlRow label="Speed">
+          <Segmented
+            options={RATE_OPTIONS}
+            value={profile.rate.toFixed(1)}
+            onChange={(v) => save({ rate: Number(v) as NarrationRate })}
+            testID="settings-rate"
+            accessibilityLabel="Narration speed"
+          />
+        </ControlRow>
+        <ControlRow label="Text size">
+          <Segmented options={TEXT_SIZES} value={profile.textSize} onChange={(textSize) => save({ textSize })} testID="settings-textsize" accessibilityLabel="Chapter text size" />
+          <T variant="reading" size={profile.textSize} tone="secondary" testID="settings-textsize-preview">
+            The studio lights are still on when you lock the door.
+          </T>
+        </ControlRow>
+        <ControlRow label="Soundscape" detail={plusActions.isPlus ? "Plays softly under every chapter." : "Night plays under every chapter, free. Plus adds three more."}>
+          <BedPicker
+            value={bed}
+            isPlus={plusActions.isPlus}
+            onChange={(next: BedId) => save({ bed: next, bedOn: true })}
+            onLocked={() => router.push({ pathname: "/paywall", params: { from: "bed" } })}
+          />
+        </ControlRow>
+      </SettingsGroup>
 
-        <Text style={s.section}>Reminders</Text>
-        <View style={s.card}>
-          <TouchableOpacity
-            style={s.plusRow}
-            onPress={() =>
-              void (async () => {
-                // The v2 queue reads remindersEnabled; the 1.0 dailies only
-                // cover a user who has no weaving dream yet.
-                await updateProfile({ remindersEnabled: true });
-                const { remindersFor, applyReminders } = await import(
-                  "@/lib/notifications"
-                );
-                const ok = await applyReminders(
-                  remindersFor(profile?.ritual ?? "both")
-                );
-                Alert.alert(
-                  ok ? "Reminders set" : "Reminders unavailable",
-                  ok
-                    ? "Vela will nudge you gently at your ritual time."
-                    : "Notifications are off for Vela in system settings, or unavailable here."
-                );
-              })()
-            }
-            testID="settings-reminders-on"
-          >
-            <Text style={s.plusText}>Remind me at my ritual time</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[s.plusRow, s.plusRowBorder]}
-            onPress={() =>
-              void (async () => {
-                await updateProfile({ remindersEnabled: false });
-                const { clearReminders } = await import("@/lib/notifications");
-                await clearReminders();
-                Alert.alert("Reminders off", "No more nudges until you ask.");
-              })()
-            }
-            testID="settings-reminders-off"
-          >
-            <Text style={s.restoreText}>Turn reminders off</Text>
-          </TouchableOpacity>
-        </View>
+      {/* ---------------------------------------------- Lock Screen privacy */}
+      <SettingsGroup title="Lock Screen privacy" testID="settings-privacy-group">
+        <SwitchRow
+          label="Keep my words off the Lock Screen"
+          detail={
+            profile.lockScreenPrivate
+              ? "Reminders use calm, neutral words. Your dream and proofs stay inside the app."
+              : "Reminders may quote your dream and your proofs."
+          }
+          value={profile.lockScreenPrivate}
+          onValueChange={(on) => save({ lockScreenPrivate: on })}
+          switchTestID="settings-lockscreen-private"
+        />
+      </SettingsGroup>
 
-        <Text style={s.section}>Vela Plus</Text>
-        <View style={s.card}>
-          {isPlus ? (
-            <View style={s.plusRow}>
-              <Sparkles size={18} color={colors.accent} />
-              <Text style={s.plusText}>Plus is active on this device.</Text>
-            </View>
-          ) : (
-            <TouchableOpacity
-              style={s.plusRow}
-              onPress={() => router.push("/paywall")}
-              testID="settings-upgrade"
-            >
-              <Sparkles size={18} color={colors.accent} />
-              <Text style={s.plusText}>Unlock Vela Plus</Text>
-            </TouchableOpacity>
-          )}
-          <TouchableOpacity
-            style={[s.plusRow, s.plusRowBorder]}
-            onPress={() => void runRestore()}
-            testID="settings-restore"
-          >
-            <RotateCcw size={18} color={colors.textMuted} />
-            <Text style={s.restoreText}>Restore purchases</Text>
-          </TouchableOpacity>
-        </View>
+      {/* ------------------------------------------------------ Your data */}
+      <SettingsGroup
+        title="Your data"
+        caption="A backup is a file you keep. Vela has no servers, so this is how your sky moves to a new phone."
+        testID="settings-data"
+      >
+        <SettingsRow
+          label="Export a backup"
+          detail="Every dream, chapter, proof and page."
+          onPress={() => void data.exportBackup()}
+          loading={data.busy === "export"}
+          testID="settings-export"
+        />
+        <SettingsRow
+          label="Import a backup"
+          detail="Merge it with this device, or replace what's here."
+          onPress={() => void data.importBackup()}
+          loading={data.busy === "import" || data.busy === "apply"}
+          testID="settings-import"
+        />
+      </SettingsGroup>
 
-        <Text style={s.section}>About</Text>
-        <View style={s.card}>
-          <Text style={s.aboutLine}>
-            Vela {Constants.expoConfig?.version ?? ""}
-          </Text>
-          <Text style={s.aboutBody}>
-            Everything you write and manifest stays on this device. No account,
-            no tracking, no servers.
-          </Text>
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+      {/* ------------------------------------------------------ Vela Plus */}
+      <SettingsGroup title="Vela Plus" testID="settings-plus">
+        {plusActions.isPlus ? (
+          <SettingsRow
+            icon={<VelaMark size={28} color={colors.ink80} />}
+            label="Plus is on"
+            detail="Thank you. Every dream can weave at once."
+            onPress={() => router.push("/paywall")}
+            testID="settings-plus-status"
+          />
+        ) : (
+          <SettingsRow
+            icon={<VelaMark size={28} color={colors.ink80} />}
+            label="Vela Plus"
+            detail="Room for more than one dream, every soundscape and area, unlimited Scenes."
+            onPress={() => router.push("/paywall")}
+            testID="settings-upgrade"
+          />
+        )}
+        {plusActions.isPlus && Platform.OS === "ios" ? (
+          <SettingsRow label="Manage subscription" onPress={() => void Linking.openURL(LEGAL_URLS.manageSubscriptions)} testID="settings-manage" />
+        ) : null}
+        <SettingsRow
+          label="Restore purchases"
+          onPress={() => void plusActions.restore()}
+          loading={plusActions.busy === "restore"}
+          testID="settings-restore"
+        />
+      </SettingsGroup>
+
+      {/* ---------------------------------------------------------- About */}
+      <AboutPanel version={version} />
+      <View style={styles.end} />
+
+      {/* --------------------------------------------------------- sheets */}
+      <ProfileSheet
+        visible={sheet === "name" || sheet === "pronunciation"}
+        focus={sheet === "pronunciation" ? "pronunciation" : "name"}
+        name={profile.name}
+        pronunciation={profile.pronunciation}
+        onClose={close}
+        onSave={(next) => {
+          save(next);
+          close();
+          toast.show({ message: "Saved. The next chapter will use it.", tone: "proof" });
+        }}
+      />
+      {(["morning", "evening"] as const).map((slot) => (
+        <TimeSheet
+          key={slot}
+          visible={sheet === slot}
+          slot={slot}
+          value={profile.ritualTimes[slot]}
+          onClose={close}
+          onSave={(value: HHmm) => {
+            save({ ritualTimes: { ...profile.ritualTimes, [slot]: value } });
+            close();
+            toast.show({ message: `${SLOT_LABEL[slot]} chapter at ${formatClock(value)}.`, tone: "proof" });
+          }}
+        />
+      ))}
+      <VoiceSheet
+        visible={sheet === "voice"}
+        voices={narration.voices}
+        selectedId={voice?.identifier ?? null}
+        onClose={close}
+        onPick={(voiceId) => save({ voiceId })}
+      />
+      <PauseSheet
+        visible={sheet === "pause"}
+        options={options}
+        onClose={close}
+        onPick={(o) => {
+          progress.pauseUntil(o.until);
+          close();
+          toast.show({ message: `Paused. ${resumesLabel(o.until)}.`, tone: "proof" });
+        }}
+      />
+      <ImportSheet
+        visible={data.pending !== null}
+        plan={data.pending?.plan ?? null}
+        exportedOn={data.pending?.exportedOn ?? null}
+        busy={data.busy === "apply"}
+        onClose={data.dismiss}
+        onChoose={(mode) => void data.choose(mode)}
+      />
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: space.base,
-    paddingVertical: space.sm,
-  },
-  back: {
-    width: 44,
-    height: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    ...type.title,
-    color: colors.text,
-    flex: 1,
-    textAlign: "center",
-  },
-  content: { padding: space.lg, paddingBottom: space.xxl },
-  section: {
-    ...type.caption,
-    color: colors.textMuted,
-    textTransform: "uppercase",
-    letterSpacing: 1.2,
-    marginBottom: space.md,
-    marginTop: space.lg,
-  },
-  chips: { flexDirection: "row", flexWrap: "wrap", gap: space.sm },
-  chip: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    backgroundColor: colors.card,
-    paddingVertical: space.sm,
-    paddingHorizontal: space.base,
-  },
-  chipOn: {
-    borderColor: colors.accentBorder,
-    backgroundColor: colors.accentSoft,
-  },
-  chipText: { ...type.caption, color: colors.textSecondary },
-  chipTextOn: { color: colors.accent, fontWeight: "600" },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-  },
-  plusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: space.md,
-    paddingVertical: space.md,
-    minHeight: 44,
-  },
-  plusRowBorder: { borderTopWidth: 1, borderTopColor: colors.hairline },
-  plusText: { ...type.body, fontWeight: "600", color: colors.text },
-  restoreText: { ...type.body, color: colors.textSecondary },
-  aboutLine: { ...type.body, fontWeight: "600", color: colors.text },
-  aboutBody: { ...type.caption, color: colors.textMuted, marginTop: space.xs },
+const styles = StyleSheet.create({
+  end: { height: space.xl },
 });

@@ -12,6 +12,7 @@ import {
   type NotificationTemplate,
   type Token,
 } from "@/lib/story/content/types";
+import { doublesWriteVerb } from "@/lib/story/weave";
 import { NOTIFICATION_LIMITS } from "./types";
 
 export type TokenValues = Readonly<Partial<Record<Token, string>>>;
@@ -69,8 +70,11 @@ export function pickTemplate(
   neutralOnly: boolean
 ): PickedTemplate | null {
   const eligible: { template: NotificationTemplate; copy: FilledCopy }[] = [];
+  const quote = values["{proof.quote}"] ?? "";
   for (const template of pool) {
     if (neutralOnly && !isNeutral(template)) continue;
+    // 'You wrote “Wrote to Mum…”' doubles the verb: skip the frame for such a proof.
+    if (quote && (doublesWriteVerb(template.title, quote) || doublesWriteVerb(template.body, quote))) continue;
     const copy = fillTemplate(template, values);
     if (copy) eligible.push({ template, copy });
   }

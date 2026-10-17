@@ -1,305 +1,183 @@
-// Vela Plus. The framing is the strategy: what's free stays generous and is
-// said out loud — the market's paywall-slam is the thing we're not.
-import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-  Linking,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { safeBack } from "@/lib/nav";
-import * as Haptics from "expo-haptics";
-import { X, Check, Sparkles, Infinity as InfinityIcon } from "lucide-react-native";
+// Vela Plus, the honest version (ELEVATE §0.12). The screen opens on the
+// user's OWN sky, with ghost constellations for dreams not yet begun, then
+// says what stays free forever BEFORE what Plus adds. Plans are plain plates
+// with StoreKit's billed price; the yearly per-month figure is computed with
+// Intl and set smaller than what is charged. No weekly plans, credits or trial.
+//
+// `?from=` sets the header: second-dream · bed · area · scenes · nudge
+// (and 'reader', 'lapsed'). Once Plus is on (a Plus member, a purchase, a
+// restore) the same screen becomes the thank-you state: the ghosts' anchors
+// light and the one gold button leads on.
+//
+// testIDs kept from 1.0: paywall-close, paywall-free-promise, plan-*,
+// paywall-buy, paywall-restore, paywall-terms, paywall-privacy.
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { X } from "lucide-react-native";
+import { useArc } from "@/contexts/ArcContext";
 import { usePlus } from "@/contexts/PlusContext";
 import type { PlanId } from "@/lib/purchase";
+import { safeBack } from "@/lib/nav";
+import { Dock, Header, IconButton, PrimaryButton, Screen, T, haptics, useToast } from "@/components/ui";
+import { AreaSign } from "@/components/glyphs";
 import {
-  colors,
-  space,
-  radius,
-  type,
-  serif,
-  accentGlow,
-} from "@/constants/theme";
-
-const BENEFITS = [
-  "Unlimited living stories — one for every dream",
-  "Every affirmation pack, all six areas",
-  "Unlimited vision board cards",
-  "All journal templates, forever",
-] as const;
-
-const PLANS: { id: PlanId; label: string; note?: string }[] = [
-  { id: "yearly", label: "Yearly", note: "best value" },
-  { id: "monthly", label: "Monthly" },
-  { id: "lifetime", label: "Lifetime", note: "one payment" },
-];
+  BenefitList,
+  DEMO_PRICES,
+  FreeForeverPanel,
+  LegalFooter,
+  PLAN_ORDER,
+  PLUS_ON_COPY,
+  PlanPlates,
+  PlusSky,
+  buyLabel,
+  demoPricesRequested,
+  orderedBenefits,
+  paywallCopy,
+  paywallSource,
+  planPrice,
+  readPlanAmounts,
+  usePlusActions,
+  usePlusSky,
+  yearlyIsBetterValue,
+  type PlanPrice,
+} from "@/components/feature/plus";
+import { colors, space } from "@/constants/theme";
 
 export default function PaywallScreen() {
   const router = useRouter();
-  const { purchase, restore, prices } = usePlus();
+  const params = useLocalSearchParams<{ from?: string | string[] }>();
+  const source = paywallSource(params.from);
+  const plus = usePlus();
+  const arc = useArc();
+  const toast = useToast();
+  const actions = usePlusActions();
+  const sky = usePlusSky();
+  const win = useWindowDimensions();
   const [plan, setPlan] = useState<PlanId>("yearly");
-  const [busy, setBusy] = useState(false);
 
-  const run = async (fn: () => Promise<string>, failMessage: string) => {
-    if (busy) return;
-    setBusy(true);
-    try {
-      const result = await fn();
-      if (result === "purchased") {
-        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        safeBack(router);
-      } else if (result === "unavailable") {
-        Alert.alert(
-          "Not available yet",
-          "Purchases unlock with the App Store release. Until then, everything free stays fully usable."
-        );
-      } else if (result === "failed") {
-        Alert.alert("That didn't go through", failMessage);
-      }
-      // "cancelled" is a normal choice: no alert.
-    } finally {
-      setBusy(false);
+  // Prices: StoreKit's display strings and numeric amounts; null on web.
+  const demo = useMemo(demoPricesRequested, []);
+  const display = demo ? DEMO_PRICES.display : plus.prices;
+  const amounts = useMemo(() => (demo ? DEMO_PRICES.amounts : readPlanAmounts(plus)), [demo, plus]);
+  const prices = useMemo(() => {
+    const out = {} as Record<PlanId, PlanPrice | null>;
+    for (const p of PLAN_ORDER) out[p] = planPrice(p, display[p], amounts[p]);
+    return out;
+  }, [display, amounts]);
+
+  // The peak: Plus turns on while this screen is open (purchase or restore).
+  const wasPlus = useRef(plus.isPlus);
+  const [justJoined, setJustJoined] = useState(false);
+  useEffect(() => {
+    if (!wasPlus.current && plus.isPlus) {
+      setJustJoined(true);
+      haptics.success();
+      toast.show({ message: "Welcome to Vela Plus.", tone: "proof" });
     }
-  };
+    wasPlus.current = plus.isPlus;
+  }, [plus.isPlus, toast]);
+
+  const isPlus = plus.isPlus;
+  const copy = isPlus ? { ...PLUS_ON_COPY, featured: null } : paywallCopy(source, { area: sky.area, stars: sky.stars });
+  const benefits = orderedBenefits(copy.featured);
+  const heroHeight = Math.round(Math.max(152, Math.min(224, win.height * 0.24)));
+  const close = () => safeBack(router);
+  const secondDream = isPlus && source === "second-dream" && arc.canCreateDream;
+
+  const dock = (
+    <Dock>
+      {isPlus ? (
+        secondDream ? (
+          <PrimaryButton label="Begin a new dream" onPress={() => router.dismissTo("/story/new")} testID="paywall-begin-dream" />
+        ) : (
+          <PrimaryButton label={justJoined ? "Back to your sky" : "Done"} onPress={close} testID="paywall-done" />
+        )
+      ) : (
+        <PrimaryButton
+          label={buyLabel(plan, prices[plan])}
+          loading={actions.busy === "buy" || actions.awaitingGrant}
+          disabled={actions.busy === "restore"}
+          onPress={() => void actions.buy(plan)}
+          testID="paywall-buy"
+          accessibilityHint={prices[plan] ? undefined : "The App Store shows the price before you confirm"}
+        />
+      )}
+    </Dock>
+  );
 
   return (
-    <SafeAreaView style={s.screen}>
-      <ScrollView contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-        <TouchableOpacity
-          style={s.close}
-          onPress={() => safeBack(router)}
-          testID="paywall-close"
-          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-        >
-          <X size={22} color={colors.textMuted} />
-        </TouchableOpacity>
-
-        <View style={s.badge}>
-          <Sparkles size={26} color={colors.accent} />
-        </View>
-        <Text style={s.h1}>Vela Plus</Text>
-        <Text style={s.lead}>
-          Room for every dream you're holding — not just the first one.
-        </Text>
-
-        <View style={s.freeCard} testID="paywall-free-promise">
-          <InfinityIcon size={16} color={colors.success} />
-          <Text style={s.freeText}>
-            Your story, unlimited listens, the daily ritual and journal stay
-            free. Forever. That's a promise, not a trial.
-          </Text>
-        </View>
-
-        <View style={s.card}>
-          {BENEFITS.map((b) => (
-            <View key={b} style={s.benefit}>
-              <Check size={15} color={colors.accent} />
-              <Text style={s.benefitText}>{b}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={s.plans}>
-          {PLANS.map(({ id, label, note }) => {
-            const on = plan === id;
-            const price = prices[id];
-            return (
-              <TouchableOpacity
-                key={id}
-                style={[s.plan, on && s.planOn]}
-                onPress={() => {
-                  void Haptics.selectionAsync();
-                  setPlan(id);
-                }}
-                activeOpacity={0.85}
-                testID={`plan-${id}`}
-              >
-                <Text style={[s.planLabel, on && s.planLabelOn]}>{label}</Text>
-                {price ? (
-                  <Text style={[s.planPrice, on && s.planLabelOn]}>{price}</Text>
-                ) : null}
-                {note ? <Text style={s.planNote}>{note}</Text> : null}
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-
-        <Text style={s.renewalText}>
-          Monthly and yearly plans renew automatically unless cancelled at
-          least 24 hours before the current period ends. Payment is charged to
-          your Apple Account. Lifetime is a one-time purchase.
-        </Text>
-        <View style={s.legalLinks}>
-          <TouchableOpacity
-            onPress={() =>
-              void Linking.openURL(
-                "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
-              )
-            }
-            testID="paywall-terms"
-            style={s.legalTap}
-          >
-            <Text style={s.legalText}>Terms of Use</Text>
-          </TouchableOpacity>
-          <Text style={s.legalDot}>•</Text>
-          <TouchableOpacity
-            onPress={() => void Linking.openURL("https://dhaxor.github.io/vela/privacy")}
-            testID="paywall-privacy"
-            style={s.legalTap}
-          >
-            <Text style={s.legalText}>Privacy Policy</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-
-      <View style={s.dock}>
-        <TouchableOpacity
-          style={s.cta}
-          activeOpacity={0.85}
-          testID="paywall-buy"
-          onPress={() =>
-            void run(() => purchase(plan), "The purchase could not be completed.")
+    <Screen
+      testID="paywall"
+      focus={sky.focus}
+      header={
+        <Header
+          title="Vela Plus"
+          back={false}
+          testID="paywall-header"
+          right={
+            <IconButton accessibilityLabel="Close" onPress={close} testID="paywall-close">
+              <X color={colors.ink80} size={22} strokeWidth={1.75} />
+            </IconButton>
           }
-        >
-          <Text style={s.ctaText}>
-            {prices[plan] ? `Unlock Plus · ${prices[plan]}` : "Unlock Plus"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() =>
-            void run(restore, "No previous purchase was found for this Apple Account.")
-          }
-          testID="paywall-restore"
-          style={s.restore}
-        >
-          <Text style={s.restoreText}>Restore purchases</Text>
-        </TouchableOpacity>
+        />
+      }
+      dock={dock}
+    >
+      <PlusSky dreams={sky.dreams} ghosts={sky.ghosts} open={isPlus} width={win.width} height={heroHeight} accessibilityLabel={sky.accessibilityLabel} />
+
+      <View style={styles.intro}>
+        {sky.stats && sky.focus ? (
+          <View style={styles.stats} testID="paywall-stats">
+            <AreaSign focus={sky.focus} size={14} color={colors.ink64} strokeWidth={1.4} />
+            <T variant="eyebrow" tone="muted" numeric numberOfLines={1} style={styles.flex}>
+              {sky.stats}
+            </T>
+          </View>
+        ) : null}
+        <T variant="display" accessibilityRole="header" testID="paywall-title">
+          {copy.title}
+        </T>
+        <T variant="body" tone="secondary" testID="paywall-lead">
+          {copy.lead}
+        </T>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.section}>
+        <FreeForeverPanel title={isPlus ? "Still free, forever" : "Free forever"} />
+      </View>
+
+      <View style={styles.section}>
+        <T variant="eyebrow" style={styles.eyebrow}>
+          {isPlus ? "Yours with Plus" : "What Plus adds"}
+        </T>
+        <BenefitList benefits={benefits} featured={copy.featured} owned={isPlus} />
+      </View>
+
+      {!isPlus ? (
+        <View style={styles.section} testID="paywall-plans">
+          <T variant="eyebrow" style={styles.eyebrow}>
+            Choose your plan
+          </T>
+          <PlanPlates value={plan} onChange={setPlan} prices={prices} yearlyBestValue={yearlyIsBetterValue(amounts)} disabled={actions.busy !== null} />
+        </View>
+      ) : null}
+
+      <View style={styles.section}>
+        <LegalFooter
+          onRestore={isPlus ? null : () => void actions.restore()}
+          restoring={actions.busy === "restore"}
+          showManage={isPlus && Platform.OS === "ios"}
+        />
+      </View>
+    </Screen>
   );
 }
 
-const s = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg },
-  content: { paddingHorizontal: space.lg, paddingBottom: 180 },
-  close: {
-    alignSelf: "flex-end",
-    width: 44,
-    height: 44,
-    borderRadius: radius.pill,
-    backgroundColor: colors.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: space.sm,
-  },
-  badge: {
-    width: 64,
-    height: 64,
-    borderRadius: radius.pill,
-    backgroundColor: colors.accentSoft,
-    borderWidth: 1,
-    borderColor: colors.accentBorder,
-    alignItems: "center",
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  h1: {
-    fontFamily: serif,
-    fontSize: 32,
-    lineHeight: 40,
-    color: colors.text,
-    textAlign: "center",
-    marginTop: space.base,
-  },
-  lead: {
-    ...type.body,
-    color: colors.textSecondary,
-    textAlign: "center",
-    marginTop: space.sm,
-    marginBottom: space.lg,
-  },
-  freeCard: {
-    flexDirection: "row",
-    gap: space.sm,
-    alignItems: "flex-start",
-    backgroundColor: colors.successSoft,
-    borderRadius: radius.lg,
-    padding: space.base,
-    marginBottom: space.md,
-  },
-  freeText: { ...type.caption, color: colors.success, flex: 1, lineHeight: 19 },
-  card: {
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-    marginBottom: space.lg,
-    gap: space.md,
-  },
-  benefit: { flexDirection: "row", alignItems: "center", gap: space.sm },
-  benefitText: { ...type.body, color: colors.textSecondary, flex: 1 },
-  plans: { flexDirection: "row", gap: space.sm },
-  plan: {
-    flex: 1,
-    backgroundColor: colors.card,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors.hairline,
-    padding: space.base,
-    alignItems: "center",
-    minHeight: 84,
-  },
-  planOn: { borderColor: colors.accentBorder, backgroundColor: colors.accentSoft },
-  planLabel: { ...type.body, fontWeight: "600", color: colors.textSecondary },
-  planLabelOn: { color: colors.accent },
-  planPrice: { ...type.caption, color: colors.textMuted, marginTop: space.xs },
-  planNote: {
-    ...type.caption,
-    color: colors.success,
-    marginTop: space.xs,
-    fontWeight: "600",
-  },
-  renewalText: {
-    ...type.caption,
-    color: colors.textMuted,
-    textAlign: "center",
-    lineHeight: 19,
-    marginTop: space.lg,
-  },
-  legalLinks: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: space.sm,
-    marginTop: space.sm,
-  },
-  legalTap: {
-    minHeight: 44,
-    justifyContent: "center",
-    paddingHorizontal: space.xs,
-  },
-  legalText: { ...type.caption, color: colors.accent },
-  legalDot: { ...type.caption, color: colors.textFaint },
-  dock: {
-    position: "absolute",
-    left: space.lg,
-    right: space.lg,
-    bottom: space.lg,
-  },
-  cta: {
-    backgroundColor: colors.accent,
-    borderRadius: radius.pill,
-    paddingVertical: space.base,
-    alignItems: "center",
-    ...accentGlow,
-  },
-  ctaText: { ...type.body, fontWeight: "600", color: colors.onAccent },
-  restore: { alignItems: "center", marginTop: space.md, minHeight: 44, justifyContent: "center" },
-  restoreText: { ...type.caption, color: colors.textMuted },
+const styles = StyleSheet.create({
+  intro: { gap: space.sm },
+  stats: { flexDirection: "row", alignItems: "center", gap: space.sm, marginBottom: space.xs },
+  flex: { flexShrink: 1 },
+  section: { marginTop: space.xl },
+  eyebrow: { marginBottom: space.base },
 });

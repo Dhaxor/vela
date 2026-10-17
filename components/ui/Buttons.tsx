@@ -183,7 +183,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "stretch",
   },
-  filledOff: { backgroundColor: colors.vellumRaised, borderWidth: 1, borderColor: colors.hairline },
+  // Opaque, so content scrolling under a Dock never shows through a disabled CTA.
+  filledOff: { backgroundColor: colors.sky700, borderWidth: 1, borderColor: colors.hairline },
   highlight: {
     position: "absolute",
     top: 0,

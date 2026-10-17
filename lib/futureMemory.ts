@@ -58,9 +58,19 @@ function bridgeValues(desire: string, motif: MotifArchetype | undefined): TokenV
   };
 }
 
-/** Final bridge text: tokens filled, sentence case, one closing period. */
-export function bridgeText(entry: Pick<BridgeEntry, "text">, desire: string, motifIds: readonly MotifId[], motifs: readonly MotifArchetype[] = MOTIFS): string {
-  const filled = fillTemplate(entry.text, bridgeValues(desire, primaryMotif(motifIds, motifs))).text;
+/**
+ * Final bridge text: tokens filled, sentence case, one closing period. A
+ * motif-tagged entry names ITS motif's place, so a dream that matched two
+ * motifs never gets the other one's room.
+ */
+export function bridgeText(
+  entry: Pick<BridgeEntry, "text"> & Partial<Pick<BridgeEntry, "motif">>,
+  desire: string,
+  motifIds: readonly MotifId[],
+  motifs: readonly MotifArchetype[] = MOTIFS
+): string {
+  const own = entry.motif && motifs.some((m) => m.id === entry.motif) ? [entry.motif] : motifIds;
+  const filled = fillTemplate(entry.text, bridgeValues(desire, primaryMotif(own, motifs))).text;
   return `${capitalize(stripTrailingPunct(collapse(filled)))}.`;
 }
 

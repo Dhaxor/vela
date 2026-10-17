@@ -90,6 +90,20 @@ export function displayablePrice(
   return trimmed.length > 0 ? trimmed : null;
 }
 
+/** A StoreKit price as numbers (for the per-month figure), or null when the store didn't give both. */
+export interface NumericPrice {
+  amount: number;
+  currency: string;
+}
+
+export function numericPrice(product: { price?: unknown; currency?: unknown } | undefined | null): NumericPrice | null {
+  const amount = product?.price;
+  const currency = product?.currency;
+  if (typeof amount !== "number" || !Number.isFinite(amount) || amount <= 0) return null;
+  if (typeof currency !== "string" || !/^[A-Za-z]{3}$/.test(currency.trim())) return null;
+  return { amount, currency: currency.trim().toUpperCase() };
+}
+
 // ------------------------------------------------------- free-tier rules
 //
 // Free forever: one dream at a time with the whole loop (chapters, bridges,
