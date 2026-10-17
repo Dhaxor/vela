@@ -36,6 +36,7 @@ import {
   paywallCopy,
   paywallSource,
   planPrice,
+  pricesMissing,
   readPlanAmounts,
   usePlusActions,
   usePlusSky,
@@ -58,6 +59,13 @@ export default function PaywallScreen() {
 
   // Prices: StoreKit's display strings and numeric amounts; null on web.
   const demo = useMemo(demoPricesRequested, []);
+  // An offline launch leaves prices null: ask StoreKit again as the paywall opens.
+  const { prices: storePrices, reloadPrices } = plus;
+  useEffect(() => {
+    if (!demo && pricesMissing(storePrices)) reloadPrices();
+    // On mount only: PlusContext keeps retrying (foreground, short backoff) after that.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const display = demo ? DEMO_PRICES.display : plus.prices;
   const amounts = useMemo(() => (demo ? DEMO_PRICES.amounts : readPlanAmounts(plus)), [demo, plus]);
   const prices = useMemo(() => {

@@ -58,8 +58,40 @@ export function isCancellation(error: unknown): boolean {
   return /cancel|abgebrochen|abbruch|annull/.test(msg);
 }
 
+/**
+ * expo-iap (OpenIAP) ErrorCode values that mean the App Store was not reached,
+ * so nothing was decided: network-error, service-error, service-timeout,
+ * service-disconnected, connection-closed, init-connection, remote-error,
+ * sync-error, not-prepared. Older 'E_NETWORK_ERROR' spellings match too.
+ */
+const UNREACHABLE_CODES: ReadonlySet<string> = new Set([
+  "network-error",
+  "service-error",
+  "service-timeout",
+  "service-disconnected",
+  "connection-closed",
+  "init-connection",
+  "remote-error",
+  "sync-error",
+  "not-prepared",
+]);
+
+/** Did the purchase fail because the App Store could not be reached (not because it said no)? */
+export function isStoreUnreachable(error: unknown): boolean {
+  if (!error) return false;
+  const e = error as { code?: string | number; message?: string };
+  if (typeof e.code === "string") {
+    const code = e.code.toLowerCase().replace(/_/g, "-").replace(/^e-/, "");
+    if (UNREACHABLE_CODES.has(code)) return true;
+  }
+  const msg = String(e.message ?? "").toLowerCase();
+  return /network|offline|not connected to the internet|timed out/.test(msg);
+}
+
+/** cancelled (a normal choice) · error (the App Store was not reached) · failed (it answered no). */
 export function classifyPurchaseError(error: unknown): PurchaseResult {
-  return isCancellation(error) ? "cancelled" : "failed";
+  if (isCancellation(error)) return "cancelled";
+  return isStoreUnreachable(error) ? "error" : "failed";
 }
 
 /**
@@ -94,6 +126,25 @@ export function ownsPlus(
     if (!id || !skus.has(id)) return false;
     return !revoked(p);
   });
+}
+
+/**
+ * What a restore decided. `syncError` is what the App Store sync threw (null
+ * when it answered). Only an answered sync that finds no Plus is the genuine
+ * none ('failed', entitlement off). When the sync could not reach the App
+ * Store, local entitlements alone cannot prove a none: 'error' (or
+ * 'cancelled' when the person dismissed the Apple Account sign-in), and the
+ * entitlement stays as it is (null). Plus found locally still restores.
+ */
+export function restoreOutcome(
+  owned: readonly OwnedPurchase[] | null | undefined,
+  syncError: unknown
+): { result: PurchaseResult; entitlement: boolean | null } {
+  if (ownsPlus(owned)) return { result: "purchased", entitlement: true };
+  if (syncError !== null && syncError !== undefined) {
+    return { result: isCancellation(syncError) ? "cancelled" : "error", entitlement: null };
+  }
+  return { result: "failed", entitlement: false };
 }
 
 /** Show a price only when the store handed us a real, non-empty string. */

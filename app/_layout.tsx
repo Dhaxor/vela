@@ -19,10 +19,12 @@ import { setAudioSession } from "@/lib/audio";
 import { skySeed } from "@/lib/sky/starfield";
 import { SkyProvider } from "@/components/sky";
 import { UIProvider } from "@/components/ui";
+import { StorageErrorScreen, launchPhase } from "@/components/feature/startup";
 import { colors, fonts } from "@/constants/theme";
 
 // Hold the native splash until the fonts and every store have answered: a
 // flash of Times, or of the wrong route, is worse than a beat of night sky.
+// A store that could not be read comes down to StorageErrorScreen instead.
 SplashScreen.preventAutoHideAsync().catch(() => {});
 
 /** Keys are the family names <T> and TextField use (constants/theme fonts). */
@@ -59,16 +61,26 @@ function RootNavigator() {
   const progress = useProgress();
   const journal = useJournal();
   const scenes = useScenes();
-  const ready = user.ready && arc.ready && progress.ready && journal.ready && scenes.ready;
+  // A store whose launch read failed keeps retrying and stays not ready; the
+  // root then shows a calm screen instead of holding the splash forever.
+  const phase = launchPhase([user, arc, progress, journal, scenes]);
+  const ready = phase === "ready";
   const profile = user.profile;
 
   // Cold-start notification taps route only once every store is ready and the tabs exist.
   useNotificationRouting(ready && !!profile);
 
   useEffect(() => {
-    if (ready) SplashScreen.hideAsync().catch(() => {});
-  }, [ready]);
+    if (phase !== "loading") SplashScreen.hideAsync().catch(() => {});
+  }, [phase]);
 
+  if (phase === "storage-error") {
+    return (
+      <SkyProvider seed={skySeed(profile?.createdAt, profile?.name)} focus={profile?.focusAreas[0] ?? null}>
+        <StorageErrorScreen />
+      </SkyProvider>
+    );
+  }
   if (!ready) return null;
 
   return (

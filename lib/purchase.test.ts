@@ -12,7 +12,9 @@ import {
   FREE_BOARD_CARDS,
   FREE_INTENTS,
   isCancellation,
+  isStoreUnreachable,
   ownsPlus,
+  restoreOutcome,
   PLUS_SKUS,
   SUBSCRIPTION_SKUS,
   numericPrice,
@@ -47,6 +49,41 @@ describe("isCancellation", () => {
   test("classify maps accordingly", () => {
     expect(classifyPurchaseError({ userCancelled: true })).toBe("cancelled");
     expect(classifyPurchaseError(new Error("boom"))).toBe("failed");
+  });
+  test("an App Store that could not be reached is 'error', never 'failed'", () => {
+    for (const code of ["network-error", "service-timeout", "init-connection", "connection-closed", "E_NETWORK_ERROR", "E_SERVICE_ERROR"]) {
+      expect(isStoreUnreachable({ code })).toBe(true);
+      expect(classifyPurchaseError({ code })).toBe("error");
+    }
+    expect(classifyPurchaseError(new Error("The Internet connection appears to be offline."))).toBe("error");
+    expect(classifyPurchaseError(new Error("Network unavailable"))).toBe("error");
+  });
+  test("an answer from the App Store stays 'failed'", () => {
+    for (const code of ["purchase-error", "item-unavailable", "sku-not-found", "unknown", "E_UNKNOWN"]) {
+      expect(isStoreUnreachable({ code })).toBe(false);
+      expect(classifyPurchaseError({ code })).toBe("failed");
+    }
+    expect(isStoreUnreachable(null)).toBe(false);
+    // A cancel wins over everything.
+    expect(classifyPurchaseError({ code: "user-cancelled", message: "network" })).toBe("cancelled");
+  });
+});
+
+describe("restoreOutcome", () => {
+  test("Plus found restores, whether or not the sync answered", () => {
+    expect(restoreOutcome([{ productId: PLUS_SKUS.yearly }], null)).toEqual({ result: "purchased", entitlement: true });
+    expect(restoreOutcome([{ productId: PLUS_SKUS.lifetime }], new Error("offline"))).toEqual({ result: "purchased", entitlement: true });
+  });
+  test("the genuine none: the App Store answered and there is no Plus", () => {
+    expect(restoreOutcome([], null)).toEqual({ result: "failed", entitlement: false });
+    expect(restoreOutcome([{ productId: PLUS_SKUS.monthly, revocationDateIOS: 1 }], null)).toEqual({ result: "failed", entitlement: false });
+  });
+  test("a sync that never reached the App Store proves nothing: 'error', entitlement untouched", () => {
+    expect(restoreOutcome([], new Error("The Internet connection appears to be offline."))).toEqual({ result: "error", entitlement: null });
+    expect(restoreOutcome(null, { code: "sync-error" })).toEqual({ result: "error", entitlement: null });
+  });
+  test("a dismissed Apple Account sign-in is a cancel", () => {
+    expect(restoreOutcome([], { code: "user-cancelled" })).toEqual({ result: "cancelled", entitlement: null });
   });
 });
 

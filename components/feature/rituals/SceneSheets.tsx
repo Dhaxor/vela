@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
 import { ImagePlus, PenLine } from "@/components/glyphs/icons";
-import { ChipGroup, DangerButton, GhostButton, PrimaryButton, SecondaryButton, Sheet, T, TextField } from "@/components/ui";
+import { ChipGroup, DangerButton, GhostButton, PrimaryButton, SecondaryButton, Sheet, StoredPhoto, T, TextField } from "@/components/ui";
 import { StarProof } from "@/components/glyphs";
 import type { Dream, Proof } from "@/contexts/arc.types";
 import { colors, radius, space } from "@/constants/theme";
@@ -201,7 +201,7 @@ export function SceneSheet({ card, proof, dreams, onClose, onSave, onRemove }: S
     >
       {card?.kind === "photo" ? (
         <View>
-          <Image source={{ uri: card.uri }} style={[styles.preview, { height: previewH }]} resizeMode="cover" accessibilityIgnoresInvertColors />
+          <StoredPhoto uri={card.uri} style={[styles.preview, { height: previewH }]} resizeMode="cover" accessibilityIgnoresInvertColors testID="scene-photo" />
           {proof ? (
             <View style={styles.proof} testID="scene-proof">
               <StarProof kind={proof.kind} size={16} />

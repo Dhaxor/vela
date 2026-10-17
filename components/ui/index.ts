@@ -25,6 +25,9 @@ export {
 export { Press, type PressProps } from "./Press";
 export { VellumCard, CheckBadge, type VellumCardProps, type CardPadding } from "./VellumCard";
 export { GildedPlate, type GildedPlateProps } from "./GildedPlate";
+export { StoredPhoto, type StoredPhotoProps } from "./StoredPhoto";
+export { MISSING_PHOTO_COPY, missingPhotoLayout, type MissingPhotoLayout } from "./storedPhotoLayout";
+export { TAB_BAR_PARTS, TAB_LABEL_MAX_SCALE, tabBarHeight, tabLabelLineHeight } from "./tabBar";
 export {
   Chip,
   ChipGroup,

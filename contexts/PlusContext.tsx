@@ -34,6 +34,7 @@ import {
   PlanId,
   PLUS_SKUS,
   PurchaseResult,
+  restoreOutcome,
   SUBSCRIPTION_SKUS,
   type NumericPrice,
 } from "@/lib/purchase";
@@ -243,6 +244,11 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     if (!store) return "unavailable";
     try {
       await store.initConnection();
+    } catch {
+      // No connection to the App Store: nothing was bought or charged.
+      return "error";
+    }
+    try {
       const sku = PLUS_SKUS[plan];
       if ((SUBSCRIPTION_SKUS as readonly string[]).includes(sku)) {
         await store.requestPurchase({
@@ -268,22 +274,23 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     try {
       await store.initConnection();
       // The user tapped Restore: ask the App Store to sync first (AppStore.sync), so stale local
-      // entitlements are refreshed. A failed sync still leaves the local entitlements to read.
+      // entitlements are refreshed. syncIOS, not restorePurchases: expo-iap's restorePurchases
+      // swallows a failed sync, and a sync that never reached the App Store must not read as
+      // 'no purchase found'. A failed sync still leaves the local entitlements to read.
+      let syncError: unknown = null;
       try {
-        await store.restorePurchases();
-      } catch {
-        // fall through to what StoreKit already has
+        if (typeof store.syncIOS === "function") await store.syncIOS();
+        else await store.restorePurchases();
+      } catch (e) {
+        syncError = e ?? new Error("App Store sync failed");
       }
       const owned = await store.getAvailablePurchases({
         onlyIncludeActiveItemsIOS: true,
       });
-      if (ownsPlus(owned as never)) {
-        setEntitlement(true);
-        return "purchased";
-      }
-      // The App Store answered, and this Apple Account owns no Plus.
-      setEntitlement(false);
-      return "failed";
+      // 'failed' only when the App Store answered and this Apple Account owns no Plus.
+      const outcome = restoreOutcome(owned as never, syncError);
+      if (outcome.entitlement !== null) setEntitlement(outcome.entitlement);
+      return outcome.result;
     } catch {
       // The App Store could not be reached: nothing was decided, the entitlement stays as it is.
       return "error";

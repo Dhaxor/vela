@@ -6,10 +6,10 @@
 // - Course: the dashed way ahead, after the newest chapter of a season in progress.
 // - Book start: the honest first page of a book carried over from Vela 1.0.
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Svg, { Circle, Line, Path } from "react-native-svg";
 import type { Proof } from "@/contexts/arc.types";
-import { BridgeButton, Press, T, UserWords, VellumCard } from "@/components/ui";
+import { BridgeButton, Press, StoredPhoto, T, UserWords, VellumCard } from "@/components/ui";
 import { BridgeGlyph, PROOF_LABEL, StarProof, TabIcon } from "@/components/glyphs";
 import { sparklePath, toRoman } from "@/lib/sky";
 import { stageMeta } from "@/lib/story/seasons";
@@ -229,7 +229,7 @@ export const ProofNode = React.memo(function ProofNode({ row, today, above, belo
           </T>
         </View>
         {proof.photoUri ? (
-          <Image source={{ uri: proof.photoUri }} style={styles.photo} accessibilityLabel="Proof photo" testID={`arc-proof-photo-${proof.id}`} />
+          <StoredPhoto uri={proof.photoUri} style={styles.photo} accessibilityLabel="Proof photo" testID={`arc-proof-photo-${proof.id}`} />
         ) : null}
       </View>
     </Press>

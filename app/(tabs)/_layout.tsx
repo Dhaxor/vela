@@ -1,9 +1,10 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, useWindowDimensions } from "react-native";
 import { Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { TabIcon, type TabIconName } from "@/components/glyphs";
-import { colors, space, typeScale } from "@/constants/theme";
+import { T, TAB_BAR_PARTS, TAB_LABEL_MAX_SCALE, tabBarHeight } from "@/components/ui";
+import { colors } from "@/constants/theme";
 
 // Today | Arc | Rituals (ELEVATE §0 Tabs). Each tab has one role in the loop:
 // Today runs it, Arc keeps it (the Memory Book), Rituals feeds it. The sky
@@ -13,17 +14,31 @@ const icon =
   (name: TabIconName) =>
   ({ focused }: { focused: boolean }) => <TabIcon name={name} focused={focused} color={focused ? colors.ink100 : colors.ink48} size={24} />;
 
+/**
+ * Tab labels are system chrome: the caption step, Instrument Sans, through <T>.
+ * They grow with Dynamic Type up to TAB_LABEL_MAX_SCALE; the bar grows with
+ * them (tabBarHeight), so a label never clips.
+ */
+const label = ({ focused, children }: { focused: boolean; children: string }) => (
+  <T variant="caption" tone={focused ? "primary" : "faint"} center numberOfLines={1} maxFontSizeMultiplier={TAB_LABEL_MAX_SCALE} style={styles.label}>
+    {children}
+  </T>
+);
+
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
+  const { fontScale } = useWindowDimensions();
+  // The bar's own height sits above the home indicator; the inset is added on top and padded out.
+  const barStyle = { height: tabBarHeight(fontScale) + insets.bottom, paddingBottom: insets.bottom + TAB_BAR_PARTS.paddingBottom };
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colors.sky950 },
-        tabBarStyle: [styles.bar, { height: BAR_HEIGHT + insets.bottom, paddingBottom: insets.bottom + space.xxs }],
+        tabBarStyle: [styles.bar, barStyle],
         tabBarActiveTintColor: colors.ink100,
         tabBarInactiveTintColor: colors.ink48,
-        tabBarLabelStyle: styles.label,
+        tabBarLabel: label,
       }}
     >
       <Tabs.Screen name="index" options={{ title: "Today", tabBarIcon: icon("today"), tabBarButtonTestID: "tab-today", tabBarAccessibilityLabel: "Today" }} />
@@ -33,17 +48,13 @@ export default function TabsLayout() {
   );
 }
 
-/** Item padding (5 + 5) + icon (24) + label (18) + bar padding (4 + 2); the home-indicator inset is added on top. */
-const BAR_HEIGHT = 60;
-
 const styles = StyleSheet.create({
   bar: {
     backgroundColor: colors.chrome,
     borderColor: colors.hairline,
-    borderTopWidth: 1,
-    paddingTop: space.xs,
+    borderTopWidth: TAB_BAR_PARTS.border,
+    paddingTop: TAB_BAR_PARTS.paddingTop,
     elevation: 0,
   },
-  // Tab labels are system chrome: the caption step of the scale, Instrument Sans.
-  label: { ...typeScale.caption, letterSpacing: 0.2 },
+  label: { letterSpacing: 0.2 },
 });

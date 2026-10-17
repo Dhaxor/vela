@@ -6,10 +6,14 @@
 // - cancelled: a normal choice, no message.
 // - unavailable (web, simulator without StoreKit): a calm note that the free
 //   loop is untouched.
+// - error (the App Store could not be reached): 'check your connection',
+//   never 'no purchase found'; that line is only for a restore the App Store
+//   answered with nothing ('failed'). The words live in resultCopy.ts.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePlus } from "@/contexts/PlusContext";
 import type { PlanId, PurchaseResult } from "@/lib/purchase";
 import { haptics, useToast } from "@/components/ui";
+import { plusResultToast } from "./resultCopy";
 
 /** How long to wait for the App Store's grant before saying it is on its way. */
 const GRANT_WAIT_MS = 12_000;
@@ -51,7 +55,9 @@ export function usePlusActions(): PlusActions {
       try {
         return await fn();
       } catch {
-        return "failed";
+        // The store seams catch their own errors; anything that still escapes
+        // decided nothing, so it is never reported as 'no purchase found'.
+        return "error";
       } finally {
         lock.current = false;
         setBusy(null);
@@ -63,16 +69,13 @@ export function usePlusActions(): PlusActions {
   const buy = useCallback(
     async (plan: PlanId) => {
       const result = await run("buy", () => plus.purchase(plan));
+      if (result === null) return null;
       if (result === "purchased") {
         haptics.success();
         if (!plus.isPlus) setAwaiting(true);
-      } else if (result === "unavailable") {
-        toast.show({ message: "Purchases open with the App Store version of Vela. Everything free stays yours.", duration: 4500 });
-      } else if (result === "failed") {
-        toast.show({ message: "That purchase didn't go through. Nothing changed; you can try again.", tone: "error", duration: 4500 });
-      } else if (result === "error") {
-        toast.show({ message: "The App Store couldn't be reached. Nothing changed; try again in a moment.", tone: "error", duration: 4500 });
       }
+      const note = plusResultToast("buy", result);
+      if (note) toast.show(note);
       return result;
     },
     [run, plus, toast]
@@ -80,17 +83,10 @@ export function usePlusActions(): PlusActions {
 
   const restore = useCallback(async () => {
     const result = await run("restore", plus.restore);
-    if (result === "purchased") {
-      haptics.success();
-      toast.show({ message: "Vela Plus is restored on this device.", tone: "proof" });
-    } else if (result === "unavailable") {
-      toast.show({ message: "Restore works in the App Store version of Vela.", duration: 4000 });
-    } else if (result === "failed") {
-      toast.show({ message: "No Vela Plus purchase was found for this Apple Account.", tone: "error", duration: 4000 });
-    } else if (result === "error") {
-      // Not 'no purchase found': the App Store didn't answer, so nothing was checked.
-      toast.show({ message: "The App Store couldn't be reached, so nothing was restored. Try again in a moment.", tone: "error", duration: 4500 });
-    }
+    if (result === null) return null;
+    if (result === "purchased") haptics.success();
+    const note = plusResultToast("restore", result);
+    if (note) toast.show(note);
     return result;
   }, [run, plus, toast]);
 

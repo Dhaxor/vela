@@ -9,3 +9,4 @@ export { BedPicker } from "./BedPicker";
 export { AboutPanel, PRIVACY_URL } from "./AboutPanel";
 export { useDataActions, type DataActions, type PendingImport } from "./useDataActions";
 export * from "./time";
+export * from "./importCopy";

@@ -10,7 +10,7 @@ import { useCallback, useState } from "react";
 import { useBackup } from "@/contexts/useBackup";
 import { BACKUP_ERROR_COPY, type BackupFile, type ImportMode, type ImportPlan } from "@/lib/backup";
 import { holdForSystemSheet, useConfirm, useToast } from "@/components/ui";
-import { importDoneCopy } from "./importCopy";
+import { EMPTY_FILE_COPY, NOTHING_TO_IMPORT_COPY, importDoneCopy, importDoneDuration, nextImportStep } from "./importCopy";
 import { backupSummaryLine, exportedOn } from "./time";
 
 /**
@@ -43,11 +43,12 @@ export function useDataActions(): DataActions {
   const [pending, setPending] = useState<PendingImport | null>(null);
 
   const apply = useCallback(
-    async (file: BackupFile, mode: ImportMode) => {
+    async (file: BackupFile, mode: ImportMode, plan: ImportPlan) => {
       setBusy("apply");
       try {
+        // The toast says what the import really did (ImportOutcome), never 'Everything is here'.
         const outcome = await backup.apply(file, mode);
-        toast.show({ message: importDoneCopy(outcome), tone: "proof", duration: outcome.devicePhotos > 0 || outcome.dreamsKept > 0 ? 5000 : undefined });
+        toast.show({ message: importDoneCopy(outcome, { nothingNew: plan.nothingNew }), tone: "proof", duration: importDoneDuration(outcome) });
       } catch {
         toast.show({ message: "That backup couldn't be imported.", tone: "error" });
       } finally {
@@ -86,8 +87,14 @@ export function useDataActions(): DataActions {
         return;
       }
       const plan = await backup.plan(parsed.backup);
-      if (plan.nothingNew) {
-        toast.show("Everything in that file is already on this device.");
+      // On differs, not nothingNew: a device ahead of the file still gets the choice, so Replace stays reachable.
+      const step = nextImportStep(plan);
+      if (step === "nothing-to-import") {
+        toast.show(NOTHING_TO_IMPORT_COPY);
+        return;
+      }
+      if (step === "empty-file") {
+        toast.show({ message: EMPTY_FILE_COPY, tone: "info", duration: 4500 });
         return;
       }
       next = { file: parsed.backup, plan };
@@ -108,7 +115,7 @@ export function useDataActions(): DataActions {
       message: `${backupSummaryLine(next.plan.incoming)}.`,
       confirmLabel: "Import",
     });
-    if (ok) await apply(next.file, next.plan.recommended);
+    if (ok) await apply(next.file, next.plan.recommended, next.plan);
   }, [backup, busy, toast, confirm, apply]);
 
   const choose = useCallback(
@@ -126,7 +133,7 @@ export function useDataActions(): DataActions {
         });
         if (!ok) return;
       }
-      await apply(current.file, mode);
+      await apply(current.file, mode, current.plan);
     },
     [pending, confirm, apply]
   );

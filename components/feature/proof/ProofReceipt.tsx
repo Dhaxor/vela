@@ -2,9 +2,9 @@
 // their own gold italic, and the photo if there is one. It is what condenses
 // into a star in the Star Birth, and the receipt that stays afterwards.
 import React from "react";
-import { Image, StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
+import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import type { ProofKind } from "@/contexts/arc.types";
-import { T, UserWords, VellumCard } from "@/components/ui";
+import { StoredPhoto, T, UserWords, VellumCard } from "@/components/ui";
 import { PROOF_LABEL, StarProof } from "@/components/glyphs";
 import { radius, space } from "@/constants/theme";
 
@@ -30,7 +30,14 @@ export function ProofReceipt({ kind, text, when, photoUri, style, testID }: Proo
       <View style={styles.body}>
         <UserWords style={styles.flex}>{text}</UserWords>
         {photoUri ? (
-          <Image source={{ uri: photoUri }} style={styles.photo} accessibilityIgnoresInvertColors accessible accessibilityLabel="Proof photo" />
+          <StoredPhoto
+            uri={photoUri}
+            style={styles.photo}
+            accessibilityIgnoresInvertColors
+            accessible
+            accessibilityLabel="Proof photo"
+            testID={testID ? `${testID}-photo` : undefined}
+          />
         ) : null}
       </View>
     </VellumCard>

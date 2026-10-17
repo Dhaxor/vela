@@ -2,8 +2,8 @@
 // with its caption, a star badge when it came from a proof, and the dream it
 // is attached to. Used by the Rituals strip and the /scenes grid.
 import React from "react";
-import { Image, StyleSheet, View } from "react-native";
-import { Press, T } from "@/components/ui";
+import { StyleSheet, View } from "react-native";
+import { Press, StoredPhoto, T } from "@/components/ui";
 import { AreaSign, StarProof } from "@/components/glyphs";
 import type { Proof } from "@/contexts/arc.types";
 import { colors, radius, space } from "@/constants/theme";
@@ -33,7 +33,7 @@ export function SceneTile({ card, width, proof, dream, detail = false, onPress, 
     <Press onPress={onPress} testID={testID} accessibilityLabel={label} accessibilityHint="Opens the scene" pressScale={0.98} style={{ width }}>
       <View style={[styles.frame, { height }]}>
         {card.kind === "photo" ? (
-          <Image source={{ uri: card.uri }} style={styles.photo} resizeMode="cover" accessibilityIgnoresInvertColors />
+          <StoredPhoto uri={card.uri} style={styles.photo} resizeMode="cover" accessibilityIgnoresInvertColors testID={`${testID}-photo`} />
         ) : (
           <View style={styles.goal}>
             <T variant={detail ? "reading" : "caption"} italic tone="gold" numberOfLines={detail ? 7 : 6}>

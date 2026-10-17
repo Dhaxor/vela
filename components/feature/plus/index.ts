@@ -10,5 +10,6 @@ export { usePlusSky, type PlusSkyModel } from "./usePlusSky";
 export { usePlusActions, type PlusActions } from "./usePlusActions";
 export { demoPricesRequested, DEMO_PRICES } from "./demoPrices";
 export * from "./copy";
+export * from "./resultCopy";
 export * from "./areas";
 export * from "./price";

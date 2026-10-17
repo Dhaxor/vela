@@ -6,6 +6,7 @@ import {
   isPlanAmount,
   perMonthEquivalent,
   planPrice,
+  pricesMissing,
   readPlanAmounts,
   yearlyIsBetterValue,
 } from "./price";
@@ -108,5 +109,15 @@ describe("buyLabel", () => {
     expect(buyLabel("monthly", { billed: "$4.99", perMonth: null })).toBe("Unlock Plus · $4.99 a month");
     expect(buyLabel("lifetime", { billed: "$69.99", perMonth: null })).toBe("Unlock Plus · $69.99 once");
     expect(buyLabel("yearly", null)).toBe("Unlock Plus");
+  });
+});
+
+describe("pricesMissing (the paywall reloads prices on mount)", () => {
+  test("null prices (an offline launch, or web) ask again", () => {
+    expect(pricesMissing({ monthly: null, yearly: null, lifetime: null })).toBe(true);
+    expect(pricesMissing({ monthly: "$4.99", yearly: null, lifetime: "$59.99" })).toBe(true);
+  });
+  test("every price known: nothing to fetch", () => {
+    expect(pricesMissing({ monthly: "$4.99", yearly: "$29.99", lifetime: "$59.99" })).toBe(false);
   });
 });

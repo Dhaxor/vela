@@ -27,6 +27,7 @@ import { VelaMark } from "@/components/glyphs";
 import { FREE_AREA_LIMIT, LEGAL_URLS, areaAllowance, areaLimitCopy, tapArea, usePlusActions } from "@/components/feature/plus";
 import {
   AboutPanel,
+  BACKUP_KEEPS_COPY,
   BedPicker,
   ControlRow,
   ImportSheet,
@@ -321,7 +322,7 @@ export default function SettingsScreen() {
       >
         <SettingsRow
           label="Export a backup"
-          detail="Every dream, chapter, proof and page."
+          detail={BACKUP_KEEPS_COPY}
           onPress={() => void data.exportBackup()}
           loading={data.busy === "export"}
           testID="settings-export"

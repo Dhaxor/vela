@@ -91,6 +91,15 @@ export function yearlyIsBetterValue(amounts: PlanAmounts): boolean {
   return y.amount < m.amount * 12;
 }
 
+/**
+ * Should the paywall ask PlusContext for prices again (usePlus().reloadPrices)?
+ * Yes while any plan still has no price from StoreKit (an offline launch);
+ * reloadPrices itself is a no-op once prices are known.
+ */
+export function pricesMissing(prices: Readonly<Record<PlanId, string | null | undefined>>): boolean {
+  return PLAN_ORDER.some((p) => !prices[p]);
+}
+
 /** How the plan bills, for the plate's second line and the dock button. */
 export const PLAN_COPY: Readonly<Record<PlanId, { readonly label: string; readonly cadence: string; readonly per: string }>> = {
   yearly: { label: "Yearly", cadence: "Billed once a year", per: "a year" },

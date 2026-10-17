@@ -7,6 +7,7 @@ import { StyleSheet, View } from "react-native";
 import type { ImportMode, ImportPlan } from "@/lib/backup";
 import { DangerButton, GhostButton, PrimaryButton, Sheet, T, VellumCard } from "@/components/ui";
 import { colors, space } from "@/constants/theme";
+import { DEVICE_AHEAD_COPY } from "./importCopy";
 import { backupSummaryLine } from "./time";
 
 export interface ImportSheetProps {
@@ -53,6 +54,11 @@ export function ImportSheet({ visible, plan, exportedOn, busy, onChoose, onClose
         <View style={styles.compare}>
           <Line label="In the file" value={backupSummaryLine(plan.incoming)} />
           <Line label="On this device" value={backupSummaryLine(plan.current)} />
+          {plan.nothingNew ? (
+            <T variant="caption" tone="muted" testID="settings-import-device-ahead">
+              {DEVICE_AHEAD_COPY}
+            </T>
+          ) : null}
         </View>
       ) : null}
       <View style={styles.choices} accessibilityRole="radiogroup" accessibilityLabel="How to import">

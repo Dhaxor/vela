@@ -3,7 +3,7 @@
 // and the chapter it changed ('Changed Chapter IV'), which opens the reader
 // where the proof is woven in gold. The anchor star opens the dream itself.
 import React from "react";
-import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import { ChevronRight, Share2 } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
@@ -11,7 +11,7 @@ import type { Dream, Proof } from "@/contexts/arc.types";
 import { toRoman } from "@/lib/sky/numerals";
 import { STAGES } from "@/lib/story/content";
 import { PROOF_LABEL, StarProof } from "@/components/glyphs";
-import { Press, SecondaryButton, Sheet, T, UserWords } from "@/components/ui";
+import { Press, SecondaryButton, Sheet, StoredPhoto, T, UserWords } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";
 import { dayMonth, dreamDay } from "@/components/feature/today/time";
 import { localDateKey } from "@/lib/progress";
@@ -121,8 +121,8 @@ export function StarDetailSheet({ dream, selection, onClose, onShare }: StarDeta
           {proof.text}
         </UserWords>
         {proof.photoUri ? (
-          <Image
-            source={{ uri: proof.photoUri }}
+          <StoredPhoto
+            uri={proof.photoUri}
             style={[styles.photo, { height: Math.round(Math.min(photoW, 520) * 0.62) }]}
             resizeMode="cover"
             accessibilityLabel="Your photo from that day"
