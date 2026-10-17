@@ -3,7 +3,7 @@
 // figure stays optically centred.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft } from "@/components/glyphs/icons";
 import { IconButton, useGutter } from "@/components/ui";
 import { colors, hitSize, space } from "@/constants/theme";
 import { SailProgress } from "./SailProgress";

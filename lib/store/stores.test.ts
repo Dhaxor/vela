@@ -4,7 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ceremonyInProgress, holdForCeremony, whenNoCeremony } from "./ceremony";
 import { isHHmm, parseProfileV2, patchProfile, profileFromV1 } from "./profile";
-import { emptyScenes, parseScenes, scenesFromV1, syncProofPhotos, userSceneCount, type ProofPhoto } from "./scenes";
+import { emptyScenes, MAX_SCENES, parseScenes, scenesFromV1, syncProofPhotos, userSceneCount, type ProofPhoto, type SceneCard, type ScenesData } from "./scenes";
 
 const NOW = new Date(2026, 9, 16, 9);
 const fixture = (name: string) => JSON.parse(fs.readFileSync(path.join(import.meta.dir, "..", "fixtures", "v1", `${name}.json`), "utf8")).raw;
@@ -93,5 +93,23 @@ describe("ceremony gate", () => {
     // Poll rather than sleep a fixed 60ms: under a loaded full-suite run the timers can land late.
     for (let waited = 0; ran.length === 0 && waited < 3000; waited += 10) await new Promise((r) => setTimeout(r, 10));
     expect(ran).toEqual(["write"]);
+  });
+});
+
+describe("Scenes never evict (review: data-safety-silent-caps-delete-oldest)", () => {
+  const goal = (i: number): SceneCard => ({ id: `g${i}`, kind: "goal", text: `goal ${i}`, createdAt: new Date(2026, 0, 1, 0, i).toISOString(), dreamId: null });
+  const full: ScenesData = { version: 2, cards: Array.from({ length: MAX_SCENES }, (_, i) => goal(MAX_SCENES - i)), importedProofIds: [] };
+
+  test("a proof photo joining a full board keeps every hand-added card, the oldest included", () => {
+    const first = full.cards.at(-1)!;
+    const next = syncProofPhotos(full, [{ id: "p1", dreamId: "d", text: "Signed the lease", photoUri: "file:///x/Documents/proof-p1.jpg", createdAt: "2026-10-20T20:00:00.000Z" }]);
+    expect(next.cards).toHaveLength(MAX_SCENES + 1);
+    expect(next.cards.some((c) => c.id === first.id)).toBe(true);
+    expect(userSceneCount(next)).toBe(MAX_SCENES);
+  });
+
+  test("more than MAX_SCENES cards survive a reload", () => {
+    const big: ScenesData = { ...full, cards: [...full.cards, goal(0), goal(-1)] };
+    expect(parseScenes(JSON.parse(JSON.stringify(big))).cards).toHaveLength(MAX_SCENES + 2);
   });
 });

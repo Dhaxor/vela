@@ -3,7 +3,7 @@
 // a quiet status on the right (11 / 18, or 'Kept tonight').
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { T, VellumCard } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";
 import { RitualGlyph, type RitualGlyphName } from "./RitualGlyph";

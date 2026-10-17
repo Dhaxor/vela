@@ -6,13 +6,13 @@ import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, space } from "@/constants/theme";
-import { useGutter } from "./Screen";
+import { useGutter, useKeyboardUp } from "./Screen";
 
 export interface DockProps {
   children: React.ReactNode;
   /** 0..1 draws the horizon progress line; null/undefined hides it. */
   progress?: number | null;
-  /** Add the home-indicator inset. Default true (false inside tab screens). */
+  /** Add the home-indicator inset. Default true (false inside tab screens). Dropped while the keyboard is up. */
   inset?: boolean;
   /** A denser scrim for tall docks (the reader's player): text fades out above it, never through it. */
   dense?: boolean;
@@ -26,6 +26,8 @@ const DENSE = [colors.transparent, colors.chrome, colors.sky950] as const;
 export function Dock({ children, progress, inset = true, dense = false, style, testID }: DockProps) {
   const insets = useSafeAreaInsets();
   const gutter = useGutter();
+  // On the keyboard there is no home indicator to clear.
+  const keyboardUp = useKeyboardUp();
   const p = progress == null ? null : Math.max(0, Math.min(1, progress));
   return (
     <View testID={testID} style={style}>
@@ -43,7 +45,7 @@ export function Dock({ children, progress, inset = true, dense = false, style, t
       <View
         style={[
           styles.content,
-          { paddingTop: p === null ? space.xl : space.base, paddingHorizontal: gutter, paddingBottom: (inset ? insets.bottom : 0) + space.base },
+          { paddingTop: p === null ? space.xl : space.base, paddingHorizontal: gutter, paddingBottom: (inset && !keyboardUp ? insets.bottom : 0) + space.base },
         ]}
       >
         {children}

@@ -6,10 +6,23 @@
 // switching bedId crossfades. Every bed player keeps the audio session
 // active: by default expo-audio deactivates the shared iOS session when its
 // last player pauses, which would silence narration still speaking over it.
+// While a bed plays it is watched (soundscapes.ts watchBed): when the system
+// pauses it (headphones out, a call), it stops and opts.onInterrupted fires,
+// so the reader can pause the voice that iOS would let carry on aloud.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { claimChapterSession } from "./session";
-import { bedAsset, bedVolume, fadeLevel, DUCK_RELEASE_MS, type BedLevel } from "./soundscapes";
+import {
+  BED_WATCH_INTERVAL_MS,
+  BED_WATCH_START,
+  bedAsset,
+  bedVolume,
+  fadeLevel,
+  watchBed,
+  DUCK_RELEASE_MS,
+  type BedLevel,
+  type BedReading,
+} from "./soundscapes";
 import {
   BED_FADES,
   BED_LEVELS,
@@ -47,6 +60,16 @@ class Bed {
 
   play(): void {
     this.player.play();
+  }
+
+  /** What the player says it is doing right now. */
+  reading(): BedReading {
+    try {
+      return { playing: this.player.playing, buffering: this.player.isBuffering, loaded: this.player.isLoaded };
+    } catch {
+      // released under us: never read as an interruption
+      return { playing: false, buffering: false, loaded: false };
+    }
   }
 
   /** Resolves true once the file is decodable, false on error or timeout. */
@@ -122,6 +145,9 @@ export const useSoundscape: UseSoundscape = (bedId, opts) => {
   const duckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const releaseSession = useRef<(() => void) | null>(null);
   const mounted = useRef(true);
+  const watchTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const onInterrupted = useRef(opts?.onInterrupted);
+  onInterrupted.current = opts?.onInterrupted;
 
   const controller = useMemo(() => {
     const setStatus = (next: SoundscapeStatus) => {
@@ -140,11 +166,30 @@ export const useSoundscape: UseSoundscape = (bedId, opts) => {
       if (duckTimer.current) clearTimeout(duckTimer.current);
       duckTimer.current = null;
     };
+    const stopWatch = () => {
+      if (watchTimer.current) clearInterval(watchTimer.current);
+      watchTimer.current = null;
+    };
+    /** Watch the playing bed; if the system pauses it, stop it and tell the reader. */
+    const startWatch = (bed: Bed) => {
+      stopWatch();
+      let watch = BED_WATCH_START;
+      watchTimer.current = setInterval(() => {
+        if (bedRef.current !== bed || statusRef.current !== "playing") return stopWatch();
+        const next = watchBed(watch, bed.reading());
+        watch = next.watch;
+        if (!next.interrupted) return;
+        stopWatch();
+        onInterrupted.current?.();
+        void fadeAway(0, "fading");
+      }, BED_WATCH_INTERVAL_MS);
+    };
 
     /** Fade the current bed to silence over `ms`, then release it. */
     const fadeAway = async (ms: number, fadingStatus: SoundscapeStatus): Promise<void> => {
       const epoch = ++epochRef.current;
       clearDuckTimer();
+      stopWatch();
       const bed = bedRef.current;
       if (!bed) {
         if (statusRef.current !== "locked") setStatus(bedIdRef.current ? "stopped" : "idle");
@@ -186,6 +231,7 @@ export const useSoundscape: UseSoundscape = (bedId, opts) => {
         }
       }
       setStatus("playing");
+      startWatch(bed);
       await bed.fadeTo(target(), BED_FADES.start);
     };
 
@@ -211,6 +257,7 @@ export const useSoundscape: UseSoundscape = (bedId, opts) => {
         bedIdRef.current = next;
         if (!old) return setStatus(next && lockedRef.current ? "locked" : "idle");
         if (old.id === next) return;
+        stopWatch();
         bedRef.current = null;
         void old.fadeTo(0, BED_FADES.stop).then(() => old.release());
         if (next && wasAudible && !lockedRef.current) void start();
@@ -234,6 +281,7 @@ export const useSoundscape: UseSoundscape = (bedId, opts) => {
       unmount: () => {
         mounted.current = false;
         clearDuckTimer();
+        stopWatch();
         epochRef.current++;
         const bed = bedRef.current;
         bedRef.current = null;

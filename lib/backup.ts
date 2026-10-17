@@ -7,14 +7,21 @@
 // apply. The file IO at the bottom is a thin seam over expo-file-system,
 // expo-sharing and expo-document-picker (a download/upload on web), required
 // lazily so bun can test this module.
+//
+// PHOTOS ARE NOT IN THE FILE. Proof and Scenes photos travel as references to
+// files on the phone that took them (web keeps its data: URIs inline). On the
+// same phone they are found again (lib/photos rebases them into the current
+// container); on a new phone they are not, so the summary counts them
+// (devicePhotos) and the UI must not promise that 'everything' moved.
 
-import type { ArcIndex, ArcSnapshot, Chapter, IsoTime } from "@/contexts/arc.types";
+import type { ArcIndex, ArcSnapshot, Chapter, Dream, DreamId, IsoTime } from "@/contexts/arc.types";
 import type { ProfileV2 } from "@/contexts/user.types";
-import { parseJournal, MAX_ENTRIES, type JournalData } from "./journal";
+import { parseJournal, type JournalData } from "./journal";
 import { DAYS_KEPT, parseProgress, type ProgressState } from "./progress";
 import { checkArcInvariants } from "./store/invariants";
 import { parseProfileV2 } from "./store/profile";
-import { MAX_SCENES, parseScenes, type ScenesData } from "./store/scenes";
+import { parseScenes, type ScenesData } from "./store/scenes";
+import { snapshotShapeProblems } from "./store/shape";
 
 export const BACKUP_KIND = "vela-backup" as const;
 export const BACKUP_VERSION = 1 as const;
@@ -44,6 +51,8 @@ export interface BackupSummary {
   readonly pages: number;
   readonly scenes: number;
   readonly name: string | null;
+  /** Photos the file only points at (files on the phone that took them): they do not move to another phone. Always set by summarizeBackup. */
+  readonly devicePhotos?: number;
 }
 
 export type BackupError = "too-large" | "not-json" | "not-a-backup" | "newer-version" | "invalid-arcs";
@@ -79,7 +88,12 @@ export function backupFileName(now: Date): string {
   return `vela-backup-${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}.json`;
 }
 
+/** A photo reference that names a file on one phone (not inline data a browser keeps). */
+const isDevicePhoto = (uri: string | null | undefined) => typeof uri === "string" && uri.startsWith("file://");
+
 export function summarizeBackup(data: BackupData): BackupSummary {
+  const proofPhotos = data.arcs.index.proofs.filter((p) => isDevicePhoto(p.photoUri)).map((p) => p.photoUri);
+  const scenePhotos = (data.scenes?.cards ?? []).flatMap((c) => (c.kind === "photo" && isDevicePhoto(c.uri) ? [c.uri] : []));
   return {
     dreams: data.arcs.index.dreams.length,
     chapters: data.arcs.index.chapters.length,
@@ -87,13 +101,29 @@ export function summarizeBackup(data: BackupData): BackupSummary {
     pages: data.journal?.entries.length ?? 0,
     scenes: data.scenes?.cards.length ?? 0,
     name: data.profile?.name ?? null,
+    // A proof photo also shows in Scenes: count each file once.
+    devicePhotos: new Set([...proofPhotos, ...scenePhotos]).size,
   };
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
 
-/** Validate a backup file's text. Never throws; nothing is applied here. */
+/**
+ * Validate a backup file's text. Never throws (anything unexpected is
+ * 'invalid-arcs'); nothing is applied here. Field types are checked before
+ * the I1–I15 invariants (lib/store/shape): a damaged file that passed would
+ * be stored as the index and crash Today on every launch.
+ */
 export function parseBackup(text: string, now: Date): ParsedBackup {
+  try {
+    return parseBackupUnsafe(text, now);
+  } catch (e) {
+    return { ok: false, error: "invalid-arcs", detail: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+function parseBackupUnsafe(text: string, now: Date): ParsedBackup {
+  if (typeof text !== "string") return { ok: false, error: "not-a-backup" };
   if (text.length > BACKUP_MAX_BYTES) return { ok: false, error: "too-large" };
   let raw: unknown;
   try {
@@ -107,7 +137,11 @@ export function parseBackup(text: string, now: Date): ParsedBackup {
   if (raw.version > BACKUP_VERSION) return { ok: false, error: "newer-version" };
   const d = raw.data;
   if (!isRecord(d.arcs) || !isRecord(d.arcs.index) || !isRecord(d.arcs.chapters)) return { ok: false, error: "invalid-arcs", detail: "missing arcs" };
-  const arcs = d.arcs as unknown as ArcSnapshot;
+  const shape = snapshotShapeProblems(d.arcs);
+  if (shape.length > 0) return { ok: false, error: "invalid-arcs", detail: shape.slice(0, 3).join("; ") };
+  const index = d.arcs.index as Record<string, unknown>;
+  // An index written before migratedFromV1At existed reads as 'never migrated'.
+  const arcs = { index: { migratedFromV1At: null, ...index }, chapters: d.arcs.chapters } as unknown as ArcSnapshot;
   const problems = checkArcInvariants(arcs);
   if (problems.length > 0) return { ok: false, error: "invalid-arcs", detail: problems.slice(0, 3).join("; ") };
   const data: BackupData = {
@@ -137,8 +171,18 @@ export interface ImportPlan {
   /** Nothing on this device yet: replace without asking. */
   readonly needsChoice: boolean;
   readonly recommended: ImportMode;
-  /** The file holds nothing this device does not already have. */
+  /**
+   * The file holds nothing this device does not already have: no dream,
+   * chapter (or newer rewrite of one), bridge, proof, page or Scene that is
+   * missing here. Newer work on a dream both sides share counts as new.
+   */
   readonly nothingNew: boolean;
+  /** The file and this device differ in any way (Replace would change something). */
+  readonly differs: boolean;
+  /** Dreams on both sides where the file carries on from this device's history (a merge takes the file's). */
+  readonly dreamsUpdated: number;
+  /** Dreams on both sides whose histories went separate ways (a merge keeps this device's; Replace takes the file's). */
+  readonly dreamsDiverged: number;
   readonly current: BackupSummary;
   readonly incoming: BackupSummary;
 }
@@ -151,13 +195,77 @@ const newIds = <T extends { readonly id: string }>(mine: readonly T[], theirs: r
   return theirs.filter((x) => !have.has(x.id));
 };
 
+/** Every chapter, bridge and proof id of one dream ('c:…', 'b:…', 'p:…'). */
+function dreamRows(index: ArcIndex, dreamId: DreamId): Set<string> {
+  const rows = new Set<string>();
+  for (const c of index.chapters) if (c.dreamId === dreamId) rows.add(`c:${c.id}`);
+  for (const b of index.bridges) if (b.dreamId === dreamId) rows.add(`b:${b.id}`);
+  for (const p of index.proofs) if (p.dreamId === dreamId) rows.add(`p:${p.id}`);
+  return rows;
+}
+
+const isSubset = (a: ReadonlySet<string>, b: ReadonlySet<string>) => [...a].every((x) => b.has(x));
+
+type DreamRelation = "added" | "same" | "device-ahead" | "file-ahead" | "diverged";
+
+/** How the file's copy of each of its dreams relates to this device's copy. */
+function relateDreams(mine: ArcIndex, theirs: ArcIndex): Map<DreamId, DreamRelation> {
+  const have = new Set(mine.dreams.map((d) => d.id));
+  const out = new Map<DreamId, DreamRelation>();
+  for (const d of theirs.dreams) {
+    if (!have.has(d.id)) {
+      out.set(d.id, "added");
+      continue;
+    }
+    const a = dreamRows(mine, d.id);
+    const b = dreamRows(theirs, d.id);
+    const fileHasAll = isSubset(a, b);
+    const deviceHasAll = isSubset(b, a);
+    out.set(d.id, fileHasAll && deviceHasAll ? "same" : fileHasAll ? "file-ahead" : deviceHasAll ? "device-ahead" : "diverged");
+  }
+  return out;
+}
+
+/** Stable text of a list of rows, order-independent (by id). */
+const rowsKey = <T extends { readonly id: string }>(rows: readonly T[]) =>
+  JSON.stringify([...rows].sort((a, b) => a.id.localeCompare(b.id)));
+
+function sameArcs(a: ArcSnapshot, b: ArcSnapshot): boolean {
+  const ia = a.index;
+  const ib = b.index;
+  if (ia.activeDreamId !== ib.activeDreamId) return false;
+  if (rowsKey(ia.dreams) !== rowsKey(ib.dreams) || rowsKey(ia.chapters) !== rowsKey(ib.chapters)) return false;
+  if (rowsKey(ia.bridges) !== rowsKey(ib.bridges) || rowsKey(ia.proofs) !== rowsKey(ib.proofs)) return false;
+  return ia.chapters.every((c) => (a.chapters[c.id]?.revision ?? 0) === (b.chapters[c.id]?.revision ?? 0));
+}
+
+function differs(current: BackupData, incoming: BackupData): boolean {
+  if (!sameArcs(current.arcs, incoming.arcs)) return true;
+  if (rowsKey(current.journal?.entries ?? []) !== rowsKey(incoming.journal?.entries ?? [])) return true;
+  if (rowsKey(current.scenes?.cards ?? []) !== rowsKey(incoming.scenes?.cards ?? [])) return true;
+  return JSON.stringify(current.profile) !== JSON.stringify(incoming.profile);
+}
+
+/** A chapter the file holds a newer rewrite of ('Rewrite this chapter' on the other side). */
+function newerRewrites(current: ArcSnapshot, incoming: ArcSnapshot): number {
+  const mine = new Map(current.index.chapters.map((c) => [c.id, c.revision]));
+  return incoming.index.chapters.filter((c) => mine.has(c.id) && c.revision > (mine.get(c.id) ?? 0)).length;
+}
+
 /**
  * The decision the import screen shows. Merge is recommended whenever both
  * sides hold data: it keeps everything from both, and only adds what is new.
  */
 export function planImport(current: BackupData, incoming: BackupData): ImportPlan {
+  const relations = [...relateDreams(current.arcs.index, incoming.arcs.index).values()];
+  const ci = current.arcs.index;
+  const ti = incoming.arcs.index;
   const nothingNew =
-    newIds(current.arcs.index.dreams, incoming.arcs.index.dreams).length === 0 &&
+    newIds(ci.dreams, ti.dreams).length === 0 &&
+    newIds(ci.chapters, ti.chapters).length === 0 &&
+    newIds(ci.bridges, ti.bridges).length === 0 &&
+    newIds(ci.proofs, ti.proofs).length === 0 &&
+    newerRewrites(current.arcs, incoming.arcs) === 0 &&
     newIds(current.journal?.entries ?? [], incoming.journal?.entries ?? []).length === 0 &&
     newIds(current.scenes?.cards ?? [], incoming.scenes?.cards ?? []).length === 0;
   const empty = isEmpty(current);
@@ -165,27 +273,69 @@ export function planImport(current: BackupData, incoming: BackupData): ImportPla
     needsChoice: !empty && !isEmpty(incoming),
     recommended: empty ? "replace" : "merge",
     nothingNew: !empty && nothingNew,
+    differs: differs(current, incoming),
+    dreamsUpdated: relations.filter((r) => r === "file-ahead").length,
+    dreamsDiverged: relations.filter((r) => r === "diverged").length,
     current: summarizeBackup(current),
     incoming: summarizeBackup(incoming),
   };
 }
 
-/** Dreams are self-contained (their chapters, bridges and proofs reference only them), so a union by dream is safe. */
-function mergeArcs(mine: ArcSnapshot, theirs: ArcSnapshot): ArcSnapshot {
-  const added = new Set(newIds(mine.index.dreams, theirs.index.dreams).map((d) => d.id));
-  const from = <T extends { readonly dreamId: string }>(rows: readonly T[]) => rows.filter((r) => added.has(r.dreamId));
-  const chapters: Record<string, Chapter> = { ...mine.chapters };
-  for (const meta of from(theirs.index.chapters)) chapters[meta.id] = theirs.chapters[meta.id];
+/** I14 after a merge: focus stays on a dream that is not released. */
+function liveFocus(dreams: readonly Dream[], preferred: readonly (DreamId | null)[]): DreamId | null {
+  for (const id of preferred) {
+    const d = id ? dreams.find((x) => x.id === id) : undefined;
+    if (d && d.status !== "released") return d.id;
+  }
+  const newest = (status: Dream["status"]) =>
+    [...dreams].filter((d) => d.status === status).sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  return (newest("active") ?? newest("resting"))?.id ?? null;
+}
+
+interface ArcMerge {
+  readonly snapshot: ArcSnapshot;
+  /** Dreams the device had, replaced by the file's longer history. */
+  readonly updated: readonly DreamId[];
+  /** Dreams whose histories diverged: the device's version was kept. */
+  readonly kept: readonly DreamId[];
+  /** checkArcInvariants of the merged arcs ([] = safe to import). */
+  readonly problems: readonly string[];
+}
+
+/**
+ * Dreams are self-contained (their chapters, bridges and proofs reference only
+ * them), so a merge picks each dream WHOLE from one side: a dream only in the
+ * file is added; a dream whose history the file carries on (every chapter,
+ * bridge and proof the device has, plus more) is taken from the file; a dream
+ * where the device is ahead, or the two went separate ways, keeps the
+ * device's. Nothing is ever dropped silently: diverged dreams are reported.
+ */
+function mergeArcs(mine: ArcSnapshot, theirs: ArcSnapshot): ArcMerge {
+  const relations = relateDreams(mine.index, theirs.index);
+  const fromFile = new Set([...relations].filter(([, r]) => r === "added" || r === "file-ahead").map(([id]) => id));
+  const updated = [...relations].filter(([, r]) => r === "file-ahead").map(([id]) => id);
+  const kept = [...relations].filter(([, r]) => r === "diverged").map(([id]) => id);
+  const pick = <T extends { readonly dreamId: string }>(own: readonly T[], file: readonly T[]) => [
+    ...own.filter((r) => !fromFile.has(r.dreamId)),
+    ...file.filter((r) => fromFile.has(r.dreamId)),
+  ];
+  const chapters: Record<string, Chapter> = {};
+  for (const meta of mine.index.chapters) if (!fromFile.has(meta.dreamId)) chapters[meta.id] = mine.chapters[meta.id];
+  for (const meta of theirs.index.chapters) if (fromFile.has(meta.dreamId)) chapters[meta.id] = theirs.chapters[meta.id];
+  const dreams = [...mine.index.dreams.filter((d) => !fromFile.has(d.id)), ...theirs.index.dreams.filter((d) => fromFile.has(d.id))].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt)
+  );
   const index: ArcIndex = {
     ...mine.index,
-    dreams: [...mine.index.dreams, ...theirs.index.dreams.filter((d) => added.has(d.id))].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-    chapters: [...mine.index.chapters, ...from(theirs.index.chapters)],
-    bridges: [...mine.index.bridges, ...from(theirs.index.bridges)],
-    proofs: [...mine.index.proofs, ...from(theirs.index.proofs)],
-    activeDreamId: mine.index.activeDreamId ?? theirs.index.activeDreamId,
+    dreams,
+    chapters: pick(mine.index.chapters, theirs.index.chapters),
+    bridges: pick(mine.index.bridges, theirs.index.bridges),
+    proofs: pick(mine.index.proofs, theirs.index.proofs),
+    activeDreamId: liveFocus(dreams, [mine.index.activeDreamId, theirs.index.activeDreamId]),
+    migratedFromV1At: mine.index.migratedFromV1At ?? theirs.index.migratedFromV1At ?? null,
   };
-  const merged: ArcSnapshot = { index, chapters };
-  return checkArcInvariants(merged).length === 0 ? merged : mine;
+  const snapshot: ArcSnapshot = { index, chapters };
+  return { snapshot, updated, kept, problems: checkArcInvariants(snapshot) };
 }
 
 function mergeProgress(mine: ProgressState | null, theirs: ProgressState | null): ProgressState | null {
@@ -197,31 +347,63 @@ function mergeProgress(mine: ProgressState | null, theirs: ProgressState | null)
   return parseProgress({ ...mine, days, lifetime, nightsShownUp: Math.max(mine.nightsShownUp, theirs.nightsShownUp, days.length) });
 }
 
+/** Every page from both sides (none is ever dropped). */
 function mergeJournal(mine: JournalData | null, theirs: JournalData | null): JournalData | null {
   if (!mine || !theirs) return mine ?? theirs;
-  const entries = [...mine.entries, ...newIds(mine.entries, theirs.entries)].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, MAX_ENTRIES);
+  const entries = [...mine.entries, ...newIds(mine.entries, theirs.entries)].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   return { ...mine, entries, phrase369: mine.phrase369 || theirs.phrase369, sheet: mine.sheet ?? theirs.sheet };
 }
 
+/** Every Scene from both sides (none is ever dropped). */
 function mergeScenes(mine: ScenesData | null, theirs: ScenesData | null): ScenesData | null {
   if (!mine || !theirs) return mine ?? theirs;
   return {
     version: 2,
-    cards: [...mine.cards, ...newIds(mine.cards, theirs.cards)].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, MAX_SCENES),
+    cards: [...mine.cards, ...newIds(mine.cards, theirs.cards)].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     importedProofIds: [...new Set([...mine.importedProofIds, ...theirs.importedProofIds])],
   };
 }
 
-/** What the device holds after the import. Replace = the file wins; merge = keep everything, add what is new. */
-export function resolveImport(current: BackupData, incoming: BackupData, mode: ImportMode): BackupData {
-  if (mode === "replace") return incoming;
+export interface ImportResolution {
+  /** What the device holds after the import. */
+  readonly data: BackupData;
+  readonly mode: ImportMode;
+  /** Merge: dreams added from the file. */
+  readonly dreamsAdded: number;
+  /** Merge: dreams whose longer history in the file replaced this device's. */
+  readonly dreamsUpdated: number;
+  /** Merge: dreams whose histories diverged; this device's version was kept. */
+  readonly dreamsKept: number;
+  /** Problems that make the result unsafe to import ([] = apply it). Never silently replaced by 'keep mine'. */
+  readonly problems: readonly string[];
+}
+
+/** Replace = the file wins; merge = keep everything, add what is new, carry each dream's longer history. */
+export function resolveImportDetailed(current: BackupData, incoming: BackupData, mode: ImportMode): ImportResolution {
+  if (mode === "replace") {
+    return { data: incoming, mode, dreamsAdded: 0, dreamsUpdated: 0, dreamsKept: 0, problems: checkArcInvariants(incoming.arcs) };
+  }
+  const arcs = mergeArcs(current.arcs, incoming.arcs);
+  const have = new Set(current.arcs.index.dreams.map((d) => d.id));
   return {
-    arcs: mergeArcs(current.arcs, incoming.arcs),
-    profile: current.profile ?? incoming.profile,
-    progress: mergeProgress(current.progress, incoming.progress),
-    journal: mergeJournal(current.journal, incoming.journal),
-    scenes: mergeScenes(current.scenes, incoming.scenes),
+    data: {
+      arcs: arcs.snapshot,
+      profile: current.profile ?? incoming.profile,
+      progress: mergeProgress(current.progress, incoming.progress),
+      journal: mergeJournal(current.journal, incoming.journal),
+      scenes: mergeScenes(current.scenes, incoming.scenes),
+    },
+    mode,
+    dreamsAdded: incoming.arcs.index.dreams.filter((d) => !have.has(d.id)).length,
+    dreamsUpdated: arcs.updated.length,
+    dreamsKept: arcs.kept.length,
+    problems: arcs.problems,
   };
+}
+
+/** What the device holds after the import (see resolveImportDetailed for what happened). */
+export function resolveImport(current: BackupData, incoming: BackupData, mode: ImportMode): BackupData {
+  return resolveImportDetailed(current, incoming, mode).data;
 }
 
 /* =========================================================================

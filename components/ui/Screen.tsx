@@ -1,8 +1,15 @@
 // Every screen starts here. <Screen> owns its own sky (per-screen backdrop,
 // ELEVATE §0/§8), the safe area, the gutter and the scroll container, and it
 // reserves room for a fixed <Dock> so the last line never hides behind it.
-import React, { createContext, useContext, useState } from "react";
+//
+// The keyboard: on iOS the KeyboardAvoidingView makes room by padding its own
+// bottom, and an absolutely placed child ignores its parent's padding. So the
+// dock sits in a plain flex box with the body (the box the padding shrinks)
+// and rises with it, and it drops its home-indicator inset while the keyboard
+// is up. The screen's one CTA stays in reach above the keyboard.
+import React, { createContext, useContext, useEffect, useState } from "react";
 import {
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -21,10 +28,31 @@ import { colors, space } from "@/constants/theme";
 import { SkyBackdrop, type SkyVariant } from "@/components/sky/SkyBackdrop";
 
 const GutterCtx = createContext<number>(24);
+const KeyboardCtx = createContext<boolean>(false);
 
 /** The current screen's side gutter (24, or 16 below 380pt). Use it to bleed full-width. */
 export function useGutter(): number {
   return useContext(GutterCtx);
+}
+
+/** True while the software keyboard is up over this screen (iOS). The Dock sits on it then, with no home-indicator inset. */
+export function useKeyboardUp(): boolean {
+  return useContext(KeyboardCtx);
+}
+
+/** iOS: is the keyboard showing (it announces itself before it moves, so the dock moves with it)? */
+function useKeyboardShown(): boolean {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (Platform.OS !== "ios") return;
+    const show = Keyboard.addListener("keyboardWillShow", () => setShown(true));
+    const hide = Keyboard.addListener("keyboardWillHide", () => setShown(false));
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
+  return shown;
 }
 
 export interface ScreenProps {
@@ -63,6 +91,7 @@ export function Screen({
   testID,
 }: ScreenProps) {
   const focused = useIsFocused();
+  const keyboardUp = useKeyboardShown();
   const win = useWindowDimensions();
   const gutter = gutterFor(win.width);
   const [dockHeight, setDockHeight] = useState(0);
@@ -88,29 +117,34 @@ export function Screen({
 
   return (
     <GutterCtx.Provider value={gutter}>
-      <View
-        style={styles.root}
-        testID={testID}
-        onLayout={(e) => {
-          const { width, height } = e.nativeEvent.layout;
-          // A screen hidden under a pushed route measures 0x0 on web; keep the last real size.
-          if (width < 1 || height < 1) return;
-          if (Math.round(width) !== Math.round(size.width) || Math.round(height) !== Math.round(size.height)) setSize({ width, height });
-        }}
-      >
-        <SkyBackdrop variant={variant} focus={focus} active={focused} width={size.width} height={size.height} />
-        <SafeAreaView edges={edges} style={styles.flex}>
-          <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-            {header}
-            {body}
-            {dock ? (
-              <View style={styles.dock} onLayout={(e) => setDockHeight(Math.round(e.nativeEvent.layout.height))}>
-                {dock}
+      <KeyboardCtx.Provider value={keyboardUp}>
+        <View
+          style={styles.root}
+          testID={testID}
+          onLayout={(e) => {
+            const { width, height } = e.nativeEvent.layout;
+            // A screen hidden under a pushed route measures 0x0 on web; keep the last real size.
+            if (width < 1 || height < 1) return;
+            if (Math.round(width) !== Math.round(size.width) || Math.round(height) !== Math.round(size.height)) setSize({ width, height });
+          }}
+        >
+          <SkyBackdrop variant={variant} focus={focus} active={focused} width={size.width} height={size.height} />
+          <SafeAreaView edges={edges} style={styles.flex}>
+            <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+              {header}
+              {/* Body and dock share this box: the keyboard padding shrinks it, so the dock rides above the keyboard. */}
+              <View style={styles.flex}>
+                {body}
+                {dock ? (
+                  <View style={styles.dock} onLayout={(e) => setDockHeight(Math.round(e.nativeEvent.layout.height))}>
+                    {dock}
+                  </View>
+                ) : null}
               </View>
-            ) : null}
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </View>
+            </KeyboardAvoidingView>
+          </SafeAreaView>
+        </View>
+      </KeyboardCtx.Provider>
     </GutterCtx.Provider>
   );
 }

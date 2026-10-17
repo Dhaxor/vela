@@ -1,13 +1,22 @@
 // Vela Plus entitlement. Same architecture that shipped and was StoreKit-
 // round-trip verified in Anker: the store call sits behind a seam, the grant
 // arrives via purchaseUpdatedListener (the only path Apple guarantees for
-// deferred/interrupted purchases), and restores are strict about revocation.
+// deferred/interrupted purchases), and restores are strict about revocation
+// (expo-iap's PurchaseIOS reports a refund as revocationDateIOS; ownsPlus).
+//
+// - Prices: fetched at launch and fetched AGAIN while they are still missing
+//   (an offline launch): on foreground, on a short retry, and when the paywall
+//   asks (reloadPrices), so the plans never stay without a price for a session.
+// - Restore: asks the App Store to sync (restorePurchases, AppStore.sync) before
+//   reading what is owned, and tells 'nothing owned' ('failed') apart from 'the
+//   App Store could not be reached' ('error', entitlement untouched).
 import React, {
   createContext,
   useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { AppState, Platform } from "react-native";
@@ -37,6 +46,9 @@ const PLUS_KEY = STORAGE_KEYS.plus;
 
 export const PURCHASES_ENABLED = Platform.OS === "ios";
 
+/** Retries of a product fetch that found no prices (then the next foreground or reloadPrices tries again). */
+const PRICE_RETRY_MS = [5_000, 20_000, 60_000] as const;
+
 function iap(): typeof import("expo-iap") | null {
   if (!PURCHASES_ENABLED) return null;
   try {
@@ -60,6 +72,8 @@ interface PlusValue {
   sceneLimit: number;
   /** Localised prices per plan, or null until the store answers. */
   prices: Record<PlanId, string | null>;
+  /** Fetch prices again when they are still missing (the paywall calls it on mount). No-op once known. */
+  reloadPrices: () => void;
   /** StoreKit's numeric price and currency per plan (the paywall's per-month figure), or null. */
   priceAmounts: Record<PlanId, NumericPrice | null>;
   purchase: (plan: PlanId) => Promise<PurchaseResult>;
@@ -106,6 +120,73 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     void AsyncStorage.setItem(PLUS_KEY, owned ? "1" : "0").catch(() => {});
   }, []);
 
+  // ------------------------------------------------------------ prices
+  const pricesKnown = useRef(false);
+  const fetching = useRef(false);
+  const alive = useRef(true);
+  const retry = useRef<{ timer: ReturnType<typeof setTimeout> | null; attempt: number }>({ timer: null, attempt: 0 });
+
+  /** One product fetch at a time; only while prices are still unknown. */
+  const loadProducts = useCallback(async () => {
+    const store = iap();
+    if (!store || pricesKnown.current || fetching.current) return;
+    fetching.current = true;
+    let got = false;
+    try {
+      await store.initConnection();
+      const [subs, inapp] = await Promise.all([
+        store.fetchProducts({ skus: [...SUBSCRIPTION_SKUS], type: "subs" }),
+        store.fetchProducts({ skus: [...INAPP_SKUS], type: "in-app" }),
+      ]);
+      if (!alive.current) return;
+      const all = [...(subs ?? []), ...(inapp ?? [])] as {
+        id?: string;
+        productId?: string;
+        displayPrice?: string;
+        price?: number | null;
+        currency?: string;
+      }[];
+      const productFor = (sku: string) => all.find((x) => (x.productId ?? x.id) === sku);
+      const priceFor = (sku: string) => displayablePrice(productFor(sku));
+      const next = {
+        monthly: priceFor(PLUS_SKUS.monthly),
+        yearly: priceFor(PLUS_SKUS.yearly),
+        lifetime: priceFor(PLUS_SKUS.lifetime),
+      };
+      setPrices(next);
+      setPriceAmounts({
+        monthly: numericPrice(productFor(PLUS_SKUS.monthly)),
+        yearly: numericPrice(productFor(PLUS_SKUS.yearly)),
+        lifetime: numericPrice(productFor(PLUS_SKUS.lifetime)),
+      });
+      got = Object.values(next).some((v) => v !== null);
+    } catch {
+      // prices stay null; the paywall omits them rather than inventing any
+    } finally {
+      fetching.current = false;
+    }
+    if (got) {
+      pricesKnown.current = true;
+      retry.current.attempt = 0;
+      return;
+    }
+    // Offline launch (or StoreKit briefly away): try again soon, a few times, then on the next foreground.
+    if (alive.current && retry.current.timer === null && retry.current.attempt < PRICE_RETRY_MS.length) {
+      const delay = PRICE_RETRY_MS[retry.current.attempt];
+      retry.current.attempt += 1;
+      retry.current.timer = setTimeout(() => {
+        retry.current.timer = null;
+        void loadProducts();
+      }, delay);
+    }
+  }, []);
+
+  const reloadPrices = useCallback(() => {
+    if (pricesKnown.current) return;
+    retry.current.attempt = 0;
+    void loadProducts();
+  }, [loadProducts]);
+
   useEffect(() => {
     const store = iap();
     if (!store) return;
@@ -135,47 +216,27 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
 
     void refreshEntitlement();
     const appStateSub = AppState.addEventListener("change", (state) => {
-      if (state === "active") void refreshEntitlement();
+      if (state !== "active") return;
+      void refreshEntitlement();
+      // Still no prices (an offline launch): fetch them again now that the app is back.
+      if (!pricesKnown.current) {
+        retry.current.attempt = 0;
+        void loadProducts();
+      }
     });
 
-    void (async () => {
-      try {
-        await store.initConnection();
-        const [subs, inapp] = await Promise.all([
-          store.fetchProducts({ skus: [...SUBSCRIPTION_SKUS], type: "subs" }),
-          store.fetchProducts({ skus: [...INAPP_SKUS], type: "in-app" }),
-        ]);
-        if (cancelled) return;
-        const all = [...(subs ?? []), ...(inapp ?? [])] as {
-          id?: string;
-          productId?: string;
-          displayPrice?: string;
-          price?: number | null;
-          currency?: string;
-        }[];
-        const productFor = (sku: string) => all.find((x) => (x.productId ?? x.id) === sku);
-        const priceFor = (sku: string) => displayablePrice(productFor(sku));
-        setPrices({
-          monthly: priceFor(PLUS_SKUS.monthly),
-          yearly: priceFor(PLUS_SKUS.yearly),
-          lifetime: priceFor(PLUS_SKUS.lifetime),
-        });
-        setPriceAmounts({
-          monthly: numericPrice(productFor(PLUS_SKUS.monthly)),
-          yearly: numericPrice(productFor(PLUS_SKUS.yearly)),
-          lifetime: numericPrice(productFor(PLUS_SKUS.lifetime)),
-        });
-      } catch {
-        // prices stay null; the paywall omits them rather than inventing any
-      }
-    })();
+    alive.current = true;
+    void loadProducts();
 
     return () => {
       cancelled = true;
+      alive.current = false;
+      if (retry.current.timer !== null) clearTimeout(retry.current.timer);
+      retry.current.timer = null;
       appStateSub.remove();
       sub?.remove?.();
     };
-  }, [setEntitlement]);
+  }, [setEntitlement, loadProducts]);
 
   const purchase = useCallback(async (plan: PlanId): Promise<PurchaseResult> => {
     const store = iap();
@@ -206,6 +267,13 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     if (!store) return "unavailable";
     try {
       await store.initConnection();
+      // The user tapped Restore: ask the App Store to sync first (AppStore.sync), so stale local
+      // entitlements are refreshed. A failed sync still leaves the local entitlements to read.
+      try {
+        await store.restorePurchases();
+      } catch {
+        // fall through to what StoreKit already has
+      }
       const owned = await store.getAvailablePurchases({
         onlyIncludeActiveItemsIOS: true,
       });
@@ -213,10 +281,12 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
         setEntitlement(true);
         return "purchased";
       }
+      // The App Store answered, and this Apple Account owns no Plus.
       setEntitlement(false);
       return "failed";
     } catch {
-      return "failed";
+      // The App Store could not be reached: nothing was decided, the entitlement stays as it is.
+      return "error";
     }
   }, [setEntitlement]);
 
@@ -230,6 +300,7 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
       canUseArea: (area: FocusId) => canUseArea(area, focusAreas ?? [], isPlus),
       sceneLimit: isPlus ? Number.POSITIVE_INFINITY : FREE_SCENES,
       prices,
+      reloadPrices,
       priceAmounts,
       purchase,
       restore,
@@ -237,7 +308,7 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
         setEntitlement(v);
       },
     }),
-    [ready, isPlus, focusAreas, prices, priceAmounts, purchase, restore, setEntitlement]
+    [ready, isPlus, focusAreas, prices, reloadPrices, priceAmounts, purchase, restore, setEntitlement]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

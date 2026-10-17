@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { Redirect } from "expo-router";
-import { ArrowRight, MoreHorizontal, Settings, X } from "lucide-react-native";
+import { ArrowRight, MoreHorizontal, Settings, X } from "@/components/glyphs/icons";
 import {
   BridgeButton,
   ChipGroup,
@@ -434,6 +434,13 @@ function Catalogue() {
             </T>
             <T variant="body">Open the portfolio file and name it.</T>
           </VellumCard>
+          {/* A toast raised while a sheet stays open draws inside the sheet (an iOS Modal covers the root). */}
+          <GhostButton
+            label="Toast from the sheet"
+            tone="danger"
+            onPress={() => toast.show({ message: "That didn’t save. Try again.", tone: "error" })}
+            testID="ks-sheet-toast"
+          />
         </View>
       </Sheet>
     </Screen>

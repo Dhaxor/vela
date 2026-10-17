@@ -5,7 +5,7 @@
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Check, X } from "lucide-react-native";
+import { Check, X } from "@/components/glyphs/icons";
 import { Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, SecondaryButton, T, UserWords, haptics } from "@/components/ui";
 import { StarProof } from "@/components/glyphs";
 import { BORN_FROM } from "@/components/feature/rituals/YourLineBlock";

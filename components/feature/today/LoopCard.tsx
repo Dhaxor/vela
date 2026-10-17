@@ -5,26 +5,28 @@
 //   [B] bridge open        Bridge card · 'I crossed it' (violet) + 'Not today'
 //   [C] next woven         Gilded plate · 'Read now' (gold) + 'Save for 21:00'
 //   [D] sealed             Closure plate (LOG SEALED): date · chapter · proofs · next ritual
-//   season complete        Gilded plate · 'Name your sky' / 'Begin Season 2' (gold)
+//   season complete        Gilded plate · 'Name your sky' / 'Begin Season 2' (gold); the
+//                          promise of the next Chapter I follows seasonCarries (proof/seasonEnd)
 //   resting / plan-locked  Vellum · 'Wake this dream' / 'Keep this dream weaving' (gold)
 //   empty                  Gilded plate · 'Begin a dream' (gold)
 // The card always carries testID 'future-memory-card' (App Review notes, e2e).
 import React, { useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
-import { ArrowRight } from "lucide-react-native";
+import { ArrowRight } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import { usePlus } from "@/contexts/PlusContext";
 import { useUser } from "@/contexts/UserContext";
 import { isArcError, type ChapterMeta, type Dream, type LoopState, type Proof } from "@/contexts/arc.types";
 import { DEFAULT_RITUAL_TIMES } from "@/contexts/user.types";
+import { now as clockNow } from "@/lib/clock";
 import { TIER_LABEL } from "@/lib/futureMemory";
 import { localDateKey } from "@/lib/progress";
 import { figureFor } from "@/lib/sky/figures";
 import { toRoman } from "@/lib/sky/numerals";
 import { chapterLabel } from "@/lib/story/seasons";
 import { BridgeGlyph, Vignette } from "@/components/glyphs";
-import { evidenceHref, weaveHref } from "@/components/feature/proof";
+import { evidenceHref, nextSeasonCopy, seasonCarries, weaveHref } from "@/components/feature/proof";
 import {
   BridgeButton,
   GhostButton,
@@ -66,6 +68,8 @@ function stripEnd(text: string): string {
 
 /** Below this window height the plate trims itself so its CTA stays above the fold (iPhone SE). */
 const COMPACT_HEIGHT = 760;
+/** Below this one (Display Zoom, 568pt tall) the bridge card trims too. */
+const TINY_HEIGHT = 640;
 
 /** The chapter's hook line: the woven proof in the user's words, else the desire. */
 function ChapterHook({ meta, dream, now, compact }: { meta: ChapterMeta; dream: Dream; now: Date; compact: boolean }) {
@@ -113,7 +117,11 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
   const toast = useToast();
   const confirm = useConfirm();
   const [busy, setBusy] = useState<string | null>(null);
-  const compact = useWindowDimensions().height < COMPACT_HEIGHT;
+  const win = useWindowDimensions();
+  const compact = win.height < COMPACT_HEIGHT;
+  // Display Zoom on a 4.7" phone (320×568), or large text on a short one: the if-then shrinks to a
+  // caption so 'I crossed it' clears the tab bar. Height is counted in text lines, so big type counts as less room.
+  const tiny = win.height / Math.max(1, win.fontScale || 1) < TINY_HEIGHT;
 
   const openChapter = (id: string, extra?: Record<string, string>) =>
     router.push({ pathname: "/story/[id]", params: { id, ...extra } });
@@ -205,6 +213,8 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
   /* ------------------------------------------------------- season complete */
   if (loop.kind === "season-complete") {
     const name = season?.constellationName ?? null;
+    // 'Begins with what you did' only when Season N+1's Chapter I really weaves the 7th proof (an unseeded season).
+    const next = nextSeasonCopy(loop.season, seasonCarries(arc.proofs(dream.id, loop.season)));
     const begin = async () => {
       setBusy("season");
       try {
@@ -224,12 +234,10 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
           {loop.named && name ? `${name} · Season ${loop.season}` : `Season ${loop.season} · seven stars`}
         </T>
         <T variant="title" accessibilityRole="header" style={styles.title}>
-          {loop.named ? `Season ${loop.season + 1} begins with what you did.` : "Your sky is whole."}
+          {loop.named ? next.title : "Your sky is whole."}
         </T>
         <T variant="body" style={styles.body}>
-          {loop.named
-            ? "A new figure, a new Chapter I, written from the last step you took."
-            : "Give this constellation a name. It stays in your sky for good."}
+          {loop.named ? next.body : "Give this constellation a name. It stays in your sky for good."}
         </T>
         {loop.named ? (
           <PrimaryButton label={`Begin Season ${loop.season + 1}`} loading={busy === "season"} onPress={() => void begin()} testID="today-begin-season" />
@@ -261,8 +269,8 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
           {bridge.text}
         </T>
         {ifThen ? (
-          <View style={styles.ifThen} testID="today-if-then">
-            <T variant="body" tone="secondary">
+          <View style={[styles.ifThen, tiny && styles.ifThenTiny]} testID="today-if-then">
+            <T variant={tiny ? "caption" : "body"} tone="secondary">
               {ifThen}
             </T>
           </View>
@@ -337,12 +345,15 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
   if (loop.kind === "next-woven") {
     const ritual = profile ? nextRitual(profile.ritual, profile.ritualTimes ?? DEFAULT_RITUAL_TIMES, now) : null;
     const save = async () => {
-      if (!ritual) return;
+      if (!profile) return;
+      // The moment is taken at the tap, never from the render: the card may have been on screen since before 21:00.
+      const slot = nextRitual(profile.ritual, profile.ritualTimes ?? DEFAULT_RITUAL_TIMES, clockNow());
+      if (!slot) return;
       setBusy("save");
       try {
-        await arc.saveForRitual(meta.id, ritual.at.toISOString());
+        await arc.saveForRitual(meta.id, slot.at.toISOString());
         haptics.select();
-        toast.show({ message: `Saved for ${ritual.tomorrow ? "tomorrow, " : ""}${ritual.hhmm}.` });
+        toast.show({ message: `Saved for ${slot.tomorrow ? "tomorrow, " : ""}${slot.hhmm}.` });
       } catch (e) {
         fail(e, "That didn’t save. Try again in a moment.");
       } finally {
@@ -426,6 +437,7 @@ const styles = StyleSheet.create({
     borderLeftWidth: 1,
     borderLeftColor: colors.violetLine,
   },
+  ifThenTiny: { marginTop: space.sm },
   cta: { marginTop: space.lg },
   ghost: { marginTop: space.sm },
   ghostTight: { marginTop: space.xs, marginBottom: -space.sm },

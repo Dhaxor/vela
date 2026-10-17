@@ -12,12 +12,11 @@
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Settings } from "lucide-react-native";
+import { Settings } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import { useProgress } from "@/contexts/RitualContext";
 import { useUser } from "@/contexts/UserContext";
 import type { Dream } from "@/contexts/arc.types";
-import { now } from "@/lib/clock";
 import { localDateKey, shouldShowLedger, weeklyLedger } from "@/lib/progress";
 import { VELA_SAIL, figureFor } from "@/lib/sky/figures";
 import { heroHeight } from "@/lib/sky/layout";
@@ -31,10 +30,16 @@ import {
   SkyHero,
   WeeklyRhythm,
   greetingFor,
+  useNow,
   type ArcSwitcherItem,
 } from "@/components/feature/today";
 import { NotTodaySheet } from "@/components/feature/proof";
 import { colors, space } from "@/constants/theme";
+
+/** Below this height the sky shrinks (Display Zoom on 4.7" phones). */
+const SHORT_WINDOW = 640;
+/** Below this width the greeting drops to the title size, on one line. */
+const NARROW_WINDOW = 360;
 
 function byCreated(a: Dream, b: Dream): number {
   return a.createdAt.localeCompare(b.createdAt);
@@ -48,8 +53,6 @@ export default function TodayScreen() {
   const { summary } = useProgress();
   const win = useWindowDimensions();
   const params = useLocalSearchParams<{ ledger?: string }>();
-  const at = now();
-  const todayKey = localDateKey(at);
 
   const [viewId, setViewId] = useState<string | null>(null);
   // The Not-today sheet keeps its dream after closing so it can animate out.
@@ -59,6 +62,9 @@ export default function TodayScreen() {
   const shown = useMemo(() => arc.dreams.filter((d) => d.status !== "released").sort(byCreated), [arc.dreams]);
   const dream = (viewId ? shown.find((d) => d.id === viewId) : undefined) ?? arc.activeDream ?? shown[0] ?? null;
   const dreamId = dream?.id ?? null;
+  // The clock Today reads: fresh after a night suspended, on tab focus, each hour, and when a saved chapter opens.
+  const at = useNow([dreamId ? arc.latestChapter(dreamId)?.savedForAt : null]);
+  const todayKey = localDateKey(at);
   const loop = arc.loopState(dreamId, at);
 
   const season = dreamId ? arc.seasonProgress(dreamId) : undefined;
@@ -99,9 +105,14 @@ export default function TodayScreen() {
     }
   };
 
-  const heroH = heroHeight(win.height);
+  // Short windows (Display Zoom on an iPhone SE/8 is 320×568) get a smaller sky, so the loop card's CTA clears the tab bar.
+  // Counted in text lines: large Dynamic Type on a short phone counts as a short window too.
+  const short = win.height / Math.max(1, win.fontScale || 1) < SHORT_WINDOW;
+  const heroH = short ? heroHeight(win.height, 0.22, 120) : heroHeight(win.height);
   // Small phones (iPhone SE) tighten the gaps so the loop card's CTA stays above the fold.
   const roomy = win.height >= 760;
+  // Narrow windows keep the greeting to one line (the display size wraps at 320pt).
+  const narrow = win.width < NARROW_WINDOW;
   const name = profile?.name?.trim() || "friend";
   const openBridge = dreamId ? arc.openBridge(dreamId) : undefined;
   // A brand-new sky says so, instead of '0 nights · 0 stars'.
@@ -110,7 +121,15 @@ export default function TodayScreen() {
   return (
     <Screen testID="today-screen" contentStyle={styles.content}>
       <View style={styles.top}>
-        <T variant="display" accessibilityRole="header" style={styles.greeting} testID="today-greeting">
+        <T
+          variant={narrow ? "title" : "display"}
+          accessibilityRole="header"
+          numberOfLines={narrow ? 1 : undefined}
+          adjustsFontSizeToFit={narrow}
+          minimumFontScale={0.8}
+          style={styles.greeting}
+          testID="today-greeting"
+        >
           {greetingFor(at)}, {name}.
         </T>
         <IconButton accessibilityLabel="Settings" variant="vellum" onPress={() => router.push("/settings")} testID="open-settings">
@@ -143,7 +162,7 @@ export default function TodayScreen() {
         </View>
       ) : null}
 
-      <View style={[styles.card, roomy && styles.roomy]}>
+      <View style={[styles.card, roomy && styles.roomy, short && styles.tight]}>
         <LoopCard
           loop={loop}
           now={at}
@@ -186,9 +205,20 @@ const styles = StyleSheet.create({
   content: { paddingTop: space.sm },
   top: { flexDirection: "row", alignItems: "flex-start", gap: space.sm },
   greeting: { flex: 1, paddingTop: space.xxs },
-  status: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: space.sm, marginTop: space.xs, marginBottom: space.xs },
+  // Wraps at accessibility text sizes rather than pushing the week off the screen.
+  status: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+    columnGap: space.sm,
+    rowGap: space.xs,
+    marginTop: space.xs,
+    marginBottom: space.xs,
+  },
   switcher: { marginTop: space.md },
   card: { marginTop: space.md },
   roomy: { marginTop: space.base },
+  tight: { marginTop: space.sm },
   section: { marginTop: space.lg },
 });

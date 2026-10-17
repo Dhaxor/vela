@@ -4,7 +4,7 @@
 // each star. Compact by design: it shares a row with the nights chip, so the
 // loop card's CTA stays above the fold on a 375×667 phone.
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
 import type { WeeklyRhythm as Rhythm, WeekDayState } from "@/lib/progress";
 import { T } from "@/components/ui";
@@ -14,6 +14,10 @@ import { sparklePath } from "@/lib/sky/shapes";
 const INITIALS = ["M", "T", "W", "T", "F", "S", "S"] as const;
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
 const STAR = 14;
+/** Dynamic Type ceiling for the weekday initials (caption text elsewhere grows to 1.8×). */
+const INITIAL_MAX_SCALE = 1.2;
+/** Below this width (Display Zoom, 320pt) the stars sit closer, so the strip still shares a row with the chip. */
+const NARROW = 360;
 
 export function rhythmCaption(week: Rhythm): string {
   if (week.met) return `${week.shownUp} of ${week.target} nights · rhythm kept`;
@@ -53,14 +57,16 @@ export interface WeeklyRhythmProps {
 export function WeeklyRhythm({ week, paused = false, todayKey, testID = "today-rhythm" }: WeeklyRhythmProps) {
   const shown = week.days.filter((d) => d.state === "shown-up").map((d) => DAY_NAMES[d.index]);
   const label = `${rhythmCaption(week)}${shown.length ? `: ${shown.join(", ")}` : ""}${paused ? ". Your sky is paused" : ""}`;
+  const narrow = useWindowDimensions().width < NARROW;
   return (
-    <View testID={testID} style={styles.row} accessible accessibilityRole="summary" accessibilityLabel={label}>
+    <View testID={testID} style={[styles.row, narrow && styles.rowNarrow]} accessible accessibilityRole="summary" accessibilityLabel={label}>
       {week.days.map((d) => {
         const today = d.dateKey === todayKey;
         return (
           <View key={d.dateKey} style={styles.cell}>
             <Day state={d.state} today={today} />
-            <T variant="caption" tone={today ? "primary" : "faint"} strong={today} center style={styles.letter}>
+            {/* Decorative (the row's label says it all), so the initials stay in their 16pt cells at any text size. */}
+            <T variant="caption" tone={today ? "primary" : "faint"} strong={today} center maxFontSizeMultiplier={INITIAL_MAX_SCALE} style={styles.letter}>
               {INITIALS[d.index]}
             </T>
           </View>
@@ -72,6 +78,7 @@ export function WeeklyRhythm({ week, paused = false, todayKey, testID = "today-r
 
 const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: space.xs },
+  rowNarrow: { gap: space.xxs },
   cell: { width: 16, alignItems: "center" },
   // Initials tuck under the star so the strip is no taller than the chip.
   letter: { marginTop: -space.xxs, lineHeight: 16 },

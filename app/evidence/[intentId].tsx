@@ -12,15 +12,18 @@
 //   Season 2 begins (or Chapter VII, when the seventh star wove it).
 // - empty: no open bridge (read the chapter / choose a bridge first), a
 //   resting dream, or an unknown one. Always a way forward.
+// - `?nameSeason=N`: the Named Sky for a PAST season that is whole but was
+//   never named (a 1.0 season migrated in one piece), opened from the sky.
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Share2 } from "lucide-react-native";
+import { Share2 } from "@/components/glyphs/icons";
 import { holdForCeremony, useArc } from "@/contexts/ArcContext";
 import { useUser } from "@/contexts/UserContext";
-import { isArcError, type Bridge, type ChapterMeta, type Dream, type Proof } from "@/contexts/arc.types";
+import { STARS_PER_SEASON, isArcError, type Bridge, type ChapterMeta, type Dream, type Proof } from "@/contexts/arc.types";
 import { now } from "@/lib/clock";
+import { safeBack } from "@/lib/nav";
 import { saveForLabel } from "@/lib/ritualTime";
 import { proofEnding } from "@/lib/futureMemory";
 import { localDateKey } from "@/lib/progress";
@@ -37,9 +40,12 @@ import {
   ProofReceipt,
   ShareCardSheet,
   StarBirth,
+  afterNamingLine,
   chapterHref,
   chimeIfAudioActive,
   nextRitual,
+  pastSeasonNamedLine,
+  seasonCarries,
   seasonSpan,
   useNamedSky,
   useProofAsks,
@@ -48,6 +54,7 @@ import {
   type NamedSkyState,
   type ProofDraft,
 } from "@/components/feature/proof";
+import { useWakeDream } from "@/components/feature/sky";
 import { colors, space } from "@/constants/theme";
 
 /** 'Chapter II begins with …' (short enough for one line on an iPhone SE). */
@@ -67,10 +74,11 @@ export default function EvidenceScreen() {
   const router = useRouter();
   const arc = useArc();
   const toast = useToast();
-  const params = useLocalSearchParams<{ intentId: string; born?: string }>();
+  const params = useLocalSearchParams<{ intentId: string; born?: string; nameSeason?: string }>();
   const dreamId = String(params.intentId ?? "");
   const dream = arc.dream(dreamId);
   const bornParam = typeof params.born === "string" ? params.born : null;
+  const nameSeason = Number(params.nameSeason);
 
   const [draft, setDraft] = useState<ProofDraft>({ kind: "did", text: "", photoUri: null });
   const [saving, setSaving] = useState(false);
@@ -135,6 +143,17 @@ export default function EvidenceScreen() {
         primary={{ label: "Return to Today", onPress: () => router.replace("/"), testID: "evidence-empty-home" }}
       />
     );
+  }
+
+  // A past season, whole but never named: its Named Sky, from the sky's season plate.
+  const current = arc.seasonProgress(dreamId)?.season ?? dream.season;
+  if (
+    Number.isInteger(nameSeason) &&
+    nameSeason >= 1 &&
+    nameSeason < current &&
+    arc.proofs(dreamId, nameSeason).length >= STARS_PER_SEASON
+  ) {
+    return <CompleteView dream={dream} season={nameSeason} />;
   }
 
   // The ceremony for a saved proof (just now, or handed over by Not today).
@@ -283,9 +302,11 @@ function BirthView({ dream, proof, play, holdRef, onPlayed }: BirthViewProps) {
   const saveForLater = async () => {
     if (!next) return router.replace("/");
     setBusy(true);
+    // Taken at the tap: the ceremony may have been on screen past the ritual time.
+    const at = nextRitual(profile, now());
     try {
-      await arc.saveForRitual(next.id, slot.at.toISOString());
-      toast.show({ message: `${chapterLabel(next.stage).split(" · ")[0]} will be waiting ${slot.later ? "tomorrow at" : "at"} ${slot.label}.`, tone: "proof" });
+      await arc.saveForRitual(next.id, at.at.toISOString());
+      toast.show({ message: `${chapterLabel(next.stage).split(" · ")[0]} will be waiting ${at.later ? "tomorrow at" : "at"} ${at.label}.`, tone: "proof" });
       router.replace("/");
     } catch {
       toast.show({ message: "That didn't save. Try once more.", tone: "error" });
@@ -308,7 +329,7 @@ function BirthView({ dream, proof, play, holdRef, onPlayed }: BirthViewProps) {
 
   const caption = closes ? (
     <View style={styles.full} testID="evidence-success">
-      <NamedSkyPanel sky={sky} season={season} span={seasonSpan(seasonProofs)} after={afterNaming(season, next)} testID="evidence-sky" />
+      <NamedSkyPanel sky={sky} season={season} span={seasonSpan(seasonProofs)} after={afterNaming(season, next, seasonCarries(seasonProofs))} testID="evidence-sky" />
     </View>
   ) : (
     <View style={styles.caption} testID="evidence-success">
@@ -411,20 +432,50 @@ function SeasonActions({ dream, season, sky, next, saveLabel, onName, onLater, b
   const router = useRouter();
   const arc = useArc();
   const toast = useToast();
+  const wakeDream = useWakeDream();
   const [beginning, setBeginning] = useState(false);
+  const [waking, setWaking] = useState(false);
 
   if (!sky.named) {
     return <PrimaryButton label="Name this sky" onPress={onName} loading={sky.saving} testID="evidence-sky-save" />;
   }
   if (dream.season > season) {
-    // A past season reopened (an old link): its story has already moved on.
-    return <PrimaryButton label="Back to Today" onPress={() => router.replace("/")} testID="evidence-finish" />;
+    // A past season (named late from the sky, or an old link): its story has already moved on.
+    return (
+      <>
+        <PrimaryButton label="Back to your sky" onPress={() => safeBack(router)} testID="evidence-finish" />
+        <GhostButton label="Return to Today" onPress={() => router.replace("/")} testID="evidence-later" />
+      </>
+    );
   }
   if (next && !next.heardAt) {
     return (
       <>
         <PrimaryButton label={`Read ${chapterLabel(next.stage).split(" · ")[0]}`} onPress={() => router.replace(weaveHref(next.id))} testID="evidence-finish" />
         {!next.savedForAt ? <GhostButton label={saveLabel} onPress={onLater} disabled={busy} testID="evidence-save-for" /> : null}
+      </>
+    );
+  }
+  // Only a weaving dream can begin its next season: a resting or plan-locked one is woken first.
+  if (!arc.weavingDreamIds.includes(dream.id)) {
+    const planLocked = arc.planLockedDreamIds.includes(dream.id);
+    const wake = async () => {
+      setWaking(true);
+      try {
+        await wakeDream(dream);
+      } finally {
+        setWaking(false);
+      }
+    };
+    return (
+      <>
+        <T variant="caption" tone="secondary" center testID="evidence-season-resting">
+          {planLocked
+            ? `One dream weaves at a time without Plus. Choose this one and Season ${season + 1} can begin.`
+            : `This dream is resting. Wake it and Season ${season + 1} can begin.`}
+        </T>
+        <PrimaryButton label={planLocked ? "Keep this dream weaving" : "Wake this dream"} onPress={() => void wake()} loading={waking} testID="evidence-wake-dream" />
+        <GhostButton label="Not tonight" onPress={() => router.replace("/")} testID="evidence-later" />
       </>
     );
   }
@@ -435,8 +486,15 @@ function SeasonActions({ dream, season, sky, next, saveLabel, onName, onLater, b
     try {
       const chapter = await arc.beginNextSeason(dream.id);
       router.replace(weaveHref(chapter.id));
-    } catch {
-      toast.show({ message: "Season 2 couldn't begin just now. Try once more.", tone: "error" });
+    } catch (e) {
+      const code = isArcError(e) ? e.code : null;
+      toast.show({
+        message:
+          code === "dream-not-weaving"
+            ? "This dream is resting. Wake it to begin its next season."
+            : `Season ${season + 1} couldn't begin just now. Try once more.`,
+        tone: "error",
+      });
     } finally {
       release();
       setBeginning(false);
@@ -450,11 +508,9 @@ function SeasonActions({ dream, season, sky, next, saveLabel, onName, onLater, b
   );
 }
 
-/** The line under the name: Chapter VII still to read, or the next season. */
-function afterNaming(season: number, next: ChapterMeta | undefined): string {
-  return next && !next.heardAt
-    ? `${chapterLabel(next.stage)} is woven from your seventh star.`
-    : `Season ${season + 1} begins with what you did.`;
+/** The line under the name: Chapter VII still to read, or the next season (promising the last step only when it is carried). */
+function afterNaming(season: number, next: ChapterMeta | undefined, carries: boolean): string {
+  return next && !next.heardAt ? `${chapterLabel(next.stage)} is woven from your seventh star.` : afterNamingLine(season, carries);
 }
 
 /** Opened on a complete season: the whole figure, its name, what comes next. */
@@ -469,6 +525,8 @@ function CompleteView({ dream, season }: { dream: Dream; season: number }) {
   const latest = arc.latestChapter(dream.id);
   const next = latest && latest.season === season && !latest.heardAt ? latest : undefined;
   const slot = nextRitual(profile, now());
+  // Named late, from the sky: the story has already moved on to a later season.
+  const past = dream.season > season;
 
   const name = async () => {
     const release = holdForCeremony(2000);
@@ -479,7 +537,7 @@ function CompleteView({ dream, season }: { dream: Dream; season: number }) {
   const later = async () => {
     if (!next) return router.replace("/");
     try {
-      await arc.saveForRitual(next.id, slot.at.toISOString());
+      await arc.saveForRitual(next.id, nextRitual(profile, now()).at.toISOString());
       router.replace("/");
     } catch {
       toast.show({ message: "That didn't save. Try once more.", tone: "error" });
@@ -498,7 +556,14 @@ function CompleteView({ dream, season }: { dream: Dream; season: number }) {
         </Dock>
       }
     >
-      <NamedSkyCeremony dreamId={dream.id} season={season} sky={sky} after={afterNaming(season, next)} figureHeight={figureHeight} testID="evidence-sky" />
+      <NamedSkyCeremony
+        dreamId={dream.id}
+        season={season}
+        sky={sky}
+        after={past ? pastSeasonNamedLine(season) : afterNaming(season, next, seasonCarries(arc.proofs(dream.id, season)))}
+        figureHeight={figureHeight}
+        testID="evidence-sky"
+      />
     </Screen>
   );
 }

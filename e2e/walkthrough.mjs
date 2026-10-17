@@ -3,6 +3,9 @@
 // App Store listing and the subscription review both need.
 //
 // Selector rule (learned on two sibling apps): prefer testIDs ("~foo").
+//
+// Exit code: 1 when any check FAILS or the walk dies, so ios-e2e.yml can gate
+// the release on the device run (the shots and the log are still published).
 import { remote } from "webdriverio";
 import fs from "fs";
 
@@ -62,6 +65,30 @@ async function exists(driver, selector, timeout = 6000) {
   } catch {
     return false;
   }
+}
+
+async function textOf(driver, selector, timeout = 4000) {
+  try {
+    const el = await driver.$(selector);
+    await el.waitForExist({ timeout });
+    return (await el.getText()) || (await el.getAttribute("label")) || "";
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Back out of the reader until Today shows. The stack after the loop is
+ * [(tabs), Chapter I, Chapter II] (the proof form is replaced by the Weave,
+ * the Weave by Chapter II), so one Back lands on Chapter I, not Today.
+ */
+async function backToToday(driver, tries = 4) {
+  for (let i = 0; i < tries; i++) {
+    if (await exists(driver, "~streak-chip", 1500)) return true;
+    if (!(await tap(driver, "~story-back", `back ${i + 1}`, 6000))) break;
+    await sleep(1200);
+  }
+  return exists(driver, "~streak-chip", 6000);
 }
 
 const caps = {
@@ -194,12 +221,12 @@ async function main() {
   record("CHAPTER-II", ch2, ch2 ? "Chapter II woven from the proof" : "no Chapter II");
   await sleep(1500);
   await shot(driver, "chapter-two");
-  await tap(driver, "~story-back", "back to Today", 8000);
-  await sleep(1500);
+  // Back returns through Chapter I to Today (REVIEW_NOTES_1.1).
+  const today = await backToToday(driver);
 
   // --- 6. Today (marketing shot) ---
-  const chip = await exists(driver, "~streak-chip", 8000);
-  record("TODAY", chip, chip ? "nights and stars chip on Today" : "no chip");
+  const chip = today && (await exists(driver, "~streak-chip", 8000));
+  record("TODAY", chip, chip ? "nights and stars chip on Today" : "no chip (still in the reader?)");
   await shot(driver, "today");
 
   // --- 7. Your line (marketing shot) ---
@@ -223,11 +250,20 @@ async function main() {
   if (await exists(driver, "~phrase-set", 3000)) await tap(driver, "~phrase-set", "begin practice");
   await sleep(1200);
   if (await exists(driver, "~rep-write", 8000)) {
-    await tap(driver, "~rep-write", "write rep 1");
-    await tap(driver, "~rep-write", "write rep 2");
-    await sleep(800);
+    const before = await textOf(driver, "~progress-369");
+    // The Write button saves what is in the field, so type the phrase each time.
+    for (let rep = 1; rep <= 2; rep++) {
+      await typeInto(driver, "~rep-input", "I am calm, capable, and paid well", `rep ${rep}`);
+      await tap(driver, "~rep-write", `write rep ${rep}`);
+      await sleep(600);
+    }
+    await sleep(400);
     await shot(driver, "method369");
-    record("M369", true, "369 sheet with reps");
+    const after = await textOf(driver, "~progress-369");
+    const written = /^(\d+) of/.exec(after);
+    const was = /^(\d+) of/.exec(before);
+    const moved = !!written && Number(written[1]) >= (was ? Number(was[1]) : 0) + 2;
+    record("M369", moved, moved ? `369 sheet: '${after}'` : `reps not counted ('${before}' → '${after}')`);
   } else {
     record("M369", false, "369 sheet not reached");
   }
@@ -252,9 +288,19 @@ async function main() {
   const passed = results.filter((r) => r.pass).length;
   log(`SUMMARY: ${passed}/${results.length} checks passed`);
   log("walkthrough complete");
+  return results.filter((r) => !r.pass).map((r) => r.name);
 }
 
-main().catch((e) => {
-  console.error("[e2e] fatal:", e);
-  process.exit(0); // shots and the log are the artefact; never fail the job
-});
+main().then(
+  (failed) => {
+    if (failed.length > 0) {
+      console.error(`[e2e] FAILED checks: ${failed.join(", ")}`);
+      process.exit(1);
+    }
+    process.exit(0);
+  },
+  (e) => {
+    console.error("[e2e] fatal:", e);
+    process.exit(1); // the shots and the log are still published by the workflow's always() step
+  }
+);

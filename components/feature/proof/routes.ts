@@ -20,6 +20,14 @@ export function evidenceHref(dreamId: DreamId): Href {
 }
 
 /**
+ * The Named Sky for a past season that was completed but never named (a 1.0
+ * season migrated whole, CONTRACTS §3): opened from the sky's season plate.
+ */
+export function nameSeasonHref(dreamId: DreamId, season: number): Href {
+  return { pathname: "/evidence/[intentId]", params: { intentId: dreamId, nameSeason: String(season) } };
+}
+
+/**
  * The Star Birth (and, at the 7th star, the Named Sky) for a proof that is
  * already saved: NotTodaySheet hands over here, and a reload of the success
  * state lands here too.

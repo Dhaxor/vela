@@ -4,7 +4,7 @@
 // marks the loop's action.
 import React from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/glyphs/icons";
 import { cardShadow, colors, radius, space } from "@/constants/theme";
 import { Press } from "./Press";
 import { haptics } from "./haptics";

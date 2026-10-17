@@ -4,3 +4,4 @@ export { MILESTONES, milestoneFor, skyLine, type Milestone } from "./milestones"
 export { SeasonStrip, type SeasonPlate, type SeasonStripProps } from "./SeasonStrip";
 export { StarDetailSheet, type StarDetailSheetProps, type StarSelection } from "./StarDetailSheet";
 export { StarList, type StarListProps } from "./StarList";
+export { useWakeDream } from "./useWakeDream";

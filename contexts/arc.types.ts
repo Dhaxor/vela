@@ -329,7 +329,7 @@ export interface SeasonProgress {
  *   2. dream not weaving (resting/released/plan-locked) ............. 'resting'
  *   3. latest chapter weaves a proof saved TODAY, is unheard, and is not
  *      saved for later .............................................. 'next-woven'   [C]
- *   4. latest chapter savedForAt > now ............................... 'sealed'       [D]
+ *   4. latest chapter savedForAt > now and still unheard ............. 'sealed'       [D]
  *   5. season complete (7 stars) and the latest chapter is heard ..... 'season-complete'
  *   6. a proof was saved today and the latest chapter is heard ....... 'sealed'       [D]
  *   7. an open bridge exists ......................................... 'bridge-open'  [B]
@@ -458,6 +458,13 @@ export interface ArcValue {
   /* ---- status ---- */
   /** Index loaded (and v1 migrated if needed) AND the latest chapter of every non-released dream is cached. */
   readonly ready: boolean;
+  /**
+   * Storage answered a launch read with an error. The provider keeps retrying
+   * and stays not ready (writing nothing) until it succeeds; meanwhile the UI
+   * may say 'Vela couldn't open your data' instead of the splash. Optional for
+   * contract compatibility; ArcProvider always sets it.
+   */
+  readonly storageError?: boolean;
   readonly schemaVersion: typeof ARC_SCHEMA_VERSION;
 
   /* ---- state ---- */

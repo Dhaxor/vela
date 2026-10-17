@@ -5,7 +5,7 @@
 import React from "react";
 import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronRight, Share2 } from "lucide-react-native";
+import { ChevronRight, Share2 } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import type { Dream, Proof } from "@/contexts/arc.types";
 import { toRoman } from "@/lib/sky/numerals";

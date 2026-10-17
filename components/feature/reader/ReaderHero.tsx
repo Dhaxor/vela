@@ -3,7 +3,7 @@
 // bridge is waiting at the end, a violet link jumps straight to it.
 import React from "react";
 import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
-import { ArrowDown } from "lucide-react-native";
+import { ArrowDown } from "@/components/glyphs/icons";
 import { GhostButton, T } from "@/components/ui";
 import { ChapterNumeral } from "@/components/glyphs";
 import { colors, space } from "@/constants/theme";

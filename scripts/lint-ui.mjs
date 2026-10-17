@@ -6,6 +6,8 @@
 //   fontStyle  a fontStyle style: the italic is a separate font file
 //   alert      Alert.alert(...): a no-op on web; use useConfirm / ConfirmSheet / useToast
 //   a11y       a touchable with no text inside and no accessibilityLabel
+//   iconBarrel an import of the "lucide-react-native" barrel, which bundles and runs
+//              every one of its ~1,759 icons at cold start; use @/components/glyphs/icons
 //
 //   node scripts/lint-ui.mjs [paths…] [--json] [--summary]
 // Exit code 1 when anything is found.
@@ -28,6 +30,11 @@ const RULES = [
   { id: 'fontWeight', re: /\bfontWeight\s*:/g, why: 'fontWeight; use <T strong> (a real 600 file)' },
   { id: 'fontStyle', re: /\bfontStyle\s*:/g, why: 'fontStyle; use <T italic> (a real italic file)' },
   { id: 'alert', re: /\bAlert\s*\.\s*alert\s*\(/g, why: 'Alert.alert is a no-op on web; use useConfirm / ConfirmSheet / useToast' },
+  {
+    id: 'iconBarrel',
+    re: /(?:\bfrom\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)["'`]lucide-react-native["'`]/g,
+    why: 'the lucide barrel loads all ~1,759 icons at cold start; import from @/components/glyphs/icons',
+  },
 ];
 
 function walk(p, out = []) {

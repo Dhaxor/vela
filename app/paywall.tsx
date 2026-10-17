@@ -14,7 +14,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { X } from "lucide-react-native";
+import { X } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import { usePlus } from "@/contexts/PlusContext";
 import type { PlanId } from "@/lib/purchase";

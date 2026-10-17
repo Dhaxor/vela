@@ -6,4 +6,5 @@ export { NightsChip, type NightsChipProps } from "./NightsChip";
 export { RitualsRow, useTodayRituals, type RitualsRowProps } from "./RitualsRow";
 export { SkyHero, type SkyHeroProps } from "./SkyHero";
 export { WeeklyRhythm, rhythmCaption, type WeeklyRhythmProps } from "./WeeklyRhythm";
+export { useNow } from "./useNow";
 export * from "./time";

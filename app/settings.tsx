@@ -9,7 +9,7 @@
 // testIDs kept from 1.0: settings-back, settings-focus-*, settings-reminders-on
 // / -off (now on the reminders Switch: '-on' while off, '-off' while on, so a
 // tap does what the id says), settings-upgrade, settings-restore.
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Linking, Platform, StyleSheet, View, useWindowDimensions } from "react-native";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -24,7 +24,7 @@ import { getPermission, requestPermissionAtCommitment, type PermissionState } fr
 import { RHYTHM_TARGET } from "@/lib/progress";
 import { ChipGroup, Header, ProgressStars, Screen, Segmented, T, useToast, type StarState } from "@/components/ui";
 import { VelaMark } from "@/components/glyphs";
-import { LEGAL_URLS, usePlusActions } from "@/components/feature/plus";
+import { FREE_AREA_LIMIT, LEGAL_URLS, areaAllowance, areaLimitCopy, tapArea, usePlusActions } from "@/components/feature/plus";
 import {
   AboutPanel,
   BedPicker,
@@ -82,6 +82,11 @@ export default function SettingsScreen() {
   const [permission, setPermission] = useState<PermissionState | null>(null);
   // Below ~400pt the week's stars move under the caption so the label never wraps.
   const wide = useWindowDimensions().width >= 400;
+  // Free areas are capped (Plus opens all six). Taken once per visit, so an accidental untick can be undone.
+  const areaRoom = useRef<{ plus: boolean; allowance: number } | null>(null);
+  if (profile && areaRoom.current?.plus !== plusActions.isPlus) {
+    areaRoom.current = { plus: plusActions.isPlus, allowance: areaAllowance(profile.focusAreas, plusActions.isPlus) };
+  }
 
   // Voices for the Listening group (an idle narration controller: it never speaks here).
   const narration = useNarration(null, { daypart: daypartAt(now()), rate: profile?.rate ?? 0.9, voiceId: profile?.voiceId ?? null });
@@ -151,12 +156,21 @@ export default function SettingsScreen() {
   };
 
   /* -------------------------------------------------------------- areas */
+  const allowance = areaRoom.current?.allowance ?? areaAllowance(profile.focusAreas, plusActions.isPlus);
+  const pickArea = (area: FocusId) => {
+    const tap = tapArea(profile.focusAreas, area, allowance);
+    if (tap.kind === "keep-one") toast.show("Keep at least one area.");
+    else if (tap.kind === "plus")
+      toast.show({
+        message: areaLimitCopy(allowance),
+        action: { label: "Vela Plus", onPress: () => router.push({ pathname: "/paywall", params: { from: "area" } }) },
+      });
+    else save({ focusAreas: tap.areas });
+  };
+  // The chip that was tapped: the one added or the one removed.
   const setAreas = (next: FocusId[]) => {
-    if (next.length === 0) {
-      toast.show("Keep at least one area.");
-      return;
-    }
-    save({ focusAreas: next });
+    const tapped = next.find((a) => !profile.focusAreas.includes(a)) ?? profile.focusAreas.find((a) => !next.includes(a));
+    if (tapped) pickArea(tapped);
   };
 
   const weekStates = summary.week.days.map((d) => DAY_STAR[d.state] ?? "upcoming");
@@ -176,7 +190,16 @@ export default function SettingsScreen() {
           onPress={() => setSheet("pronunciation")}
           testID="settings-pronunciation-row"
         />
-        <ControlRow label="Your areas" detail="Lines and prompts for these areas are always free.">
+        <ControlRow
+          label="Your areas"
+          detail={
+            plusActions.isPlus
+              ? "Every area is open with Plus. These shape your lines and prompts."
+              : allowance > FREE_AREA_LIMIT
+                ? "Lines and prompts for these areas stay free. Plus opens all six."
+                : "Lines and prompts for up to three areas are free. Plus opens all six."
+          }
+        >
           <ChipGroup
             multiple
             options={FOCUS_AREAS.map((f) => ({ value: f.id, label: f.label }))}

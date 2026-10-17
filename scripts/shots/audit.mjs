@@ -149,6 +149,20 @@ function driver(page, outDir) {
       }
       await sleep(600);
     },
+    /** The first visible element's rect (CSS px), or null. */
+    async rect(id) {
+      return page.eval(`(() => { const el = ${findExpr(sel(id))}; if (!el) return null; const r = el.getBoundingClientRect(); return { top: r.top, bottom: r.bottom, left: r.left, right: r.right }; })()`);
+    },
+    /** Fail unless `id` sits in the first view: on screen, and starting (or, `whole`, ending) above `above` (the dock or the tab bar). */
+    async inFirstView(id, above, whole = false) {
+      const r = await api.rect(id);
+      if (!r) throw new Error(`not on screen: ${id}`);
+      const limit = above ? (await api.rect(above))?.top ?? Infinity : await page.eval('innerHeight');
+      const vw = await page.eval('innerWidth');
+      if (r.left < -1 || r.right > vw + 1) throw new Error(`${id} runs off the screen (${Math.round(r.left)}..${Math.round(r.right)} of ${vw})`);
+      if (r.top >= limit) throw new Error(`${id} starts below ${above ?? 'the fold'} (top ${Math.round(r.top)} ≥ ${Math.round(limit)})`);
+      if (whole && r.bottom > limit + 1) throw new Error(`${id} is cut off by ${above ?? 'the fold'} (bottom ${Math.round(r.bottom)} > ${Math.round(limit)})`);
+    },
     async shot(name) {
       await page.waitForImages(4000);
       await sleep(STILL ? 500 : 900);
@@ -263,6 +277,8 @@ async function walk(page, w, h) {
     await a.waitUrl(/^\/story\//, 15000);
     await a.waitFor('story-listen');
     await a.waitText('Maya');
+    // Every player control fits the screen (at 320pt the row used to clip 'Voice').
+    for (const id of ['story-listen', 'story-voice']) await a.inFirstView(id);
     await a.shot('chapter-1-top');
   });
   await a.step('Chapter I: the seed woven in gold', async () => {
@@ -295,6 +311,8 @@ async function walk(page, w, h) {
     await a.tap('story-record-proof');
     await a.waitUrl(/^\/evidence\//);
     await a.waitFor('evidence-note');
+    // The one required field is in the first view, above 'Chart this proof' (ELEVATE §8's 375×667 gate).
+    await a.inFirstView('evidence-note', 'evidence-dock');
     await a.shot('evidence-1-form');
     await a.tap('evidence-kind-did');
     await a.type('evidence-note', PROOF);
@@ -342,6 +360,12 @@ async function walk(page, w, h) {
     }
     await a.waitFor('future-memory-card');
     await a.waitText('2 stars');
+    // Today's one filled CTA clears the tab bar on arrival, and the week strip stays on screen.
+    let cta = null;
+    for (const id of ['today-enter-chapter', 'today-choose-bridge', 'weave-next-chapter', 'record-proof']) if (!cta && (await a.visible(id))) cta = id;
+    if (!cta) throw new Error("no filled CTA on Today's loop card");
+    await a.inFirstView(cta, '[data-testid="tab-today"]', true);
+    await a.inFirstView('today-rhythm');
     await a.shot('today-1-top');
     await a.scroll('end');
     await a.shot('today-1-end');

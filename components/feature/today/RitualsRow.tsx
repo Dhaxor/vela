@@ -7,7 +7,7 @@
 import React, { useMemo } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/glyphs/icons";
 import type { Dream } from "@/contexts/arc.types";
 import { useArc } from "@/contexts/ArcContext";
 import { dailyAffirmation } from "@/lib/affirmations";

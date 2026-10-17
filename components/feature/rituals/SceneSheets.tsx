@@ -3,7 +3,7 @@
 // choice among the dreams that are not released, or none.
 import React, { useEffect, useState } from "react";
 import { Image, StyleSheet, View, useWindowDimensions } from "react-native";
-import { ImagePlus, PenLine } from "lucide-react-native";
+import { ImagePlus, PenLine } from "@/components/glyphs/icons";
 import { ChipGroup, DangerButton, GhostButton, PrimaryButton, SecondaryButton, Sheet, T, TextField } from "@/components/ui";
 import { StarProof } from "@/components/glyphs";
 import type { Dream, Proof } from "@/contexts/arc.types";

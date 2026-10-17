@@ -5,7 +5,7 @@
 // first person ('I am so grateful that I have my own design studio…').
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View, type TextInput } from "react-native";
-import { X } from "lucide-react-native";
+import { X } from "@/components/glyphs/icons";
 import {
   Dock,
   GhostButton,

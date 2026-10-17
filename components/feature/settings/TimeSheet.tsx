@@ -4,7 +4,7 @@
 // stepper in 5-minute steps, and four quick picks for the slot.
 import React, { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Minus, Plus } from "lucide-react-native";
+import { Minus, Plus } from "@/components/glyphs/icons";
 import type { HHmm } from "@/contexts/user.types";
 import { Chip, GhostButton, IconButton, PrimaryButton, Sheet, T } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";

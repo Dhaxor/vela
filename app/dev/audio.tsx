@@ -6,7 +6,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Platform, StyleSheet, View } from "react-native";
 import { Redirect } from "expo-router";
-import { Square } from "lucide-react-native";
+import { Square } from "@/components/glyphs/icons";
 import {
   ChipGroup,
   Dock,

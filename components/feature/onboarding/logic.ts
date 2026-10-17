@@ -1,9 +1,14 @@
 // Pure helpers for First Light and the Weave (no React Native imports, bun-tested).
 import type { FocusId } from "@/lib/focus";
 
-/** Focus selection is tap order: tap adds, tap again removes; [0] is the primary area. */
-export function toggleFocus(current: readonly FocusId[], id: FocusId): FocusId[] {
-  return current.includes(id) ? current.filter((f) => f !== id) : [...current, id];
+/**
+ * Focus selection is tap order: tap adds, tap again removes; [0] is the
+ * primary area. An add past `max` is ignored (First Light passes
+ * FREE_AREA_LIMIT: more areas are a Plus benefit).
+ */
+export function toggleFocus(current: readonly FocusId[], id: FocusId, max: number = Number.POSITIVE_INFINITY): FocusId[] {
+  if (current.includes(id)) return current.filter((f) => f !== id);
+  return current.length >= max ? [...current] : [...current, id];
 }
 
 /** Above this many words, neighbours travel together so the Weave's scatter stays legible. */

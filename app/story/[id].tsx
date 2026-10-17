@@ -9,7 +9,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Platform, StyleSheet, View, type LayoutChangeEvent, type NativeScrollEvent, type NativeSyntheticEvent, type ScrollView } from "react-native";
 import { useIsFocused, useLocalSearchParams, useRouter, type Href } from "expo-router";
-import { Ellipsis } from "lucide-react-native";
+import { Ellipsis } from "@/components/glyphs/icons";
 import { Header, IconButton, Screen, T, useConfirm, useMotion, useToast, type ScreenProps } from "@/components/ui";
 import {
   BedGlyph,
@@ -228,7 +228,14 @@ function Reader({ chapter, meta, dream, reveal, jumpToBridge, devAsk }: ReaderPr
   /* ---- listening ---- */
   const [bedId, setBedId] = useState<BedId>(() => resolveBed(profile?.bed, plus.isPlus));
   const [bedOn, setBedOn] = useState(() => profile?.bedOn !== false);
-  const bed = useSoundscape(bedOn ? bedId : null, { locked: !plus.canUseBed(bedId) });
+  // AirPods out or a call: iOS pauses the bed but not the voice, so the bed's stop pauses the voice too
+  // (the chapter would otherwise carry on aloud from the speaker). Resume picks both up again.
+  const bed = useSoundscape(bedOn ? bedId : null, {
+    locked: !plus.canUseBed(bedId),
+    onInterrupted: () => {
+      if (narrationRef.current.status === "playing") narrationRef.current.pause();
+    },
+  });
   const bedRef = useRef(bed);
   bedRef.current = bed;
   const [sleep, setSleep] = useState<SleepChoice>("off");

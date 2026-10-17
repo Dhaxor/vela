@@ -47,9 +47,13 @@ export const checkArcInvariants: CheckArcInvariants = (snapshot: ArcSnapshot) =>
         if (!STAGE_IDS.includes(c.stage)) bad(`I2 chapter ${c.id}: stage out of range`);
         if (i > 0 && c.number !== inSeason[i - 1].number + 1) bad(`I2 chapter ${c.id}: numbers not consecutive`);
       });
-      // I3: stage = min(loop proofs in the season at write time + 1, 7). Migrated text was staged by the same rule in migrate.
+      // I3: stage = min(loop proofs in the season at write time + 1, 7). A chapter carried over
+      // from 1.0 was staged by migration from its season's proofs, not by its 1.0 createdAt, and a
+      // 'Rewrite this chapter' keeps that stage (I10). So the check skips migrated chapters, also
+      // when an earlier build's rerender relabelled one 'engine': any chapter older than the migration.
+      const migratedAt = index.migratedFromV1At ?? null;
       for (const c of inSeason) {
-        if (c.source === "migrated-v1") continue;
+        if (c.source === "migrated-v1" || (migratedAt !== null && c.createdAt < migratedAt)) continue;
         const completed = index.proofs.filter(
           (p) => p.dreamId === dream.id && p.season === season && p.origin !== "onboarding" && p.createdAt <= c.createdAt
         ).length;

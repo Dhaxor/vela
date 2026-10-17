@@ -4,7 +4,7 @@
 // The dismiss control sits beside the card, not inside it (no nested buttons).
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { X } from "lucide-react-native";
+import { X } from "@/components/glyphs/icons";
 import { IconButton, T, VellumCard } from "@/components/ui";
 import { VelaMark } from "@/components/glyphs";
 import { colors, hitSize, space } from "@/constants/theme";

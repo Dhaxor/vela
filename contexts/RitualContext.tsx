@@ -1,12 +1,13 @@
 // Forgiving progress (lib/progress, CONTRACTS §10): nights shown up that never
 // reset, the weekly rhythm with rest nights, and 'Pause my sky'. Persisted
 // under 'vela.progress.v2'; the 1.0 ritual days migrate once from
-// 'vela.ritual.v1' (read-only) into lifetime counters.
+// 'vela.ritual.v1' (read-only) into lifetime counters. A failed read is
+// retried, never taken as 'absent' (which would re-migrate 1.0 days over 1.1 progress).
 //
 // useProgress() is the API screens use.
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ArcCtx } from "./arcCtx";
-import { createStoreQueue, parseJson, readRaw } from "./persist";
+import { createStoreQueue, loadUntilRead, parseJson, readKey } from "./persist";
 import { STORAGE_KEYS, V1_KEYS } from "@/lib/storageKeys";
 import { now } from "@/lib/clock";
 import {
@@ -27,6 +28,8 @@ import type { DateKey } from "./arc.types";
 
 interface RitualStore {
   ready: boolean;
+  /** A launch read failed and is being retried (still not ready, nothing written). */
+  storageError: boolean;
   state: ProgressState;
   recordAct: (act: LoopAct) => void;
   setRhythmTarget: (target: number) => void;
@@ -38,6 +41,8 @@ interface RitualStore {
 
 export interface ProgressValue {
   readonly ready: boolean;
+  /** A launch read failed and is being retried (still not ready, nothing written). */
+  readonly storageError: boolean;
   readonly state: ProgressState;
   /** Chip label, weekly rhythm, pause and today's acts; stars from useArc().totalStars. */
   readonly summary: ProgressSummary;
@@ -51,6 +56,7 @@ const Ctx = createContext<RitualStore | null>(null);
 
 export function RitualProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
+  const [storageError, setStorageError] = useState(false);
   const [state, setState] = useState<ProgressState>(emptyProgress);
   const ref = useRef<ProgressState>(state);
   const queue = useMemo(createStoreQueue, []);
@@ -67,29 +73,32 @@ export function RitualProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    let stale = false;
-    void (async () => {
-      const raw = await readRaw(STORAGE_KEYS.progress);
-      let loaded: ProgressState;
-      if (raw) loaded = parseProgress(parseJson(raw));
-      else {
-        loaded = progressFromRitualV1(parseJson(await readRaw(V1_KEYS.ritual)));
-        if (loaded.nightsShownUp > 0) queue.enqueue({ head: [STORAGE_KEYS.progress, loaded] });
+    const job = loadUntilRead(
+      async () => {
+        const raw = await readKey(STORAGE_KEYS.progress);
+        if (raw) return { loaded: parseProgress(parseJson(raw)), migrated: false };
+        const loaded = progressFromRitualV1(parseJson(await readKey(V1_KEYS.ritual)));
+        return { loaded, migrated: loaded.nightsShownUp > 0 };
+      },
+      {
+        onLoaded: ({ loaded, migrated }) => {
+          if (migrated) queue.enqueue({ head: [STORAGE_KEYS.progress, loaded] });
+          // RootNavigator renders no screen before every store is ready, so nothing was recorded yet.
+          ref.current = loaded;
+          setState(loaded);
+          setStorageError(false);
+          setReady(true);
+        },
+        onFailure: () => setStorageError(true),
       }
-      if (stale) return;
-      // RootNavigator renders no screen before every store is ready, so nothing was recorded yet.
-      ref.current = loaded;
-      setState(loaded);
-      setReady(true);
-    })();
-    return () => {
-      stale = true;
-    };
+    );
+    return () => job.cancel();
   }, [queue]);
 
   const store = useMemo<RitualStore>(
     () => ({
       ready,
+      storageError,
       state,
       recordAct: (act) => update((s) => recordActFn(s, act, now())),
       setRhythmTarget: (target) => update((s) => setRhythmTargetFn(s, target)),
@@ -100,7 +109,7 @@ export function RitualProvider({ children }: { children: React.ReactNode }) {
         await queue.flush();
       },
     }),
-    [ready, state, update, queue]
+    [ready, storageError, state, update, queue]
   );
 
   return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
@@ -124,7 +133,7 @@ export function useProgress(): ProgressValue {
   const dayKey = localDateKey(now());
   const summary = useMemo(() => summarize(s.state, stars, now()), [s.state, stars, dayKey]);
   return useMemo(
-    () => ({ ready: s.ready, state: s.state, summary, recordAct: s.recordAct, setRhythmTarget: s.setRhythmTarget, pauseUntil: s.pauseUntil, resume: s.resume }),
+    () => ({ ready: s.ready, storageError: s.storageError, state: s.state, summary, recordAct: s.recordAct, setRhythmTarget: s.setRhythmTarget, pauseUntil: s.pauseUntil, resume: s.resume }),
     [s, summary]
   );
 }

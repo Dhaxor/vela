@@ -17,6 +17,7 @@ import { useUser } from "@/contexts/UserContext";
 import { focusById, type FocusId } from "@/lib/focus";
 import { Dock, PrimaryButton, Screen, T, TextField, drift, useMotion } from "@/components/ui";
 import { AreaSign } from "@/components/glyphs";
+import { FREE_AREA_LIMIT } from "@/components/feature/plus";
 import {
   DEFAULT_PRESET,
   DesireField,
@@ -197,8 +198,8 @@ export default function OnboardingScreen() {
 
           {step === FOCUS ? (
             <>
-              <StepIntro title="What are you calling in?" lead="Your first story begins with the first one you choose. Add others if they pull at you too." />
-              <FocusGrid value={focusAreas} onChange={setFocusAreas} testIDPrefix="focus-" />
+              <StepIntro title="What are you calling in?" lead="Your first story begins with the first one you choose. Add up to two more if they pull at you too." />
+              <FocusGrid value={focusAreas} onChange={setFocusAreas} testIDPrefix="focus-" max={FREE_AREA_LIMIT} />
             </>
           ) : null}
 

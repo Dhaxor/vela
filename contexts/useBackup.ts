@@ -2,6 +2,7 @@
 // lib/backup file and applies an import to every store, merge or replace.
 // Call from a screen (below every provider).
 import { useCallback, useMemo } from "react";
+import { ArcError } from "./arc.types";
 import { useArc } from "./ArcContext";
 import { useJournal } from "./JournalContext";
 import { useRitualStore } from "./RitualContext";
@@ -13,8 +14,9 @@ import {
   parseBackup,
   pickBackupText,
   planImport,
-  resolveImport,
+  resolveImportDetailed,
   shareBackupFile,
+  summarizeBackup,
   type BackupData,
   type BackupFile,
   type ExportOutcome,
@@ -22,6 +24,18 @@ import {
   type ImportPlan,
   type ParsedBackup,
 } from "@/lib/backup";
+
+/** What an import did (so the toast can tell the truth). */
+export interface ImportOutcome {
+  readonly mode: ImportMode;
+  readonly dreamsAdded: number;
+  /** Dreams whose longer history in the file replaced this device's. */
+  readonly dreamsUpdated: number;
+  /** Merge only: dreams whose histories diverged; this device's version was kept. */
+  readonly dreamsKept: number;
+  /** Photos the file only points at; they show only on the phone that took them. */
+  readonly devicePhotos: number;
+}
 
 function appVersion(): string | null {
   try {
@@ -42,8 +56,12 @@ export interface BackupValue {
   readFromFile(): Promise<ParsedBackup | null>;
   /** What importing this file would do here (show it before applying). */
   plan(backup: BackupFile): Promise<ImportPlan>;
-  /** Apply: 'replace' makes the file the truth; 'merge' keeps everything and adds what is new. */
-  apply(backup: BackupFile, mode: ImportMode): Promise<void>;
+  /**
+   * Apply: 'replace' makes the file the truth; 'merge' keeps everything, adds
+   * what is new and carries each shared dream's longer history. Rejects (and
+   * changes nothing) when the result would not be valid.
+   */
+  apply(backup: BackupFile, mode: ImportMode): Promise<ImportOutcome>;
 }
 
 export function useBackup(): BackupValue {
@@ -74,13 +92,23 @@ export function useBackup(): BackupValue {
       },
       plan: async (backup) => planImport(await snapshot(), backup.data),
       apply: async (backup, mode) => {
-        const next = resolveImport(await snapshot(), backup.data, mode);
+        const resolution = resolveImportDetailed(await snapshot(), backup.data, mode);
+        // Never apply (or quietly swap for 'keep mine') a result that breaks the arc's invariants.
+        if (resolution.problems.length > 0) throw new ArcError("invalid-input", resolution.problems.slice(0, 3).join("; "));
+        const next = resolution.data;
         // The arc first: it validates, and a rejection leaves every store untouched.
         await arc.importSnapshot(next.arcs);
         await user.replaceProfile(next.profile ?? user.profile);
         if (next.progress) await ritual.replaceProgress(next.progress);
         if (next.journal) await journal.replaceJournal(next.journal);
         if (next.scenes) await scenes.replaceScenes(next.scenes);
+        return {
+          mode,
+          dreamsAdded: resolution.dreamsAdded,
+          dreamsUpdated: resolution.dreamsUpdated,
+          dreamsKept: resolution.dreamsKept,
+          devicePhotos: summarizeBackup(backup.data).devicePhotos ?? 0,
+        };
       },
     }),
     [snapshot, arc, user, ritual, journal, scenes]

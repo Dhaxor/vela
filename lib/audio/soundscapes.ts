@@ -95,3 +95,40 @@ export function fadeLevel(from: number, to: number, progress: number): number {
   const b = Math.max(0, to) ** LOUDNESS_EXPONENT;
   return (a + (b - a) * p) ** (1 / LOUDNESS_EXPONENT);
 }
+
+/* =========================================================================
+ * Watching for someone else pausing the bed
+ * ========================================================================= */
+
+/**
+ * iOS pauses expo-audio's players itself when the route drops (AirPods back
+ * in the case, headphones pulled) or a call interrupts, but expo-speech hears
+ * neither: the chapter would carry on, aloud, from the phone's speaker. The
+ * bed is the canary. While it should be playing, the hook reads the player
+ * every BED_WATCH_INTERVAL_MS; BED_WATCH_MISSES 'not playing' readings in a
+ * row, after it was heard playing, mean the system paused it, and the reader
+ * pauses the voice too. Buffering and loading never count, and a bed that
+ * never started (web autoplay rules) never trips it.
+ */
+export interface BedWatch {
+  readonly seenPlaying: boolean;
+  readonly misses: number;
+}
+
+export const BED_WATCH_START: BedWatch = { seenPlaying: false, misses: 0 };
+export const BED_WATCH_INTERVAL_MS = 1000;
+export const BED_WATCH_MISSES = 2;
+
+export interface BedReading {
+  readonly playing: boolean;
+  readonly buffering: boolean;
+  readonly loaded: boolean;
+}
+
+/** One reading of the player. Pure. `interrupted` is true on the reading that trips the watch. */
+export function watchBed(prev: BedWatch, reading: BedReading): { readonly watch: BedWatch; readonly interrupted: boolean } {
+  if (reading.playing) return { watch: { seenPlaying: true, misses: 0 }, interrupted: false };
+  if (!prev.seenPlaying || reading.buffering || !reading.loaded) return { watch: { seenPlaying: prev.seenPlaying, misses: 0 }, interrupted: false };
+  const misses = prev.misses + 1;
+  return { watch: { seenPlaying: true, misses }, interrupted: misses === BED_WATCH_MISSES };
+}

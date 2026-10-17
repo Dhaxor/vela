@@ -3,7 +3,7 @@
 // today's deck; at least one line keeps the page.
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { RefreshCw, X } from "lucide-react-native";
+import { RefreshCw, X } from "@/components/glyphs/icons";
 import { Dock, Header, IconButton, PrimaryButton, Screen, T, haptics, useToast } from "@/components/ui";
 import { SealedMoment } from "@/components/feature/rituals/SealedMoment";
 import { SkyWriting } from "@/components/feature/rituals/SkyWriting";

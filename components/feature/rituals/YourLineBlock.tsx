@@ -4,7 +4,7 @@
 // line opens it full screen (/affirmation); carrying it records 'line-carried'.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/glyphs/icons";
 import { Press, SecondaryButton, T, UserWords } from "@/components/ui";
 import { StarProof } from "@/components/glyphs";
 import type { ProofKind } from "@/contexts/arc.types";

@@ -73,3 +73,23 @@ export function dreamDay(dreamCreatedAt: string, dateKey: string): number {
   const start = localDateKey(new Date(dreamCreatedAt));
   return Math.max(1, daysBetween(start, dateKey) + 1);
 }
+
+/** Longest wait between two looks at the clock while Today is open. */
+export const MAX_REFRESH_MS = 60 * 60 * 1000;
+
+/**
+ * When Today must look at the clock again, strictly after `now`: the next
+ * whole local hour (the greeting, the chapter eyebrow and the day itself all
+ * turn on the hour; midnight is one of them), or an earlier `boundary` such
+ * as a chapter's 'saved for 21:30'. Pure.
+ */
+export function nextRefreshAt(now: Date, boundaries: readonly (string | null | undefined)[] = []): Date {
+  const t = now.getTime();
+  let next = new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1, 0, 0, 0).getTime();
+  if (next <= t) next = t + MAX_REFRESH_MS;
+  for (const b of boundaries) {
+    const at = b ? Date.parse(b) : Number.NaN;
+    if (Number.isFinite(at) && at > t && at < next) next = at;
+  }
+  return new Date(next);
+}

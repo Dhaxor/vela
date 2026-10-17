@@ -11,7 +11,7 @@ import {
   snapshot,
   TEST_LIBRARY,
 } from "./fixtures";
-import { notificationId, planQueue, settleHistory } from "./schedule";
+import { notificationId, planQueue, planWindow, settleHistory } from "./schedule";
 import { isNeutral } from "./templates";
 import { emptyTemplateHistory, ID_PREFIX, NOTIFICATION_LIMITS, type PlannedNotification, type TemplateHistory } from "./types";
 
@@ -52,8 +52,33 @@ describe("planQueue: what is never planned (N5)", () => {
     expect(planned.every((n) => localDateKey(new Date(n.fireAt)) > "2026-10-18")).toBe(true);
   });
 
-  test("a pause covering the whole horizon plans nothing", () => {
-    expect(plan(snapshot({ pausedUntil: "2026-11-14" })).planned).toEqual([]);
+  test("a pause longer than the horizon still plans the resume day and the days after it", () => {
+    // 'Two weeks' and '30 nights' (Settings): the queue is rebuilt only while the app is open,
+    // so the 10-day horizon must start where the pause ends, or reminders never resume.
+    for (const [nights, pausedUntil, resume] of [
+      [10, "2026-10-25", "2026-10-26"],
+      [14, "2026-10-29", "2026-10-30"],
+      [30, "2026-11-14", "2026-11-15"],
+    ] as const) {
+      const { planned } = plan(snapshot({ pausedUntil, lastActDateKey: "2026-10-14" }));
+      expect(planned.length).toBeGreaterThan(0);
+      expect(localTimes(planned)[0]).toBe(`${resume} 21:00`);
+      expect(planned.every((n) => localDateKey(new Date(n.fireAt)) > pausedUntil)).toBe(true);
+      // Ten days of the resumed rhythm (one voice per evening), never more than the pending cap.
+      expect(planned.length).toBeLessThanOrEqual(NOTIFICATION_LIMITS.maxPending);
+      expect(new Set(planned.map((n) => localDateKey(new Date(n.fireAt)))).size).toBe(10);
+      expect(nights).toBeGreaterThanOrEqual(NOTIFICATION_LIMITS.horizonDays);
+    }
+  });
+
+  test("planWindow: today without a pause, the day after the pause while one runs", () => {
+    expect(planWindow(null, NOW()).firstDay).toBe("2026-10-15");
+    expect(planWindow("2026-10-14", NOW()).firstDay).toBe("2026-10-15"); // an expired pause
+    const w = planWindow("2026-11-14", NOW());
+    expect(w.firstDay).toBe("2026-11-15");
+    expect(localDateKey(w.from)).toBe("2026-11-15");
+    expect([w.from.getHours(), w.from.getMinutes()]).toEqual([0, 0]);
+    expect(localDateKey(w.end)).toBe("2026-11-25");
   });
 });
 

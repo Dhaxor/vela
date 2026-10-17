@@ -2,7 +2,7 @@
 // page. Quiet on purpose: the bridge above it is the action.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronLeft, ChevronRight } from "lucide-react-native";
+import { ChevronLeft, ChevronRight } from "@/components/glyphs/icons";
 import { Press, T } from "@/components/ui";
 import type { ChapterMeta } from "@/contexts/arc.types";
 import { colors, radius, space } from "@/constants/theme";

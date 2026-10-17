@@ -2,9 +2,14 @@
 // caption and an optional link to one dream. Proof photos join automatically,
 // once each, and never count toward the free limit. Stored under
 // 'vela.scenes.v2'; migrated once from 'vela.board.v1' (never written). Pure.
+//
+// Nothing here ever drops a card the user has: not on load, not when a proof
+// photo joins, not in a backup merge. The one cap (MAX_SCENES) only stops the
+// user ADDING more cards by hand; it never evicts.
 
 export const SCENE_CAPTION_MAX = 60;
 export const GOAL_TEXT_MAX = 120;
+/** Most cards a user can add by hand (Plus included). Proof photos never count, and nothing is ever evicted. */
 export const MAX_SCENES = 200;
 
 export type SceneCard =
@@ -73,7 +78,7 @@ function parseCards(v: unknown): SceneCard[] {
       out.push(c);
     }
   }
-  return out.slice(0, MAX_SCENES);
+  return out;
 }
 
 /** Stored 'vela.scenes.v2' value. Malformed reads as empty. */
@@ -93,7 +98,11 @@ export function userSceneCount(data: ScenesData): number {
   return data.cards.filter((c) => c.kind === "goal" || c.proofId === null).length;
 }
 
-/** Add a card for every proof photo not imported before. Returns the same object when nothing changed. */
+/**
+ * Add a card for every proof photo not imported before. Returns the same
+ * object when nothing changed. Never removes a card: proof photos are bounded
+ * by the proofs themselves and do not count toward MAX_SCENES.
+ */
 export function syncProofPhotos(data: ScenesData, proofs: readonly ProofPhoto[]): ScenesData {
   const done = new Set(data.importedProofIds);
   const fresh = proofs.filter((p) => p.photoUri && !done.has(p.id));
@@ -111,7 +120,7 @@ export function syncProofPhotos(data: ScenesData, proofs: readonly ProofPhoto[])
     }));
   return {
     version: 2,
-    cards: [...cards, ...data.cards].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, MAX_SCENES),
+    cards: [...cards, ...data.cards].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
     importedProofIds: [...data.importedProofIds, ...fresh.map((p) => p.id)],
   };
 }

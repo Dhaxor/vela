@@ -142,11 +142,13 @@ describe("rebuild: exact cancellation (N2, N3)", () => {
     expect(os.pending.size).toBe(0);
   });
 
-  test("paused through the horizon: reported as paused", async () => {
+  test("paused past the horizon: the queue waits on the other side of the pause", async () => {
     const os = fakeOS();
     const result = await rebuildWith(S({ pausedUntil: "2026-11-14" }), deps(os.scheduler, () => at(2026, 10, 15, 20), { history: emptyTemplateHistory() }));
-    expect(result.skipped).toBe("paused");
-    expect(os.pending.size).toBe(0);
+    expect(result.skipped).toBeUndefined();
+    expect(os.pending.size).toBeGreaterThan(0);
+    const days = [...os.pending.values()].map((n) => n.id.slice(-24)).map((iso) => new Date(iso)).map((d) => d.getTime());
+    expect(Math.min(...days)).toBeGreaterThan(at(2026, 11, 15, 0).getTime() - 1);
   });
 
   test("web: no scheduler, a safe no-op", async () => {

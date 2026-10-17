@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FlatList, StyleSheet, View, useWindowDimensions, type ListRenderItemInfo } from "react-native";
 import { useRouter } from "expo-router";
-import { MoreHorizontal } from "lucide-react-native";
+import { MoreHorizontal } from "@/components/glyphs/icons";
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 import type { ChapterMeta, DreamId, Proof } from "@/contexts/arc.types";
 import { useArc } from "@/contexts/ArcContext";

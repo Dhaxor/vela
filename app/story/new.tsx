@@ -9,7 +9,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { X } from "lucide-react-native";
+import { X } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import { isArcError } from "@/contexts/arc.types";
 import { useUser } from "@/contexts/UserContext";

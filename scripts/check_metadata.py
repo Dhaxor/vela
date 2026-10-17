@@ -20,6 +20,45 @@ LIMITS = {
 # whatsNew is legitimately empty pre-1.0 (first releases have no section).
 REQUIRED = ("name", "subtitle", "description", "keywords")
 
+# Phrases the listing must never use (docs/ELEVATE_1.1.md §0 Deferred and §8
+# Excluded): the crowded 4.3 'future self' framing, fortune-telling terms
+# (4.3(b)), ranking claims Vela can't back (2.3.1/2.3.7), and pricing we don't
+# offer (no trials, no weekly plans). Whole words, any case, in every field.
+BANNED = (
+    "future self",
+    "future-self",
+    "astrology",
+    "astrological",
+    "horoscope",
+    "zodiac",
+    "tarot",
+    "lunar",
+    "moon",
+    "free trial",
+    "weekly plan",
+    "weekly subscription",
+    "#1",
+    "number one",
+)
+# The owner's September 2026 ASO subtitle keeps 'Future Self' (a search term it
+# was chosen for). That exact subtitle is the one place the phrase may appear.
+OWNER_SUBTITLE = "Future Self Visualization"
+
+
+def banned_in(text: str) -> list[str]:
+    """The banned phrases in `text` (case-insensitive, whole words)."""
+    low = text.lower()
+    found = []
+    for phrase in BANNED:
+        if phrase.startswith("#"):
+            hit = phrase in low
+        else:
+            hit = re.search(rf"(?<![\w-]){re.escape(phrase)}(?![\w-])", low) is not None
+        if hit:
+            found.append(phrase)
+    return found
+
+
 PAIR = re.compile(r'^"([A-Za-z]+)"\s*=\s*"((?:[^"\\]|\\.)*)"\s*;', re.M)
 
 
@@ -46,6 +85,13 @@ def main() -> int:
             print(f"  {flag} {key}: {n}/{limit}")
             if n > limit:
                 problems.append(f"{key}: {n} > {limit}")
+
+    for key, value in vals.items():
+        hits = banned_in(value)
+        if key == "subtitle" and value == OWNER_SUBTITLE:
+            hits = [h for h in hits if h not in ("future self", "future-self")]
+        if hits:
+            problems.append(f"{key}: banned phrase(s): " + ", ".join(hits))
 
     kw = {k.strip().lower() for k in vals.get("keywords", "").split(",") if k.strip()}
     # Apple indexes whole words, so compare words, not substrings: "manifest" is a

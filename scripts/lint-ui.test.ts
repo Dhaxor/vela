@@ -31,6 +31,17 @@ describe("lint-ui rules", () => {
   });
 });
 
+describe("lucide barrel imports", () => {
+  test("the barrel is flagged however it is loaded; per-icon files and the glyphs module pass", () => {
+    expect(rules('import { X } from "lucide-react-native";')).toEqual(["iconBarrel@1"]);
+    expect(rules("const L = require('lucide-react-native');")).toEqual(["iconBarrel@1"]);
+    expect(rules('const L = await import("lucide-react-native");')).toEqual(["iconBarrel@1"]);
+    expect(rules('export { default as X } from "lucide-react-native/icons/x";')).toEqual([]);
+    expect(rules('import { X } from "@/components/glyphs/icons";')).toEqual([]);
+    expect(rules('// import { X } from "lucide-react-native";')).toEqual([]);
+  });
+});
+
 describe("icon-only touchables", () => {
   test("an icon with no label is flagged, on the opening tag's line", () => {
     const src = ["<View>", "  <TouchableOpacity onPress={go}>", "    <Settings size={22} />", "  </TouchableOpacity>", "</View>"].join("\n");

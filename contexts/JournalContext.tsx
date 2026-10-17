@@ -1,9 +1,10 @@
 // Journal: script and gratitude pages (newest first, each with a stable id so
 // a past page can be opened) plus one 3·6·9 sheet per day with its phrase
 // carried forward. Stored under 'vela.journal.v2'; migrated once from
-// 'vela.journal.v1', which is never written.
+// 'vela.journal.v1', which is never written. A failed read is retried, never
+// taken as 'absent' (which would re-migrate 1.0 pages over the 1.1 journal).
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { createStoreQueue, parseJson, readRaw } from "./persist";
+import { createStoreQueue, loadUntilRead, parseJson, readKey } from "./persist";
 import { STORAGE_KEYS, V1_KEYS } from "@/lib/storageKeys";
 import { now } from "@/lib/clock";
 import { localDateKey } from "@/lib/progress";
@@ -32,6 +33,8 @@ export interface EntryOptions {
 
 interface JournalValue {
   ready: boolean;
+  /** A launch read failed and is being retried (still not ready, nothing written). */
+  storageError: boolean;
   /** Newest first. */
   entries: JournalEntry[];
   /** A past page by id (/journal/entry/[id]). */
@@ -52,6 +55,7 @@ const Ctx = createContext<JournalValue | null>(null);
 
 export function JournalProvider({ children }: { children: React.ReactNode }) {
   const [ready, setReady] = useState(false);
+  const [storageError, setStorageError] = useState(false);
   const [data, setData] = useState<JournalData>(emptyJournal);
   const ref = useRef<JournalData>(data);
   const queue = useMemo(createStoreQueue, []);
@@ -66,23 +70,25 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   );
 
   useEffect(() => {
-    let stale = false;
-    void (async () => {
-      const raw = await readRaw(STORAGE_KEYS.journal);
-      let loaded = raw ? parseJournal(parseJson(raw)) : null;
-      if (!loaded) {
-        const v1 = await readRaw(V1_KEYS.journal);
-        loaded = v1 ? journalFromV1(parseJson(v1)) : emptyJournal();
-        if (v1) queue.enqueue({ head: [STORAGE_KEYS.journal, loaded] });
+    const job = loadUntilRead(
+      async () => {
+        const raw = await readKey(STORAGE_KEYS.journal);
+        if (raw) return { loaded: parseJournal(parseJson(raw)), migrated: false };
+        const v1 = await readKey(V1_KEYS.journal);
+        return { loaded: v1 ? journalFromV1(parseJson(v1)) : emptyJournal(), migrated: !!v1 };
+      },
+      {
+        onLoaded: ({ loaded, migrated }) => {
+          if (migrated) queue.enqueue({ head: [STORAGE_KEYS.journal, loaded] });
+          ref.current = loaded;
+          setData(loaded);
+          setStorageError(false);
+          setReady(true);
+        },
+        onFailure: () => setStorageError(true),
       }
-      if (stale) return;
-      ref.current = loaded;
-      setData(loaded);
-      setReady(true);
-    })();
-    return () => {
-      stale = true;
-    };
+    );
+    return () => job.cancel();
   }, [queue]);
 
   const today = localDateKey(now());
@@ -143,6 +149,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<JournalValue>(
     () => ({
       ready,
+      storageError,
       entries: data.entries,
       entry: (id) => data.entries.find((e) => e.id === id),
       addEntry,
@@ -153,7 +160,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
       exportJournal: () => ref.current,
       replaceJournal,
     }),
-    [ready, data, today, sheetFor, addEntry, setPhrase369, addRep, replaceJournal]
+    [ready, storageError, data, today, sheetFor, addEntry, setPhrase369, addRep, replaceJournal]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

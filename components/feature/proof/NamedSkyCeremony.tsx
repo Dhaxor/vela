@@ -14,6 +14,7 @@ import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { LIMITS, isArcError, type DreamId, type Proof } from "@/contexts/arc.types";
 import { useArc } from "@/contexts/ArcContext";
 import { formatCardDate } from "@/lib/share/cardModel";
+import { suggestConstellationNameOf } from "@/lib/store/arcSelectors";
 import { figureFor } from "@/lib/sky/figures";
 import { ConstellationFigure } from "@/components/sky";
 import { GildedPlate, T, TextField, haptics, useGutter, useMotion } from "@/components/ui";
@@ -52,7 +53,8 @@ export function useNamedSky(dreamId: DreamId, season: number): NamedSkyState {
   const arc = useArc();
   const dream = arc.dream(dreamId);
   const named = dream?.constellations.find((c) => c.season === season)?.name ?? null;
-  const suggested = dream ? arc.suggestConstellationName(dreamId) : "";
+  // The suggestion for THIS season ('The Studio', 'The Studio II'): a past season named late keeps its own numeral.
+  const suggested = !dream ? "" : season === dream.season ? arc.suggestConstellationName(dreamId) : suggestConstellationNameOf(dream, season);
   const [name, setName] = useState(named ?? suggested);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);

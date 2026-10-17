@@ -1,8 +1,11 @@
 // THE PROOF FORM (ELEVATE §3 core loop step 2): today's bridge, what kind of
 // proof appeared (did / moved / learned), one honest sentence and an optional
 // photo. The save CTA lives in the host screen's dock (thumb zone).
+// On short screens (iPhone SE/8, 375×667) the one required field must be in
+// the first view, above the dock: the bridge card tightens and the sentence
+// comes before the kind tiles.
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { LIMITS, type Bridge, type ProofKind } from "@/contexts/arc.types";
 import { T, TextField } from "@/components/ui";
 import { space } from "@/constants/theme";
@@ -30,9 +33,21 @@ const PLACEHOLDER: Readonly<Record<ProofKind, string>> = {
   learned: "What got in the way, or what you noticed.",
 };
 
+/** Below this window height the sentence comes first (the 375×667 gate in ELEVATE §8). */
+export const SHORT_FORM_HEIGHT = 700;
+
 export function ProofForm({ bridge, draft, onChange, onNotToday }: ProofFormProps) {
+  const short = useWindowDimensions().height < SHORT_FORM_HEIGHT;
+  const kinds = (
+    <View style={styles.block}>
+      <T variant="eyebrow" style={styles.label}>
+        What kind of proof
+      </T>
+      <KindPicker value={draft.kind} onChange={(kind) => onChange({ ...draft, kind })} />
+    </View>
+  );
   return (
-    <View style={styles.root} testID="evidence-form">
+    <View style={[styles.root, short && styles.rootShort]} testID="evidence-form">
       <View style={styles.intro}>
         <T variant="eyebrow" tone="muted">
           Proof, not pressure
@@ -42,14 +57,9 @@ export function ProofForm({ bridge, draft, onChange, onNotToday }: ProofFormProp
         </T>
       </View>
 
-      <BridgeSummary bridge={bridge} onNotToday={onNotToday} testID="evidence-bridge" />
+      <BridgeSummary bridge={bridge} onNotToday={onNotToday} compact={short} testID="evidence-bridge" />
 
-      <View style={styles.block}>
-        <T variant="eyebrow" style={styles.label}>
-          What kind of proof
-        </T>
-        <KindPicker value={draft.kind} onChange={(kind) => onChange({ ...draft, kind })} />
-      </View>
+      {short ? null : kinds}
 
       <TextField
         label="In one honest sentence"
@@ -64,6 +74,8 @@ export function ProofForm({ bridge, draft, onChange, onNotToday }: ProofFormProp
         style={styles.block}
       />
 
+      {short ? kinds : null}
+
       <PhotoField uri={draft.photoUri} onChange={(photoUri) => onChange({ ...draft, photoUri })} />
     </View>
   );
@@ -71,6 +83,7 @@ export function ProofForm({ bridge, draft, onChange, onNotToday }: ProofFormProp
 
 const styles = StyleSheet.create({
   root: { gap: space.lg, paddingTop: space.sm },
+  rootShort: { gap: space.base, paddingTop: 0 },
   intro: { gap: space.sm },
   block: { gap: 0 },
   label: { marginBottom: space.sm },

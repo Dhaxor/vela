@@ -109,8 +109,8 @@ export function isWeaving(index: ArcIndex, dreamId: DreamId, isPlus: boolean): b
 
 /**
  * Today's loop card. Precedence, first match wins (arc.types LoopState):
- * empty → resting → next-woven [C] → sealed-until [D] → season-complete →
- * sealed-today [D] → bridge-open [B] → chapter-waiting [A].
+ * empty → resting → next-woven [C] → sealed-until [D] (unheard only) →
+ * season-complete → sealed-today [D] → bridge-open [B] → chapter-waiting [A].
  */
 export function loopStateOf(index: ArcIndex, dreamId: DreamId | null, now: Date, isPlus: boolean): LoopState {
   const dream = dreamOf(index, dreamId);
@@ -127,7 +127,9 @@ export function loopStateOf(index: ArcIndex, dreamId: DreamId | null, now: Date,
   if (woven && woven.dateKey === today && !heard && !savedLater) {
     return { kind: "next-woven", dreamId: dream.id, chapterId: latest.id, proofId: woven.id };
   }
-  if (savedLater) return { kind: "sealed", dreamId: dream.id, chapterId: latest.id, until: latest.savedForAt };
+  // A save only defers an UNHEARD chapter: once it is read ('Read it now'), the save is spent and
+  // the day's bridge must show (the 'next-woven' notification follows the same rule).
+  if (savedLater && !heard) return { kind: "sealed", dreamId: dream.id, chapterId: latest.id, until: latest.savedForAt };
   const season = seasonProgressOf(index, dream.id);
   if (season?.complete && heard) {
     return { kind: "season-complete", dreamId: dream.id, season: season.season, named: season.constellationName !== null };

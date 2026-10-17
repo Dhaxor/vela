@@ -24,7 +24,13 @@ export const SUBSCRIPTION_SKUS: readonly string[] = [
 export const INAPP_SKUS: readonly string[] = [PLUS_SKUS.lifetime];
 export const ALL_SKUS: readonly string[] = [...SUBSCRIPTION_SKUS, ...INAPP_SKUS];
 
-export type PurchaseResult = "purchased" | "cancelled" | "unavailable" | "failed";
+/**
+ * purchased · cancelled (a normal choice) · unavailable (no StoreKit here) ·
+ * failed (the store answered: the purchase failed, or a restore found nothing) ·
+ * error (the App Store could not be reached; nothing was decided, the
+ * entitlement is unchanged; say 'try again', never 'no purchase found').
+ */
+export type PurchaseResult = "purchased" | "cancelled" | "unavailable" | "failed" | "error";
 
 /**
  * Did the user cancel, or did the purchase actually fail? A cancel is a
@@ -56,12 +62,22 @@ export function classifyPurchaseError(error: unknown): PurchaseResult {
   return isCancellation(error) ? "cancelled" : "failed";
 }
 
+/**
+ * The fields of an expo-iap Purchase that decide ownership. expo-iap 4.7.2's
+ * PurchaseIOS reports a refund as `revocationDateIOS` (ms since epoch);
+ * `revocationDate` is kept for other payload shapes. Either one revokes.
+ */
 export interface OwnedPurchase {
   productId?: string;
   id?: string;
-  /** A refunded/revoked entitlement carries this; never honour it. */
+  /** A refunded/revoked entitlement (PurchaseIOS); never honour it. */
+  revocationDateIOS?: number | null;
+  /** Same meaning, other payload shapes. */
   revocationDate?: number | string | null;
 }
+
+const revoked = (p: OwnedPurchase) =>
+  (p.revocationDateIOS !== undefined && p.revocationDateIOS !== null) || (p.revocationDate !== undefined && p.revocationDate !== null);
 
 /**
  * Does this restore payload prove Plus? Any of the three SKUs counts —
@@ -76,7 +92,7 @@ export function ownsPlus(
   return purchases.some((p) => {
     const id = p.productId ?? p.id;
     if (!id || !skus.has(id)) return false;
-    return p.revocationDate === undefined || p.revocationDate === null;
+    return !revoked(p);
   });
 }
 

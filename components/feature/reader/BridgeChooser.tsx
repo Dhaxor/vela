@@ -4,7 +4,7 @@
 // if-then line with a time, and the violet commitment.
 import React, { useMemo, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { Plus } from "lucide-react-native";
+import { Plus } from "@/components/glyphs/icons";
 import { BridgeButton, ChipGroup, GhostButton, Press, T, TextField, VellumCard } from "@/components/ui";
 import { BridgeGlyph } from "@/components/glyphs";
 import { LIMITS, type BridgeChoice, type BridgeOffer, type BridgeOfferTier, type IfThen } from "@/contexts/arc.types";

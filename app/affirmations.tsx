@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { Lock, Share2 } from "lucide-react-native";
+import { Lock, Share2 } from "@/components/glyphs/icons";
 import { Chip, Header, IconButton, PrimaryButton, Screen, T, haptics, useGutter, useToast } from "@/components/ui";
 import { StarProof, Vignette } from "@/components/glyphs";
 import { BORN_FROM } from "@/components/feature/rituals/YourLineBlock";

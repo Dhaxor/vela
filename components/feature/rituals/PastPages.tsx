@@ -3,7 +3,7 @@
 // Each opens /journal/entry/[id].
 import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { GhostButton, Press, T, VellumCard } from "@/components/ui";
 import { colors, space } from "@/constants/theme";
 import type { JournalEntry } from "@/lib/journal";

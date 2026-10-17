@@ -7,7 +7,7 @@
 // Birth. Reduce Motion and still mode show the end state.
 import React, { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import type { ProofKind } from "@/contexts/arc.types";
 import type { Figure } from "@/lib/sky/figures";
 import { ConstellationFigure } from "@/components/sky";

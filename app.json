@@ -16,8 +16,9 @@
       },
       "icon": "./assets/icon.png",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "Vela lets you pin photos from your library to your vision board. Photos stay on this device.",
-        "NSPhotoLibraryAddUsageDescription": "Vela saves the proof cards you choose to share to your photo library."
+        "NSPhotoLibraryUsageDescription": "Vela lets you add photos to your Scenes and to the proof you record. Photos stay on this device.",
+        "NSPhotoLibraryAddUsageDescription": "Vela saves the proof cards you choose to share to your photo library.",
+        "RCTAsyncStorageExcludeFromBackup": false
       }
     },
     "android": {

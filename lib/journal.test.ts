@@ -118,3 +118,19 @@ describe("journal storage v2", () => {
     for (const p of SCRIPT_PROMPTS) expect(p.text.toLowerCase()).not.toContain("future self");
   });
 });
+
+describe("pages are never dropped (review: data-safety-silent-caps-delete-oldest)", () => {
+  test("260 days of a script page and a gratitude page: all 520 kept, the first one too", () => {
+    let j = emptyJournal();
+    for (let day = 0; day < 260; day++) {
+      for (const kind of ["script", "gratitude"] as const) {
+        const at = new Date(2026, 0, 1 + day, kind === "script" ? 8 : 21);
+        j = addJournalEntry(j, { id: `${kind}-${day}`, kind, dateKey: at.toISOString().slice(0, 10), prompt: "p", text: `Page ${day}`, createdAt: at.toISOString() });
+      }
+    }
+    expect(j.entries).toHaveLength(520);
+    expect(j.entries.at(-1)!.id).toBe("script-0");
+    // And they survive a reload.
+    expect(parseJournal(JSON.parse(JSON.stringify(j))).entries).toHaveLength(520);
+  });
+});

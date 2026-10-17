@@ -390,7 +390,10 @@ export function rerenderChapter(state: ArcState, chapterId: ChapterId, env: ArcE
     },
     env
   );
-  const nextMeta: ChapterMeta = { ...meta, title: chapter.title, revision: chapter.revision, source: chapter.source, revisedAt: env.now.toISOString() };
+  // The meta's source records where the chapter (its slot and stage) came from. A chapter carried over
+  // from 1.0 stays 'migrated-v1' after a rewrite: its stage came from migration, so I3 must keep exempting it.
+  const source = meta.source === "migrated-v1" ? meta.source : chapter.source;
+  const nextMeta: ChapterMeta = { ...meta, title: chapter.title, revision: chapter.revision, source, revisedAt: env.now.toISOString() };
   return {
     state: {
       index: { ...index, dreams: replaceBy(index.dreams, appendUsed(dream, usedIds)), chapters: replaceBy(index.chapters, nextMeta) },

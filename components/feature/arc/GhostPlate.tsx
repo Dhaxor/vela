@@ -4,7 +4,7 @@
 // than one dream at a time). testID 'new-story' is kept from 1.0.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { Press, T } from "@/components/ui";
 import { ConstellationFigure } from "@/components/sky";
 import { figureFor } from "@/lib/sky";

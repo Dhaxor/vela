@@ -12,6 +12,9 @@ import {
   isBedLocked,
   resolveBed,
   suggestedBed,
+  watchBed,
+  BED_WATCH_MISSES,
+  BED_WATCH_START,
 } from "./soundscapes";
 import { BEDS, BED_IDS, BED_LEVELS, DEFAULT_BED, FREE_BEDS } from "./types";
 
@@ -110,5 +113,40 @@ describe("barrel", () => {
     expect(typeof audio.setAudioSession).toBe("function");
     expect(typeof audio.playStarBirthChime).toBe("function");
     expect(audio.rankVoices([])).toEqual([]);
+  });
+});
+
+describe("watchBed: the system pausing the bed pauses the voice", () => {
+  const playing = { playing: true, buffering: false, loaded: true };
+  const paused = { playing: false, buffering: false, loaded: true };
+
+  function run(readings: { playing: boolean; buffering: boolean; loaded: boolean }[]): number[] {
+    let watch = BED_WATCH_START;
+    const trips: number[] = [];
+    readings.forEach((r, i) => {
+      const next = watchBed(watch, r);
+      watch = next.watch;
+      if (next.interrupted) trips.push(i);
+    });
+    return trips;
+  }
+
+  test("AirPods out: playing, then paused for two readings, trips once", () => {
+    expect(BED_WATCH_MISSES).toBe(2);
+    expect(run([playing, playing, paused, paused, paused, paused])).toEqual([3]);
+  });
+
+  test("one stray reading never trips it", () => {
+    expect(run([playing, paused, playing, paused, playing])).toEqual([]);
+  });
+
+  test("a bed that never played (web autoplay rules, still loading) never trips it", () => {
+    expect(run([paused, paused, paused, { playing: false, buffering: false, loaded: false }])).toEqual([]);
+  });
+
+  test("buffering and unloaded readings reset the count", () => {
+    const buffering = { playing: false, buffering: true, loaded: true };
+    expect(run([playing, paused, buffering, paused, { playing: false, buffering: false, loaded: false }, paused])).toEqual([]);
+    expect(run([playing, paused, buffering, paused, paused])).toEqual([4]);
   });
 });

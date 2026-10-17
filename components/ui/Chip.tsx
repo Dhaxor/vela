@@ -2,7 +2,7 @@
 // raised sky surface + 1.5px gold300 border + a gold check, never a gold fill.
 import React from "react";
 import { StyleSheet, View, type StyleProp, type ViewStyle } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/glyphs/icons";
 import { colors, radius, space } from "@/constants/theme";
 import { Press } from "./Press";
 import { T } from "./T";

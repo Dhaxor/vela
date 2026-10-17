@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { chapterEyebrow, dayMonth, dreamDay, greetingFor, nextRitual, relativeDay, saveForLabel, wallTime } from "./time";
+import { MAX_REFRESH_MS, chapterEyebrow, dayMonth, dreamDay, greetingFor, nextRefreshAt, nextRitual, relativeDay, saveForLabel, wallTime } from "./time";
 
 const at = (h: number, m = 0, day = 21) => new Date(2026, 9, day, h, m, 0, 0);
 const TIMES = { morning: "08:00", evening: "21:00" };
@@ -65,5 +65,34 @@ describe("day phrases", () => {
     const created = at(21, 2, 7).toISOString();
     expect(dreamDay(created, "2026-10-07")).toBe(1);
     expect(dreamDay(created, "2026-10-15")).toBe(9);
+  });
+});
+
+describe("nextRefreshAt: Today never keeps yesterday's clock", () => {
+  test("the next whole hour, so the greeting, the eyebrow and midnight all land", () => {
+    expect(nextRefreshAt(at(21, 4)).getTime()).toBe(at(22).getTime());
+    expect(nextRefreshAt(at(23, 59)).getTime()).toBe(new Date(2026, 9, 22, 0, 0, 0, 0).getTime());
+    expect(nextRefreshAt(at(11, 59)).getHours()).toBe(12);
+  });
+
+  test("an earlier boundary wins: a chapter saved for 21:30 opens at 21:30", () => {
+    const savedFor = at(21, 30).toISOString();
+    expect(nextRefreshAt(at(21, 4), [savedFor]).getTime()).toBe(at(21, 30).getTime());
+    // past, missing or later-than-the-hour boundaries change nothing
+    expect(nextRefreshAt(at(21, 4), [at(20).toISOString(), null, undefined, "nope", at(23).toISOString()]).getTime()).toBe(at(22).getTime());
+  });
+
+  test("always strictly after now, never more than an hour away", () => {
+    for (const t of [at(0), at(0, 0, 1), at(12, 0), at(21, 59)]) {
+      const next = nextRefreshAt(t).getTime();
+      expect(next).toBeGreaterThan(t.getTime());
+      expect(next - t.getTime()).toBeLessThanOrEqual(MAX_REFRESH_MS);
+    }
+  });
+
+  test("a saved-for time read on a stale card: the loop sees tomorrow once the clock moves on", () => {
+    // Saved last night for 21:00; reopened the next evening at 20:12: the next look is 21:00, when it opens.
+    const tonight = new Date(2026, 9, 22, 21, 0, 0, 0).toISOString();
+    expect(nextRefreshAt(new Date(2026, 9, 22, 20, 12), [tonight]).getTime()).toBe(Date.parse(tonight));
   });
 });

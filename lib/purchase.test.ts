@@ -144,3 +144,14 @@ describe("numericPrice", () => {
     expect(numericPrice(undefined)).toBeNull();
   });
 });
+
+describe("revocation as expo-iap 4.7.2 reports it (review: store-compliance-revocation-field)", () => {
+  test("a refunded PurchaseIOS (revocationDateIOS) never grants, through any path", () => {
+    const refunded = { productId: PLUS_SKUS.lifetime, revocationDateIOS: 1_760_000_000_000, revocationReasonIOS: "0" };
+    expect(ownsPlus([refunded])).toBe(false);
+    // purchaseUpdatedListener calls ownsPlus([purchase]) on each replayed transaction.
+    expect(ownsPlus([refunded, { productId: "com.other.app.pro" }])).toBe(false);
+    expect(ownsPlus([{ productId: PLUS_SKUS.monthly, revocationDateIOS: null }])).toBe(true);
+    expect(ownsPlus([{ productId: PLUS_SKUS.monthly, revocationDateIOS: undefined }])).toBe(true);
+  });
+});

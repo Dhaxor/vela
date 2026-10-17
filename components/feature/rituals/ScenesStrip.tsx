@@ -2,7 +2,7 @@
 // in an 'Add a scene' frame; empty, an engraved window and the invitation.
 import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { Plus } from "lucide-react-native";
+import { Plus } from "@/components/glyphs/icons";
 import { Press, SecondaryButton, T, VellumCard, useGutter } from "@/components/ui";
 import { Vignette } from "@/components/glyphs";
 import type { Proof } from "@/contexts/arc.types";

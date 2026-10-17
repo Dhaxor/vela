@@ -163,7 +163,8 @@ export interface JournalData {
   phrase369: string;
 }
 
-export const MAX_ENTRIES = 500;
+// No cap on the number of pages: a page the user wrote is never dropped, on
+// load, on save or in a backup merge (1.0 silently evicted the oldest past 500).
 export const ENTRY_TEXT_MAX = 4000;
 export const PHRASE_369_MAX = 80;
 
@@ -208,7 +209,7 @@ function parseJournalShape(v: unknown): JournalData {
   });
   return {
     version: 2,
-    entries: entries.slice(0, MAX_ENTRIES),
+    entries,
     sheet: parseSheet(v.sheet),
     phrase369: typeof v.phrase369 === "string" ? v.phrase369.slice(0, PHRASE_369_MAX) : "",
   };
@@ -224,9 +225,9 @@ export function journalFromV1(raw: unknown): JournalData {
   return parseJournalShape(raw);
 }
 
-/** Prepend a new entry (trimmed, capped). */
+/** Prepend a new entry (text trimmed to ENTRY_TEXT_MAX). Never drops an older page. */
 export function addJournalEntry(data: JournalData, entry: JournalEntry): JournalData {
   const text = entry.text.trim().slice(0, ENTRY_TEXT_MAX);
   if (!text) return data;
-  return { ...data, entries: [{ ...entry, text }, ...data.entries.filter((e) => e.id !== entry.id)].slice(0, MAX_ENTRIES) };
+  return { ...data, entries: [{ ...entry, text }, ...data.entries.filter((e) => e.id !== entry.id)] };
 }

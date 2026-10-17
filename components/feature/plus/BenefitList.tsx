@@ -3,7 +3,7 @@
 // soundscapes first) and its disc wears the gold line.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Check } from "lucide-react-native";
+import { Check } from "@/components/glyphs/icons";
 import { T } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";
 import type { Benefit, BenefitId } from "./copy";

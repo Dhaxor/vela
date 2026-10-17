@@ -17,6 +17,10 @@
 // - quiet-return once per quiet spell, after quietReturnAfterDays quiet days.
 // A ritual cue within an hour of any of those is dropped (one voice at a time).
 // Days on or before pausedUntil plan nothing; reminders resume the day after.
+// While a pause runs, the 10-day horizon starts on that resume day, not today:
+// the queue is only rebuilt while the app is open, so a horizon that began
+// today would leave a 14- or 30-night pause with nothing planned after it, and
+// reminders would never 'resume' for the user who stepped away.
 
 import type { ChapterMeta, DateKey, DreamId, IsoTime } from "@/contexts/arc.types";
 import type { HHmm } from "@/contexts/user.types";
@@ -98,10 +102,28 @@ function localInstant(key: DateKey, time: HHmm): Date | null {
   return new Date(y, m - 1, d, t.hour, t.minute);
 }
 
-function horizonEnd(now: Date): Date {
-  const end = new Date(now);
+function horizonEnd(from: Date): Date {
+  const end = new Date(from);
   end.setDate(end.getDate() + NOTIFICATION_LIMITS.horizonDays);
   return end;
+}
+
+/** The planning window: [from, end], starting on firstDay (today, or the day a running pause ends). */
+interface PlanWindow {
+  readonly firstDay: DateKey;
+  readonly from: Date;
+  readonly end: Date;
+}
+
+/** Today's window, or, while a pause runs, the window that opens the day after it ends. */
+export function planWindow(pausedUntil: DateKey | null, now: Date): PlanWindow {
+  const today = localDateKey(now);
+  if (!pausedUntil || pausedUntil < today) return { firstDay: today, from: now, end: horizonEnd(now) };
+  const firstDay = addDays(pausedUntil, 1);
+  const [y, m, d] = firstDay.split("-").map(Number);
+  const midnight = new Date(y, m - 1, d);
+  const from = midnight > now ? midnight : now;
+  return { firstDay, from, end: horizonEnd(from) };
 }
 
 /** The user's ritual times for one day, in order. */
@@ -150,13 +172,13 @@ function ritualCue(
   return { slot: heard ? "ritual-bridge" : "ritual-chapter", url: urlForChapter(chapter.id), chapter };
 }
 
-function ritualCandidates(snapshot: NotificationSnapshot, now: Date): Candidate[] {
+function ritualCandidates(snapshot: NotificationSnapshot, now: Date, firstDay: DateKey): Candidate[] {
   const today = localDateKey(now);
   const out: Candidate[] = [];
   const n = snapshot.dreams.length;
   const times = ritualSlots(snapshot);
   for (let d = 0; d <= NOTIFICATION_LIMITS.horizonDays; d += 1) {
-    const day = addDays(today, d);
+    const day = addDays(firstDay, d);
     for (const [index, time] of times.entries()) {
       const at = localInstant(day, time);
       if (!at) continue;
@@ -211,13 +233,12 @@ function nextWovenCandidates(snapshot: NotificationSnapshot): Candidate[] {
   return out;
 }
 
-function ledgerCandidates(snapshot: NotificationSnapshot, now: Date): Candidate[] {
+function ledgerCandidates(snapshot: NotificationSnapshot, firstDay: DateKey): Candidate[] {
   const keys = snapshot.proofDateKeys ?? [];
-  const today = localDateKey(now);
   const time = mainRitualTime(snapshot);
   const out: Candidate[] = [];
   for (let d = 0; d <= NOTIFICATION_LIMITS.horizonDays; d += 1) {
-    const day = addDays(today, d);
+    const day = addDays(firstDay, d);
     if (weekdayIndex(day) !== 6) continue;
     const weekStart = addDays(day, -6);
     const weekProofs = keys.filter((k) => k >= weekStart && k <= day).length;
@@ -244,13 +265,12 @@ function quietSpellStart(snapshot: NotificationSnapshot): DateKey | null {
   return snapshot.pausedUntil && snapshot.pausedUntil > start ? snapshot.pausedUntil : start;
 }
 
-function quietReturnCandidate(snapshot: NotificationSnapshot, now: Date, history: TemplateHistory): Candidate | null {
+function quietReturnCandidate(snapshot: NotificationSnapshot, now: Date, history: TemplateHistory, firstDay: DateKey): Candidate | null {
   const spell = quietSpellStart(snapshot);
   if (!spell || history.quietSpell === spell) return null;
-  const today = localDateKey(now);
   const first = addDays(spell, NOTIFICATION_LIMITS.quietReturnAfterDays + 1);
   for (let d = 0; d <= NOTIFICATION_LIMITS.horizonDays; d += 1) {
-    const day = addDays(today, d);
+    const day = addDays(firstDay, d);
     if (day < first) continue;
     for (const time of ritualSlots(snapshot)) {
       const at = localInstant(day, time);
@@ -338,18 +358,18 @@ export function planQueue(
     return { planned: [], history: { ...settled, pending: [] } };
   }
 
-  const end = horizonEnd(now);
+  const { firstDay, from, end } = planWindow(snapshot.pausedUntil, now);
   const inWindow = (c: Candidate) =>
-    c.at > now && c.at <= end && !(snapshot.pausedUntil && localDateKey(c.at) <= snapshot.pausedUntil);
+    c.at > now && c.at >= from && c.at <= end && !(snapshot.pausedUntil && localDateKey(c.at) <= snapshot.pausedUntil);
 
-  const quiet = quietReturnCandidate(snapshot, now, settled);
+  const quiet = quietReturnCandidate(snapshot, now, settled, firstDay);
   const specific = [
     ...ifThenCandidates(snapshot),
     ...nextWovenCandidates(snapshot),
-    ...ledgerCandidates(snapshot, now),
+    ...ledgerCandidates(snapshot, firstDay),
     ...(quiet ? [quiet] : []),
   ].filter(inWindow);
-  const rituals = ritualCandidates(snapshot, now)
+  const rituals = ritualCandidates(snapshot, now, firstDay)
     .filter(inWindow)
     .filter((r) => !collides(r, specific));
   const candidates = [...specific, ...rituals].sort(

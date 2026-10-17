@@ -8,7 +8,7 @@
 // - a ledger: chapters · proofs · nights, and 'Your sky'.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import type { ChapterMeta, Dream, ProofKind, SeasonProgress } from "@/contexts/arc.types";
 import { Press, T, UserWords } from "@/components/ui";
 import { ChapterCover } from "@/components/sky";
@@ -150,15 +150,28 @@ const styles = StyleSheet.create({
   words: { marginTop: space.xs },
   stage: { marginTop: space.sm },
   standing: { marginTop: space.xs },
+  // At accessibility text sizes the stats and 'Your sky' no longer fit one line: 'Your sky' wraps under them
+  // (it keeps its own width, so it can never be squeezed under the numbers).
   ledger: {
     flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
+    columnGap: space.base,
     marginTop: space.lg,
     paddingTop: space.md,
     borderTopWidth: 1,
     borderTopColor: colors.hairline,
   },
-  stats: { flexDirection: "row", alignItems: "center", gap: space.base },
+  stats: { flexDirection: "row", alignItems: "center", gap: space.base, flexShrink: 0 },
   divider: { width: 1, alignSelf: "stretch", backgroundColor: colors.hairline },
-  open: { flex: 1, minHeight: hitSize, flexDirection: "row", alignItems: "center", justifyContent: "flex-end", gap: space.xxs },
+  open: {
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: "auto",
+    minHeight: hitSize,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: space.xxs,
+  },
 });

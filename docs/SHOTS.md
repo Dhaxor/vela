@@ -197,7 +197,10 @@ loop, one numbered PNG per screen in `<outDir>/<size>/`:
    `area`, `scenes`, `nudge`, `lapsed`), Settings (top, middle, end, the time
    sheet), and Today's 'Save for' → the sealed card.
 
-Each step asserts what it expects (a visible testID, the right words). A step
+Each step asserts what it expects (a visible testID, the right words), and at
+every size it checks the first view: the proof's sentence field starts above
+the dock, Today's filled CTA clears the tab bar, and the reader's player
+controls stay on screen (run `--sizes 320x568` for Display Zoom). A step
 that fails is captured as `NN-FAILED-<step>.png` and the run exits 1; so does
 any uncaught error or `console.error` from the app. A green run prints
 `0 failed step(s), 0 app error(s)` per size.

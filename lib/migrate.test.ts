@@ -9,6 +9,8 @@ import path from "node:path";
 import { paragraphsForDaypart, type ArcSnapshot, type V1RawStorage } from "@/contexts/arc.types";
 import { checkArcInvariants, migrateV1 } from "./migrate";
 import { chaptersOf, latestChapterOf, loopStateOf, openBridgeOf, proofsOf, seasonProgressOf } from "./store/arcSelectors";
+import { applyArcAction } from "./store/arc";
+import { buildBackup, parseBackup, serializeBackup } from "./backup";
 
 interface Fixture {
   raw: V1RawStorage;
@@ -238,5 +240,50 @@ describe("damaged input never throws", () => {
     expect(report.warnings.some((w) => w.includes("no readable story"))).toBe(true);
     expect(checkArcInvariants(snapshot)).toEqual([]);
     expect(snapshot.index.chapters.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
+describe("constructed 1.0.1 shapes (exact 1.0 StoryContext rules)", () => {
+  for (const name of ["board-photo", "two-proofs-one-story"]) {
+    test(`${name}: valid v2, no warnings, input untouched`, () => {
+      const raw = load(name);
+      const before = JSON.stringify(raw);
+      const { snapshot, report } = migrate(raw);
+      expect(report.warnings).toEqual([]);
+      expect(checkArcInvariants(snapshot)).toEqual([]);
+      expect(JSON.stringify(raw)).toBe(before);
+    });
+  }
+});
+
+describe("two proofs against one 1.0 story, then 'Rewrite this chapter' (review r05b)", () => {
+  const { snapshot } = migrate(load("two-proofs-one-story"));
+  const dream = only(snapshot);
+  const latest = latestChapterOf(snapshot.index, dream.id)!;
+  const rewrite = (index: ArcSnapshot["index"], texts: ArcSnapshot["chapters"]) =>
+    applyArcAction({ index, texts }, { type: "RERENDER_CHAPTER", chapterId: latest.id }, { now: new Date("2026-10-17T20:00:00.000Z"), isPlus: false, name: "Maya", newId: () => "x", seed: 7 }).state;
+  const roundTrip = (s: ArcSnapshot) =>
+    parseBackup(serializeBackup(buildBackup({ arcs: s, profile: null, progress: null, journal: null, scenes: null }, NOW, "1.1.0")), NOW);
+
+  test("the migrated story is staged from all seven proofs, though two came after its 1.0 createdAt", () => {
+    expect(latest).toMatchObject({ source: "migrated-v1", stage: 7 });
+    expect(proofsOf(snapshot.index, dream.id).filter((p) => p.createdAt > latest.createdAt)).toHaveLength(2);
+    expect(roundTrip(snapshot).ok).toBe(true);
+  });
+
+  test("the rewrite keeps the migration's provenance, so I3 still holds and the user's backups stay importable", () => {
+    const after = rewrite(snapshot.index, snapshot.chapters);
+    const meta = after.index.chapters.find((c) => c.id === latest.id)!;
+    expect(meta).toMatchObject({ source: "migrated-v1", stage: 7, number: 7, revision: 2 });
+    const snap = { index: after.index, chapters: after.texts };
+    expect(checkArcInvariants(snap)).toEqual([]);
+    expect(roundTrip(snap)).toMatchObject({ ok: true });
+  });
+
+  test("an index an earlier build already relabelled 'engine' is still valid (the chapter predates the migration)", () => {
+    const after = rewrite(snapshot.index, snapshot.chapters);
+    const poisoned = { ...after.index, chapters: after.index.chapters.map((c) => (c.id === latest.id ? { ...c, source: "engine" as const } : c)) };
+    expect(checkArcInvariants({ index: poisoned, chapters: after.texts })).toEqual([]);
+    expect(roundTrip({ index: poisoned, chapters: after.texts }).ok).toBe(true);
   });
 });

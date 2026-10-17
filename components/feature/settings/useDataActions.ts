@@ -2,11 +2,22 @@
 // contexts/useBackup (which owns every store read and write). This hook only
 // sequences the conversation: pick → validate → plan → (merge | replace,
 // confirmed) → apply, with plain-language toasts and no Alert.alert.
+//
+// Sheets here follow one another (picker → ImportSheet → ConfirmSheet). iOS
+// shows one presented sheet at a time; the UI Sheet queues each one until the
+// last has left, and the document picker's own exit is held for here.
 import { useCallback, useState } from "react";
 import { useBackup } from "@/contexts/useBackup";
 import { BACKUP_ERROR_COPY, type BackupFile, type ImportMode, type ImportPlan } from "@/lib/backup";
-import { useConfirm, useToast } from "@/components/ui";
+import { holdForSystemSheet, useConfirm, useToast } from "@/components/ui";
+import { importDoneCopy } from "./importCopy";
 import { backupSummaryLine, exportedOn } from "./time";
+
+/**
+ * After the share sheet closes. expo-sharing resolves the same way whether the
+ * file was saved, sent or the sheet was cancelled, so this never claims a save.
+ */
+export const EXPORT_SHARED_COPY = "Your backup file is ready. If you didn't save it, export again and choose Save to Files.";
 
 export interface PendingImport {
   readonly file: BackupFile;
@@ -35,8 +46,8 @@ export function useDataActions(): DataActions {
     async (file: BackupFile, mode: ImportMode) => {
       setBusy("apply");
       try {
-        await backup.apply(file, mode);
-        toast.show({ message: mode === "merge" ? "Backup merged. Everything is here." : "Backup restored on this device.", tone: "proof" });
+        const outcome = await backup.apply(file, mode);
+        toast.show({ message: importDoneCopy(outcome), tone: "proof", duration: outcome.devicePhotos > 0 || outcome.dreamsKept > 0 ? 5000 : undefined });
       } catch {
         toast.show({ message: "That backup couldn't be imported.", tone: "error" });
       } finally {
@@ -51,7 +62,7 @@ export function useDataActions(): DataActions {
     setBusy("export");
     try {
       const outcome = await backup.exportToFile();
-      if (outcome === "shared") toast.show({ message: "Backup ready. Keep the file somewhere safe.", tone: "proof" });
+      if (outcome === "shared") toast.show({ message: EXPORT_SHARED_COPY, tone: "info", duration: 5000 });
       else if (outcome === "downloaded") toast.show({ message: "Backup downloaded.", tone: "proof" });
       else toast.show({ message: "Sharing isn't available on this device right now.", tone: "error" });
     } catch {
@@ -67,6 +78,8 @@ export function useDataActions(): DataActions {
     let next: { file: BackupFile; plan: ImportPlan } | null = null;
     try {
       const parsed = await backup.readFromFile();
+      // The picker is still sliding away when it resolves: the next sheet waits for it.
+      holdForSystemSheet();
       if (!parsed) return; // cancelled: a normal choice
       if (!parsed.ok) {
         toast.show({ message: BACKUP_ERROR_COPY[parsed.error], tone: "error", duration: 4500 });

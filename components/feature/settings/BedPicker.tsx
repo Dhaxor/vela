@@ -3,7 +3,7 @@
 // soundscapes (from=bed) instead of pretending to switch.
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { Lock } from "lucide-react-native";
+import { Lock } from "@/components/glyphs/icons";
 import { SOUNDSCAPES, isBedLocked, type BedId } from "@/lib/audio";
 import { Chip } from "@/components/ui";
 import { colors, space } from "@/constants/theme";

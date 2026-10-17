@@ -59,8 +59,13 @@ jobs:
           (cd e2e && npm install)
           appium --port 4723 --base-path / > appium.log 2>&1 &
           for i in $(seq 1 30); do curl -s http://127.0.0.1:4723/status && break; sleep 2; done
-          (cd e2e && UDID="$UDID" BUNDLE_ID="$BUNDLE_ID" SHOTS_DIR=../shots node walkthrough.mjs) || echo "walkthrough exited $?"
+          # A failed check fails the job (the results step below still publishes the shots).
+          set +e
+          (cd e2e && UDID="$UDID" BUNDLE_ID="$BUNDLE_ID" SHOTS_DIR=../shots node walkthrough.mjs)
+          status=$?
+          set -e
           tail -n 60 appium.log || true
+          exit $status
 
       - name: Publish results to e2e-results branch
         if: always()

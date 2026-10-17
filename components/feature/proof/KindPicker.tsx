@@ -2,7 +2,7 @@
 // each with its StarProof glyph (kind is told by shape and tint, never gold).
 // Selected = the shared selected state (raised, gold300 border, check badge).
 import React from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import type { ProofKind } from "@/contexts/arc.types";
 import { T, VellumCard } from "@/components/ui";
 import { PROOF_LABEL, StarProof } from "@/components/glyphs";
@@ -17,6 +17,18 @@ export const KIND_PROMPT: Readonly<Record<ProofKind, string>> = {
   learned: "What did today teach you?",
 };
 
+/**
+ * Below NARROW_WIDTH a tile's text box is ~66pt, narrower than 'Something'
+ * in the caption face, which then broke mid-word ('Somethi / ng …'). The
+ * tiles there use these shorter labels; screen readers keep the full ones.
+ */
+export const NARROW_WIDTH = 360;
+export const SHORT_KIND_LABEL: Readonly<Record<ProofKind, string>> = {
+  did: "I did it",
+  moved: "It moved",
+  learned: "I learned",
+};
+
 export interface KindPickerProps {
   value: ProofKind;
   onChange: (kind: ProofKind) => void;
@@ -25,6 +37,7 @@ export interface KindPickerProps {
 }
 
 export function KindPicker({ value, onChange, testIDPrefix = "evidence-kind-" }: KindPickerProps) {
+  const narrow = useWindowDimensions().width < NARROW_WIDTH;
   return (
     <View style={styles.row} accessibilityRole="radiogroup" accessibilityLabel="Kind of proof">
       {PROOF_KINDS.map((kind) => {
@@ -42,7 +55,7 @@ export function KindPicker({ value, onChange, testIDPrefix = "evidence-kind-" }:
             <View style={styles.inner}>
               <StarProof kind={kind} size={28} />
               <T variant="caption" strong tone={selected ? "primary" : "secondary"} center numberOfLines={2}>
-                {PROOF_LABEL[kind]}
+                {narrow ? SHORT_KIND_LABEL[kind] : PROOF_LABEL[kind]}
               </T>
             </View>
           </VellumCard>

@@ -5,7 +5,7 @@
 import React, { useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, View } from "react-native";
-import { RefreshCw, X } from "lucide-react-native";
+import { RefreshCw, X } from "@/components/glyphs/icons";
 import { Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, T, useToast } from "@/components/ui";
 import { SealedMoment } from "@/components/feature/rituals/SealedMoment";
 import { dayParts } from "@/components/feature/rituals/dates";

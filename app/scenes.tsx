@@ -5,8 +5,8 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { ImagePlus, PenLine } from "lucide-react-native";
-import { Chip, Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, T, haptics, useGutter, useToast } from "@/components/ui";
+import { ImagePlus, PenLine } from "@/components/glyphs/icons";
+import { Chip, Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, T, haptics, holdForSystemSheet, useGutter, useToast } from "@/components/ui";
 import { Vignette } from "@/components/glyphs";
 import { NewSceneSheet, SceneSheet, type Composer } from "@/components/feature/rituals/SceneSheets";
 import { SceneTile } from "@/components/feature/rituals/SceneTile";
@@ -64,6 +64,8 @@ export default function ScenesScreen() {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       const Picker = require("expo-image-picker") as typeof import("expo-image-picker");
       const res = await Picker.launchImageLibraryAsync({ mediaTypes: ["images"], quality: 0.8 });
+      // The library is still sliding away: the caption sheet waits its turn (one presented sheet at a time on iOS).
+      holdForSystemSheet();
       const uri = res.canceled ? null : res.assets?.[0]?.uri ?? null;
       if (uri) setComposer({ kind: "photo", uri });
     } catch {

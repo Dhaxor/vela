@@ -2,7 +2,7 @@
 // optional quiet action on the right ('See all').
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { Press, T } from "@/components/ui";
 import { colors, hitSize, space } from "@/constants/theme";
 

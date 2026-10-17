@@ -17,4 +17,5 @@ export { useProofAsks } from "./useProofAsks";
 export { nextRitual, type RitualSlot } from "./ritualTime";
 export { whenLabel } from "./proofDates";
 export { chimeIfAudioActive } from "./chime";
-export { evidenceHref, starBirthHref, weaveHref, chapterHref } from "./routes";
+export { evidenceHref, nameSeasonHref, starBirthHref, weaveHref, chapterHref } from "./routes";
+export { afterNamingLine, nextSeasonCopy, pastSeasonNamedLine, seasonCarries } from "./seasonEnd";

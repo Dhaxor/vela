@@ -1,7 +1,8 @@
 // Focus as AreaSign cards (onboarding). The first card chosen is the area the
 // first story lives in ('First'); any others are optional extras ('Also')
-// that personalise later suggestions. Invitations are never truncated: rows
-// stretch so both cards in a row share the taller height.
+// that personalise later suggestions, up to `max` in all (more areas are a
+// Plus benefit). Invitations are never truncated: rows stretch so both cards
+// in a row share the taller height.
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { FOCUS_AREAS, type FocusId } from "@/lib/focus";
@@ -16,9 +17,12 @@ export interface FocusGridProps {
   onChange: (next: FocusId[]) => void;
   /** testID per card: `${testIDPrefix}${id}`. */
   testIDPrefix?: string;
+  /** Most areas to hold; a tap past it is ignored and a quiet note says so. */
+  max?: number;
 }
 
-export function FocusGrid({ value, onChange, testIDPrefix = "focus-" }: FocusGridProps) {
+export function FocusGrid({ value, onChange, testIDPrefix = "focus-", max }: FocusGridProps) {
+  const full = max !== undefined && value.length >= max;
   const rows: (typeof FOCUS_AREAS)[number][][] = [];
   for (let i = 0; i < FOCUS_AREAS.length; i += 2) rows.push(FOCUS_AREAS.slice(i, i + 2));
   return (
@@ -34,9 +38,9 @@ export function FocusGrid({ value, onChange, testIDPrefix = "focus-" }: FocusGri
                 key={f.id}
                 padding="compact"
                 style={[styles.card, on && styles.on]}
-                onPress={() => onChange(toggleFocus(value, f.id))}
+                onPress={() => onChange(toggleFocus(value, f.id, max))}
                 testID={`${testIDPrefix}${f.id}`}
-                accessibilityLabel={`${f.label}. ${f.invitation}${primary ? " Your first story." : on ? " Also chosen." : ""}`}
+                accessibilityLabel={`${f.label}. ${f.invitation}${primary ? " Your first story." : on ? " Also chosen." : full ? " Unavailable: three are chosen." : ""}`}
               >
                 <View style={styles.top}>
                   <AreaSign focus={f.id} size={28} color={on ? colors.gold300 : colors.ink80} />
@@ -60,6 +64,11 @@ export function FocusGrid({ value, onChange, testIDPrefix = "focus-" }: FocusGri
           })}
         </View>
       ))}
+      {full ? (
+        <T variant="caption" tone="muted" center testID={`${testIDPrefix}full`}>
+          Three to begin with. You can change them any time in Settings.
+        </T>
+      ) : null}
     </View>
   );
 }

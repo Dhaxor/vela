@@ -7,23 +7,26 @@
 //   one shows that season.
 // - 'See as a list' is the same stars as rows (VoiceOver, large text).
 // - A complete season is named here if the Named Sky was skipped, and then
-//   'Begin Season N' starts the next one.
+//   'Begin Season N' starts the next one, for a dream that weaves; a resting
+//   or plan-locked dream says so and offers to wake it first.
+// - A past season that was whole but never named (a 1.0 season migrated in
+//   one piece) can be named from its plate.
 // - Gentle lifetime milestones (3, 12, 30 stars), in copy only.
 // Deep-link safe: back uses safeBack (Header), and an unknown id gets a
 // designed empty state instead of a blank page.
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { List, Sparkles } from "lucide-react-native";
+import { List, Sparkles } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
-import { isArcError } from "@/contexts/arc.types";
+import { STARS_PER_SEASON, isArcError } from "@/contexts/arc.types";
 import { figureFor } from "@/lib/sky/figures";
 import { seasonStageLabel } from "@/lib/story/seasons";
 import { Vignette } from "@/components/glyphs";
 import { GhostButton, Header, PrimaryButton, Screen, T, haptics, useToast } from "@/components/ui";
 import { dreamGivenName } from "@/lib/dreams";
 import { focusById } from "@/lib/focus";
-import { ShareCardSheet, evidenceHref, weaveHref } from "@/components/feature/proof";
+import { ShareCardSheet, evidenceHref, nameSeasonHref, weaveHref } from "@/components/feature/proof";
 import {
   ConstellationView,
   KindLegend,
@@ -31,6 +34,7 @@ import {
   StarDetailSheet,
   StarList,
   skyLine,
+  useWakeDream,
   type SeasonPlate,
   type StarSelection,
 } from "@/components/feature/sky";
@@ -55,6 +59,8 @@ export default function SkyScreen() {
   const [selection, setSelection] = useState<StarSelection | null>(null);
   const [shareId, setShareId] = useState<string | null>(null);
   const [starting, setStarting] = useState(false);
+  const [waking, setWaking] = useState(false);
+  const wakeDream = useWakeDream();
 
   // A new season (Begin Season N) moves the view along with it.
   const firstSeason = useRef(current);
@@ -121,6 +127,13 @@ export default function SkyScreen() {
   const reserved = 400 + (plates.length > 1 ? 136 : 0);
   const figH = Math.round(Math.min(560, Math.max(260, win.height - reserved)));
 
+  // Only a weaving dream can begin its next season (beginNextSeason requires it).
+  const weaving = arc.weavingDreamIds.includes(dream.id);
+  const planLocked = arc.planLockedDreamIds.includes(dream.id);
+  const released = dream.status === "released";
+  // A past season that is whole but has no name (CONTRACTS §3: 'the Named Sky can still be done').
+  const pastUnnamed = !isCurrent && !released && plate.lit >= STARS_PER_SEASON && !plate.name;
+
   const begin = async () => {
     setStarting(true);
     try {
@@ -128,9 +141,26 @@ export default function SkyScreen() {
       haptics.reveal();
       router.push(weaveHref(chapter.id));
     } catch (e) {
-      toast.show({ message: isArcError(e) && e.code === "season-incomplete" ? "This season still has stars to light." : "The next season couldn’t start. Try again.", tone: "error" });
+      const code = isArcError(e) ? e.code : null;
+      toast.show({
+        message:
+          code === "season-incomplete"
+            ? "This season still has stars to light."
+            : code === "dream-not-weaving"
+              ? "This dream is resting. Wake it to begin its next season."
+              : "The next season couldn’t start. Try again.",
+        tone: "error",
+      });
     } finally {
       setStarting(false);
+    }
+  };
+  const wake = async () => {
+    setWaking(true);
+    try {
+      await wakeDream(dream);
+    } finally {
+      setWaking(false);
     }
   };
 
@@ -189,13 +219,33 @@ export default function SkyScreen() {
         </View>
       )}
 
-      {isCurrent && complete ? (
+      {isCurrent && complete && !released ? (
         <View style={styles.actions}>
           {unnamed ? (
             <PrimaryButton label="Name your sky" onPress={() => router.push(evidenceHref(dream.id))} testID="sky-name" />
-          ) : (
+          ) : weaving ? (
             <PrimaryButton label={`Begin Season ${current + 1}`} loading={starting} onPress={() => void begin()} testID="sky-begin-season" />
+          ) : (
+            <View style={styles.resting} testID="sky-season-resting">
+              <T variant="body" center>
+                {planLocked
+                  ? `Vela Plus has ended, so one dream weaves at a time. Choose this one and Season ${current + 1} can begin.`
+                  : `This dream is resting. Wake it and Season ${current + 1} can begin.`}
+              </T>
+              <PrimaryButton
+                label={planLocked ? "Keep this dream weaving" : "Wake this dream"}
+                loading={waking}
+                onPress={() => void wake()}
+                testID="sky-wake-dream"
+              />
+            </View>
           )}
+        </View>
+      ) : null}
+
+      {pastUnnamed ? (
+        <View style={styles.actions}>
+          <PrimaryButton label="Name this sky" onPress={() => router.push(nameSeasonHref(dream.id, plate.season))} testID="sky-name-season" />
         </View>
       ) : null}
 
@@ -241,6 +291,7 @@ const styles = StyleSheet.create({
   legend: { marginTop: space.base },
   list: { marginTop: space.lg },
   actions: { marginTop: space.lg },
+  resting: { gap: space.base },
   milestone: { marginTop: space.xl, gap: space.xs, paddingHorizontal: space.base },
   toggle: { marginTop: space.base },
   empty: { flex: 1, alignItems: "center", justifyContent: "center", paddingVertical: space.huge },

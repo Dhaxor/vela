@@ -20,11 +20,13 @@ export interface BridgeSummaryProps {
   bridge: Bridge;
   /** Shows the bridge's other honest outcome, 'Not today' (a learned star). */
   onNotToday?: () => void;
+  /** Short screens: the bridge in two lines, without the if-then rehearsal. */
+  compact?: boolean;
   testID?: string;
 }
 
-export function BridgeSummary({ bridge, onNotToday, testID }: BridgeSummaryProps) {
-  const plan = ifThenLine(bridge);
+export function BridgeSummary({ bridge, onNotToday, compact = false, testID }: BridgeSummaryProps) {
+  const plan = compact ? null : ifThenLine(bridge);
   return (
     <VellumCard tone="bridge" testID={testID}>
       <View style={styles.head}>
@@ -33,7 +35,7 @@ export function BridgeSummary({ bridge, onNotToday, testID }: BridgeSummaryProps
           {`Today's bridge · ${TIER_LABEL[bridge.tier]}`}
         </T>
       </View>
-      <T variant="body" tone="primary" style={styles.text}>
+      <T variant="body" tone="primary" style={styles.text} numberOfLines={compact ? 2 : undefined}>
         {bridge.text}
       </T>
       {plan ? (

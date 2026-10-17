@@ -6,7 +6,7 @@
 // - ControlRow: a label over a full-width control (segmented, chips, stars).
 import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { Press, Switch, T, VellumCard } from "@/components/ui";
 import { colors, hitSize, space } from "@/constants/theme";
 

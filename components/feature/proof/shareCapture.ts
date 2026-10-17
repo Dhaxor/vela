@@ -3,8 +3,8 @@
 // module (shareCapture.web.ts) rasterizes the card's SVG and downloads it.
 // Native modules are required lazily so nothing loads until the user shares.
 import type { RefObject } from "react";
-import type { View } from "react-native";
-import { CARD_HEIGHT, CARD_WIDTH } from "@/lib/share/cardModel";
+import { PixelRatio, Platform, type View } from "react-native";
+import { captureSizeFor } from "./captureSize";
 
 export type ShareOutcome = "shared" | "downloaded" | "unavailable";
 
@@ -27,12 +27,14 @@ export async function shareCardImage(target: CaptureTarget, fileName: string): P
     const Sharing = require("expo-sharing") as typeof import("expo-sharing");
     /* eslint-enable @typescript-eslint/no-require-imports */
     if (!(await Sharing.isAvailableAsync())) return "unavailable";
+    // iOS reads these as points at the screen's scale: 360×640 pt is 1080×1920 px on a @3x phone.
+    const { width, height } = captureSizeFor(Platform.OS, PixelRatio.get());
     const uri = await captureRef(view, {
       format: "png",
       quality: 1,
       result: "tmpfile",
-      width: CARD_WIDTH,
-      height: CARD_HEIGHT,
+      width,
+      height,
       fileName: fileName.replace(/\.png$/u, ""),
     });
     await Sharing.shareAsync(uri, { mimeType: "image/png", UTI: "public.png", dialogTitle: "Share your star" });

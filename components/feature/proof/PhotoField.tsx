@@ -4,7 +4,7 @@
 // adds it automatically. Nothing leaves the phone.
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
-import { ImagePlus, X } from "lucide-react-native";
+import { ImagePlus, X } from "@/components/glyphs/icons";
 import { IconButton, Press, T, useToast } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";
 

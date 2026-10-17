@@ -70,6 +70,8 @@ export function usePlusActions(): PlusActions {
         toast.show({ message: "Purchases open with the App Store version of Vela. Everything free stays yours.", duration: 4500 });
       } else if (result === "failed") {
         toast.show({ message: "That purchase didn't go through. Nothing changed; you can try again.", tone: "error", duration: 4500 });
+      } else if (result === "error") {
+        toast.show({ message: "The App Store couldn't be reached. Nothing changed; try again in a moment.", tone: "error", duration: 4500 });
       }
       return result;
     },
@@ -85,6 +87,9 @@ export function usePlusActions(): PlusActions {
       toast.show({ message: "Restore works in the App Store version of Vela.", duration: 4000 });
     } else if (result === "failed") {
       toast.show({ message: "No Vela Plus purchase was found for this Apple Account.", tone: "error", duration: 4000 });
+    } else if (result === "error") {
+      // Not 'no purchase found': the App Store didn't answer, so nothing was checked.
+      toast.show({ message: "The App Store couldn't be reached, so nothing was restored. Try again in a moment.", tone: "error", duration: 4500 });
     }
     return result;
   }, [run, plus, toast]);

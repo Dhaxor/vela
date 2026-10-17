@@ -4,7 +4,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { ChevronLeft } from "lucide-react-native";
+import { ChevronLeft } from "@/components/glyphs/icons";
 import { safeBack } from "@/lib/nav";
 import { colors, hitSize, space } from "@/constants/theme";
 import { IconButton } from "./Buttons";

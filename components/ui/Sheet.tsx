@@ -1,7 +1,13 @@
 // Bottom sheet that behaves the same on iOS and react-native-web: a Modal with
 // a sky scrim, a panel that rises from the bottom edge (a plain fade under
 // Reduce Motion), a grabber, an optional title and pinned footer actions.
-import React, { useEffect, useRef, useState } from "react";
+//
+// One root sheet at a time (./presentation): iOS refuses to present a Modal
+// while another is up or still leaving, and never retries. So a root sheet
+// waits for its turn before it mounts its Modal, and gives the turn back once
+// iOS reports the Modal gone (onDismiss). Sheets inside a sheet are nested
+// presentations and show at once. The open sheet also hosts the toast.
+import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
   Modal,
@@ -18,6 +24,8 @@ import { colors, motion, radius, space } from "@/constants/theme";
 import { gutterFor } from "@/lib/sky/layout";
 import { T } from "./T";
 import { drift, useMotion } from "./motion";
+import { IOS_DISMISS_FALLBACK_MS, presenter } from "./presentation";
+import { ToastLayer } from "./ToastHost";
 
 export interface SheetProps {
   visible: boolean;
@@ -37,29 +45,80 @@ export interface SheetProps {
 
 const EXIT_MS = motion.state;
 
+/** True inside a sheet's content: a sheet there is a nested presentation. */
+const InSheetCtx = createContext(false);
+let sheetSeq = 0;
+
 export function Sheet({ visible, onClose, title, subtitle, children, footer, dismissible = true, scroll = false, testID }: SheetProps) {
   const policy = useMotion();
   const insets = useSafeAreaInsets();
   const win = useWindowDimensions();
   const gutter = gutterFor(win.width);
-  const [mounted, setMounted] = useState(visible);
+  const nested = useContext(InSheetCtx);
+  const id = useRef<string | null>(null);
+  id.current ??= `sheet-${++sheetSeq}`;
+  const [mounted, setMounted] = useState(false);
   const [panelH, setPanelH] = useState(win.height * 0.5);
   const p = useSharedValue(0);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** This root sheet holds the presenter's turn (from the grant until its Modal is gone). */
+  const granted = useRef(false);
 
   useEffect(() => {
     if (exitTimer.current) clearTimeout(exitTimer.current);
+    let cancel: (() => void) | null = null;
     if (visible) {
-      setMounted(true);
-      p.value = policy.still ? 1 : withTiming(1, { duration: motion.enter, easing: drift });
+      const enter = () => {
+        granted.current = !nested;
+        setMounted(true);
+        p.value = policy.still ? 1 : withTiming(1, { duration: motion.enter, easing: drift });
+      };
+      if (nested) enter();
+      else cancel = presenter.request(id.current as string, enter);
     } else {
       p.value = policy.still ? 0 : withTiming(0, { duration: EXIT_MS, easing: drift });
       exitTimer.current = setTimeout(() => setMounted(false), policy.still ? 0 : EXIT_MS);
     }
     return () => {
+      cancel?.();
       if (exitTimer.current) clearTimeout(exitTimer.current);
     };
-  }, [visible, policy.still, p]);
+  }, [visible, policy.still, p, nested]);
+
+  // Give the turn back once the Modal is off screen: iOS reports it (onDismiss,
+  // with a fallback should that never come); elsewhere unmounting is enough.
+  const giveBack = () => {
+    if (!granted.current) return;
+    granted.current = false;
+    presenter.release(id.current as string);
+  };
+  useEffect(() => {
+    if (mounted || !granted.current) return;
+    if (Platform.OS !== "ios") {
+      giveBack();
+      return;
+    }
+    const fallback = setTimeout(giveBack, IOS_DISMISS_FALLBACK_MS);
+    return () => clearTimeout(fallback);
+  }, [mounted]);
+  // Toasts draw in the sheet that is open on top.
+  const layered = mounted && visible;
+  useEffect(() => {
+    const me = id.current as string;
+    if (!layered) return;
+    presenter.layerIn(me);
+    return () => presenter.layerOut(me);
+  }, [layered]);
+  // Unmounting frees the turn (or drops a request still waiting for one).
+  useEffect(
+    () => () => {
+      const me = id.current as string;
+      granted.current = false;
+      presenter.layerOut(me);
+      presenter.release(me);
+    },
+    []
+  );
 
   const slide = policy.transitions;
   const scrim = useAnimatedStyle(() => ({ opacity: p.value }));
@@ -76,7 +135,14 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
   );
 
   return (
-    <Modal transparent visible={mounted} animationType="none" statusBarTranslucent onRequestClose={dismissible ? onClose : () => {}}>
+    <Modal
+      transparent
+      visible={mounted}
+      animationType="none"
+      statusBarTranslucent
+      onRequestClose={dismissible ? onClose : () => {}}
+      onDismiss={Platform.OS === "ios" ? giveBack : undefined}
+    >
       <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.scrim, scrim]}>
           <Pressable
@@ -108,9 +174,12 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
               {subtitle}
             </T>
           ) : null}
-          {body}
-          {footer ? <View style={styles.footer}>{footer}</View> : null}
+          <InSheetCtx.Provider value>
+            {body}
+            {footer ? <View style={styles.footer}>{footer}</View> : null}
+          </InSheetCtx.Provider>
         </Animated.View>
+        <ToastLayer layer={id.current} />
       </KeyboardAvoidingView>
     </Modal>
   );

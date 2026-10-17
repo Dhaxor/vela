@@ -389,3 +389,38 @@ describe("totals, import, storage shape", () => {
     expect(index).not.toContain(chapters[0].body[0].text);
   });
 });
+
+describe("a chapter saved for later, then read anyway (review: loop-logic-sealed-after-heard)", () => {
+  test("once heard, the save is spent: the bridge chosen from it is open all the next day", () => {
+    // 21:04 on the 20th: proof saved, Chapter II woven; 'Save for tomorrow, 21:00'; then 'Read it now' and a bridge.
+    const w = world({ start: new Date(2026, 9, 20, 17, 4) }); // one hour per action: the proof lands at 21:04
+    const ch = create(w);
+    const dreamId = w.state.index.dreams[0].id;
+    w.run({ type: "MARK_HEARD", chapterId: ch.id });
+    w.run({ type: "CHOOSE_BRIDGE", input: { chapterId: ch.id, choice: { tier: "own", text: "Email the landlord" } } });
+    const r = w.run({ type: "SAVE_PROOF_AND_WEAVE", input: { dreamId, kind: "did", text: "Emailed the landlord about the unit" } });
+    const next = r.nextChapter!;
+    const tomorrow21 = new Date(2026, 9, 21, 21, 0).toISOString();
+    w.run({ type: "SAVE_FOR_RITUAL", chapterId: next.id, at: tomorrow21 });
+    const at = (h: number, m = 0) => new Date(2026, 9, 21, h, m);
+    expect(loopStateOf(w.state.index, dreamId, at(8), false)).toMatchObject({ kind: "sealed", until: tomorrow21 });
+    w.run({ type: "MARK_HEARD", chapterId: next.id });
+    const bridge = w.run({ type: "CHOOSE_BRIDGE", input: { chapterId: next.id, choice: { tier: "own", text: "Sketch the sign" } } });
+    for (const t of [at(8), at(12), at(18), at(20, 59)]) {
+      expect(loopStateOf(w.state.index, dreamId, t, false)).toEqual({ kind: "bridge-open", dreamId, chapterId: next.id, bridgeId: bridge.id });
+    }
+  });
+
+  test("an unheard chapter saved for later stays sealed until its time", () => {
+    const w = world({ start: new Date(2026, 9, 20, 17, 4) }); // one hour per action: the proof lands at 21:04
+    const ch = create(w);
+    const dreamId = w.state.index.dreams[0].id;
+    w.run({ type: "MARK_HEARD", chapterId: ch.id });
+    w.run({ type: "CHOOSE_BRIDGE", input: { chapterId: ch.id, choice: { tier: "own", text: "Email the landlord" } } });
+    const r = w.run({ type: "SAVE_PROOF_AND_WEAVE", input: { dreamId, kind: "did", text: "Emailed the landlord about the unit" } });
+    const until = new Date(2026, 9, 21, 21, 0).toISOString();
+    w.run({ type: "SAVE_FOR_RITUAL", chapterId: r.nextChapter!.id, at: until });
+    expect(loopStateOf(w.state.index, dreamId, new Date(2026, 9, 21, 20, 59), false)).toMatchObject({ kind: "sealed", until });
+    expect(loopStateOf(w.state.index, dreamId, new Date(2026, 9, 21, 21, 1), false)).toMatchObject({ kind: "chapter-waiting", heard: false });
+  });
+});

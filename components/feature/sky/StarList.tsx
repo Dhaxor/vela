@@ -5,7 +5,7 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
-import { ChevronRight } from "lucide-react-native";
+import { ChevronRight } from "@/components/glyphs/icons";
 import { useArc } from "@/contexts/ArcContext";
 import { STARS_PER_SEASON, type Dream, type Proof } from "@/contexts/arc.types";
 import { sparklePath } from "@/lib/sky/shapes";

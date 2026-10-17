@@ -67,6 +67,12 @@ export interface SoundscapeOptions {
   readonly locked?: boolean;
   /** Base volume, default BED_LEVELS.full. */
   readonly volume?: number;
+  /**
+   * The system paused the playing bed (headphones or AirPods disconnected, a
+   * call or Siri interrupted). The bed has already stopped itself; pause the
+   * narration, which iOS does not pause (soundscapes.ts watchBed).
+   */
+  readonly onInterrupted?: () => void;
 }
 
 export interface SoundscapeController {

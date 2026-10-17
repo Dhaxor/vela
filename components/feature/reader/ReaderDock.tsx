@@ -8,9 +8,10 @@
 // scrim: story text fades out above the progress line and never shows through
 // the status line or the controls.
 import React from "react";
-import { StyleSheet, View, type LayoutChangeEvent } from "react-native";
-import { Dock, Press, T, haptics, type TTone } from "@/components/ui";
+import { StyleSheet, View, useWindowDimensions, type LayoutChangeEvent } from "react-native";
+import { Dock, Press, T, haptics, useGutter, type TTone } from "@/components/ui";
 import { accentGlow, colors, radius, space } from "@/constants/theme";
+import { DOCK_DISC, dockControlWidth } from "./dockLayout";
 import { PauseGlyph, PlayGlyph } from "./glyphs";
 
 export type PlayState = "play" | "pause" | "resume" | "again";
@@ -44,8 +45,9 @@ const PLAY_LABEL: Record<PlayState, string> = {
   again: "Listen again",
 };
 
-const DISC = 64;
-function DockControl({ glyph, label, accessibilityLabel, onPress, testID, active }: DockControlSpec) {
+const DISC = DOCK_DISC;
+
+function DockControl({ glyph, label, accessibilityLabel, onPress, testID, active, width }: DockControlSpec & { width: number }) {
   const tone: TTone = active ? "primary" : "muted";
   return (
     <Press
@@ -56,11 +58,11 @@ function DockControl({ glyph, label, accessibilityLabel, onPress, testID, active
       accessibilityLabel={accessibilityLabel}
       pressScale={0.94}
       hitSlop={4}
-      style={styles.control}
+      style={[styles.control, { width }]}
       testID={testID}
     >
       {glyph}
-      <T variant="caption" tone={tone} numeric numberOfLines={1} style={styles.controlLabel}>
+      <T variant="caption" tone={tone} numeric numberOfLines={1} style={{ maxWidth: width }}>
         {label}
       </T>
     </Press>
@@ -69,6 +71,9 @@ function DockControl({ glyph, label, accessibilityLabel, onPress, testID, active
 
 export function ReaderDock({ progress, status, play, quiet, disabled, onPlay, left, right, onLayout }: ReaderDockProps) {
   const playing = play === "pause";
+  // 320pt (Display Zoom on an iPhone SE/8) leaves 288pt inside the gutters: the controls narrow to fit.
+  const gutter = useGutter();
+  const control = dockControlWidth(useWindowDimensions().width - 2 * gutter, space.xs);
   const glyphColor = quiet || disabled ? colors.gold300 : colors.onGold;
   return (
     <View onLayout={onLayout}>
@@ -78,8 +83,8 @@ export function ReaderDock({ progress, status, play, quiet, disabled, onPlay, le
         </T>
         <View style={styles.row}>
           <View style={styles.side}>
-            <DockControl {...left[0]} />
-            <DockControl {...left[1]} />
+            <DockControl {...left[0]} width={control} />
+            <DockControl {...left[1]} width={control} />
           </View>
           <Press
             onPress={() => {
@@ -96,8 +101,8 @@ export function ReaderDock({ progress, status, play, quiet, disabled, onPlay, le
             {playing ? <PauseGlyph size={26} color={glyphColor} /> : <PlayGlyph size={26} color={glyphColor} />}
           </Press>
           <View style={styles.side}>
-            <DockControl {...right[0]} />
-            <DockControl {...right[1]} />
+            <DockControl {...right[0]} width={control} />
+            <DockControl {...right[1]} width={control} />
           </View>
         </View>
       </Dock>
@@ -108,8 +113,7 @@ export function ReaderDock({ progress, status, play, quiet, disabled, onPlay, le
 const styles = StyleSheet.create({
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
   side: { flexDirection: "row", alignItems: "center", gap: space.xs },
-  control: { width: 64, minHeight: 52, alignItems: "center", justifyContent: "center", gap: space.xs, borderRadius: radius.sm },
-  controlLabel: { maxWidth: 64 },
+  control: { minHeight: 52, alignItems: "center", justifyContent: "center", gap: space.xs, borderRadius: radius.sm },
   disc: {
     width: DISC,
     height: DISC,

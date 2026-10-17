@@ -118,7 +118,7 @@ All keys live in `lib/storageKeys.ts`. Inline key strings are not allowed anywhe
 | `vela.profile.v2` | `ProfileV2` | UserContext (A2) | yes |
 | `vela.progress.v2` | `ProgressState` (shape: A6) | RitualContext (A2) | yes |
 | `vela.journal.v2` | journal entries + 369 sheet | JournalContext (A2) | yes |
-| `vela.scenes.v2` | Scenes cards (former board) with optional `dreamId` | Board/ScenesContext (A2) | yes (photo URIs only) |
+| `vela.scenes.v2` | Scenes cards (former board) with optional `dreamId` | Board/ScenesContext (A2) | yes (photo URIs only: the photos stay on the phone that took them; `BackupSummary.devicePhotos` counts them) |
 | `vela.asks.v1` | `AskLedger` | lib/asks (A6) | no (device-local) |
 | `vela.notifications.v2` | `TemplateHistory` | lib/notifications (A6) | no |
 | `vela.plus.v1`, `vela-review-requested-v1` | unchanged 1.0 keys | PlusContext (A2), reviewPrompt (A6) | no |
@@ -133,6 +133,23 @@ every chapter key first, then the index. A crash between the two leaves at
 worst an orphan chapter key, which is harmless and is garbage-collected on
 load. The index never points at a missing chapter. Loading tolerates
 `chapter.revision >= meta.revision`.
+
+**A failed read is not 'absent'.** Launch reads throw `StorageReadError`
+when storage answers with an error (`contexts/persist` `readKeys`/`readKey`,
+three quick tries). Every provider loads through `loadUntilRead`
+(`lib/store/storageRead`): it stays not ready, writes nothing and sets
+`storageError` until a read succeeds, retrying with backoff. Only a read that
+succeeded and found nothing may migrate a v1 key or start empty. The arc's
+launch load is `lib/store/arcLoad` `loadArcState` (storage injected, tested).
+A stored index whose rows fail the field-type checks (`lib/store/shape`) is
+'unreadable' and quarantined like a corrupt one.
+
+**Photo URIs follow the app container.** iOS moves the app's data container
+on every update, so a stored `file://…/Documents/<name>` URI goes stale while
+the file survives. Proof photos (arc index) and Scenes photos are rebased into
+the current `Paths.document` by file name on every load and on backup import,
+when the file exists there (`lib/photos` `rebasePhotoUri`). Screens keep
+reading plain URIs.
 
 **Persist queue.** Every write goes through one serialized queue
 (`lib/store/persistQueue.ts`, A2). It coalesces repeated index writes and runs
@@ -304,7 +321,7 @@ The precedence (first match wins) is written in `arc.types.ts` next to
 2. `resting` (with reason: resting, released or plan-locked)
 3. `next-woven` [C]: the chapter was woven from a proof saved today, is
    unheard, and is not saved for later. CTAs: 'Read now' / 'Save for 21:00'.
-4. `sealed` [D]: `savedForAt` is in the future.
+4. `sealed` [D]: `savedForAt` is in the future and the latest chapter is unheard (reading it spends the save).
 5. `season-complete`: 7 stars and the latest chapter heard. CTA: Named Sky or
    Begin Season 2.
 6. `sealed` [D]: a proof was saved today and the latest chapter is heard.
@@ -797,6 +814,17 @@ waits for every store to be `ready`.
 - 2026-10-16 integrator: additive fields. PlusValue.priceAmounts (Record<PlanId, {amount, currency} | null>, from StoreKit's numeric price; lib/purchase numericPrice). ProfileV2.bedOn?: false (the reader's 'Silence'; stored only when chosen, so other profiles keep their exact shape). lib/audio isAudioActive() (AudioSession.active()). Dock `dense` (the reader's denser scrim). ScreenProps.scrollProps accepts `ref`.
 - 2026-10-16 integrator: behaviour. SkyBackdrop keys chart circles by index and Screen ignores 0×0 layouts (the 'two children with the same key' error on every push over a tab). Disabled filled buttons are opaque (sky700). lib/futureMemory bridgeText names a motif-tagged entry's own place. Notification picking skips 'You wrote {proof.quote}' frames for a 'Wrote…' proof (doublesWriteVerb). The Plus nudge after a Star Birth counts logged proofs, not the onboarding seed. The reader's open bridge offers 'Not today' (NotTodaySheet); its season-complete card goes straight to the Named Sky when the sky is unnamed. Paywall entry points pass from=area|scenes|nudge|lapsed. /story/new's screen testID is new-story-screen (new-story stays on Arc's ghost plate and empty state).
 - 2026-10-16 integrator: tooling. scripts/shots/audit.mjs is the 1.1 fresh-install walk (exit 1 on a failed step or app error); new scripts/shots/gallery.mjs; persona maya-unseeded-eve; seed routes @script @m369 @gratitude @affirmation @affirmations @born replace @stories @journal @board. e2e/walkthrough.mjs follows the 1.1 review path.
+- 2026-10-17 data-engine (review fixes): a failed storage read is never 'absent'. contexts/persist: readKeys/readKey throw StorageReadError (readRaw/readMany/allKeys are gone; listKeys returns null on failure). New lib/store/storageRead (readWithRetry, loadUntilRead, retryDelayMs) and lib/store/arcLoad (loadArcState, parseStoredIndex, parseStoredChapter, repairChapter). Every provider exposes storageError (ArcValue.storageError optional; UserValue, ProgressValue, JournalValue, ScenesValue) and stays not ready until a read succeeds.
+- 2026-10-17 data-engine: photo URIs are rebased into the current container on load and import (lib/photos rebasePhotoUri, ownPhotoFileName, photoUriResolver, rebaseIndexPhotos, rebaseScenePhotos). New v1 fixtures board-photo and two-proofs-one-story (constructed with the 1.0.1 rules).
+- 2026-10-17 data-engine: new lib/store/shape (indexShapeProblems, chapterShapeProblems, snapshotShapeProblems). parseBackup checks field types first and never throws; the launch index load quarantines malformed rows. rerenderChapter keeps a migrated chapter's meta.source 'migrated-v1', and I3 also skips any chapter older than index.migratedFromV1At.
+- 2026-10-17 data-engine: backup merge works per dream. ImportPlan gains differs, dreamsUpdated, dreamsDiverged; nothingNew also counts chapters, bridges, proofs and newer rewrites. New resolveImportDetailed (dreamsAdded/Updated/Kept, problems: a merge is never silently replaced by 'keep mine'). useBackup().apply resolves to ImportOutcome { mode, dreamsAdded, dreamsUpdated, dreamsKept, devicePhotos } and rejects on problems. BackupSummary.devicePhotos (optional).
+- 2026-10-17 data-engine: nothing evicts user content. lib/journal MAX_ENTRIES is gone (pages are never dropped); Scenes never drop a card on load, sync or merge, and MAX_SCENES only limits cards added by hand.
+- 2026-10-17 data-engine: lib/store/ceremony releaseAllCeremonies(); contexts/persist runs it on AppState 'inactive'/'background', so writes held for a ceremony reach storage before iOS suspends the app.
+- 2026-10-17 data-engine: Plus. PurchaseResult gains 'error' (the App Store could not be reached; entitlement untouched). restore() runs restorePurchases (AppStore.sync) before reading. PlusValue.reloadPrices(); prices are refetched while still unknown (foreground, short retries). ownsPlus honours expo-iap's revocationDateIOS.
+- 2026-10-17 data-engine: lib/notifications planWindow(pausedUntil, now): while a pause runs, the 10-day horizon starts the day after it, so 14/30-night pauses resume. e2e/walkthrough.mjs backs out to Today through Chapter I, types each 3·6·9 rep, and exits 1 on a failed check (ios-e2e.yml gates on it).
+- 2026-10-17 ui-native (review fixes): one root Sheet at a time. components/ui/presentation (presenter, holdForSystemSheet, also in the ui barrel) queues every root-level Sheet until the previous Modal has left (iOS onDismiss + settle); sheets inside a sheet are nested and skip it; useDataActions holds for the document picker. The toast draws inside the top open sheet (components/ui/ToastHost), and UIProvider unmounts an answered ConfirmSheet. Screen keeps the Dock in the box the keyboard padding shrinks (it rides above the iOS keyboard) and drops its home-indicator inset while the keyboard is up (useKeyboardUp).
+- 2026-10-17 ui-native: lib/audio SoundscapeOptions.onInterrupted (optional): a playing bed the system pauses (route lost, a call) stops itself and calls it; the reader pauses narration. Pure soundscapes watchBed / BED_WATCH_*.
+- 2026-10-17 ui-native: free affirmation areas are capped where focusAreas are written (components/feature/plus/areas: FREE_AREA_LIMIT 3, areaAllowance, tapArea): First Light's focus grid takes `max`, Settings > Your areas offers Plus past the allowance; a profile already holding more keeps it. Today reads its clock through useNow (AppState 'active', tab focus, each hour, savedForAt). The review ask is claimed only when asked (proof/starBirthAsks). Season-end copy follows proof/seasonEnd seasonCarries. Past seasons that are whole and unnamed are named from the sky (nameSeasonHref → /evidence/[id]?nameSeason=N). Icons come from components/glyphs/icons (per-icon files); lint-ui rule iconBarrel bans the lucide barrel.
 
 ## 20. Integration notes (Phase 1 complete; Phase 3 updates inline)
 
@@ -991,8 +1019,8 @@ await arc.saveProofAndWeave({ dreamId, kind: "learned", text: lesson, origin: "n
 | `useProgress()` (`@/contexts/RitualContext`) | `ready`, `state`, `summary`, `recordAct(act)`, `setRhythmTarget(3..7)`, `pauseUntil(dateKey)`, `resume()`. `summary` holds `nightsShownUp`, `stars`, `chipLabel`, `week { weekStart, target, shownUp, met, days[7] }`, `paused`, `pausedUntil` and `doneToday`. Each day is 'shown-up' \| 'rest' \| 'today-open' \| 'future' \| 'paused'. Screens record 'line-carried' (Your lines) and 'ritual-saved' (a practice saved); ArcContext records 'chapter-heard' and 'proof'. |
 | `useJournal()` | `entries` (newest first), `entry(id)`, `addEntry(kind, prompt, text, { promptId?, dreamId? })` (returns the entry, or null when empty), `sheetToday`, `phrase369`, `setPhrase369`, `addRep(slot, text)`. |
 | `useScenes()` (`@/contexts/ScenesContext`) | `cards`, `canAddScene`, `addPhoto(uri, caption, { dreamId })`, `addGoal(text, { dreamId })` (both return null at the free limit), `setCaption`, `attach(id, dreamId \| null)`, `removeCard`. Proof photos join automatically and never count toward the limit. |
-| `usePlus()` | `isPlus`, `prices`, `purchase(plan)`, `restore()`, `canAddDream(n)`, `canUseBed(bedId)`, `canUseArea(focus)`, `sceneLimit`. The second-dream gate is `arc.canCreateDream`. |
-| `useBackup()` (`@/contexts/useBackup`) | `exportToFile()` ('shared' \| 'downloaded' \| 'unavailable'), `readFromFile()` (null = cancelled, else `{ ok, backup, summary }` or `{ ok: false, error }`; show `BACKUP_ERROR_COPY[error]` from `@/lib/backup`), `plan(backup)` (`{ needsChoice, recommended, nothingNew, current, incoming }`), `apply(backup, 'merge' \| 'replace')`. Offer merge (recommended) or replace only when `needsChoice` is true. |
+| `usePlus()` | `isPlus`, `prices`, `reloadPrices()` (the paywall calls it on mount while prices are null), `purchase(plan)`, `restore()` ('purchased' \| 'failed' = the App Store found no Plus \| 'error' = it could not be reached \| …), `canAddDream(n)`, `canUseBed(bedId)`, `canUseArea(focus)`, `sceneLimit`. The second-dream gate is `arc.canCreateDream`. |
+| `useBackup()` (`@/contexts/useBackup`) | `exportToFile()` ('shared' \| 'downloaded' \| 'unavailable'), `readFromFile()` (null = cancelled, else `{ ok, backup, summary }` or `{ ok: false, error }`; show `BACKUP_ERROR_COPY[error]` from `@/lib/backup`), `plan(backup)` (`{ needsChoice, recommended, nothingNew, differs, dreamsUpdated, dreamsDiverged, current, incoming }`), `apply(backup, 'merge' \| 'replace')` → `ImportOutcome { mode, dreamsAdded, dreamsUpdated, dreamsKept, devicePhotos }` (rejects, changing nothing, when the result would be invalid). Offer merge (recommended) or replace only when `needsChoice` is true. `nothingNew` is truthful; `differs` says whether Replace would change anything. Photos are not in the file (`summary.devicePhotos`): never say 'Everything is here'. |
 
 The 1.0 adapters (`useStories()`, `useRitual()`, `useBoard()`) are deleted (§20.1).
 
@@ -1125,3 +1153,10 @@ Six slots:
    - cold-start deep links
    - provisional permission
 6. Backup export to Files and import back. A proof photo copied into documents.
+7. A proof photo, a Scenes photo and a 1.0.1 board photo survive an update: install build N, add the photos, install build N+1 over it (TestFlight), and every photo still shows (the container path changes; lib/photos rebases).
+8. Background during Star Birth: save a proof, swipe home at once, kill the app from the switcher, relaunch: the proof and the woven chapter are there.
+9. Import > Replace on a phone that already has a dream: pick the file, Replace, then 'Replace with backup': the destructive confirm appears and the backup applies. Afterwards a reader 'Rewrite this chapter' confirm still appears.
+10. The keyboard: the onboarding desire and name steps, the proof form, the Script page and the Named Sky field each keep their one CTA visible above the keyboard.
+11. Listening with AirPods: take them out mid-chapter (and take a call mid-chapter): the bed and the voice both pause, nothing carries on from the speaker, and Resume picks both up. With Silence chosen (no bed) the voice can still carry on: that case needs a native route-change observer.
+12. Share image from a star on a @3x and a @2x iPhone: the PNG is 1080×1920 and not blank.
+13. An error toast raised inside an open sheet (a rejected rename in the Arc menu, a failed 'Not today') shows over the sheet.
