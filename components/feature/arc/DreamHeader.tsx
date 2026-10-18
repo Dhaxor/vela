@@ -16,7 +16,7 @@ import { AreaSign } from "@/components/glyphs";
 import { focusById } from "@/lib/focus";
 import { seasonStageLabel } from "@/lib/story/seasons";
 import { cardShadow, colors, hitSize, radius, space } from "@/constants/theme";
-import { dreamName, type DreamStats } from "./model";
+import { dreamName, statsLabel, type DreamStats } from "./model";
 
 export type DreamStanding = "weaving" | "resting" | "released" | "plan-locked";
 
@@ -102,7 +102,7 @@ export function DreamHeader({ dream, latest, progress, kinds, stats, standing, o
       </View>
 
       <View style={styles.ledger}>
-        <View style={styles.stats} accessible accessibilityLabel={`${stats.chapters} chapters, ${stats.proofs} proofs, ${stats.nights} nights.`} testID="arc-stats">
+        <View style={styles.stats} accessible accessibilityLabel={statsLabel(stats)} testID="arc-stats">
           <Stat value={stats.chapters} label={stats.chapters === 1 ? "chapter" : "chapters"} />
           <View style={styles.divider} />
           <Stat value={stats.proofs} label={stats.proofs === 1 ? "proof" : "proofs"} />

@@ -14,6 +14,7 @@ import { PROOF_LABEL, StarProof } from "@/components/glyphs";
 import { Press, T } from "@/components/ui";
 import { colors, radius, space } from "@/constants/theme";
 import { dayMonth, dreamDay } from "@/components/feature/today/time";
+import { spoken } from "@/lib/a11y";
 import type { StarSelection } from "./StarDetailSheet";
 
 export interface StarListProps {
@@ -64,7 +65,7 @@ export function StarList({ dream, season, proofs, onSelect }: StarListProps) {
           <Press
             key={p.id}
             onPress={() => onSelect({ kind: "proof", proofId: p.id })}
-            accessibilityLabel={`Star ${p.starIndex}, ${PROOF_LABEL[p.kind]}, ${day}: ${p.text}${chapter ? `. Changed Chapter ${toRoman(chapter.number)}` : ""}`}
+            accessibilityLabel={`Star ${p.starIndex}, ${PROOF_LABEL[p.kind]}, ${day}: ${chapter ? spoken(p.text, `Changed Chapter ${toRoman(chapter.number)}`) : p.text}`}
             testID={`sky-list-star-${p.starIndex}`}
             pressScale={0.98}
             style={styles.row}

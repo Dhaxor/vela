@@ -24,6 +24,7 @@ import {
 } from "@/contexts/arc.types";
 import { addDays, daysBetween, isDateKey, localDateKey } from "@/lib/progress";
 import { dreamGivenName, dreamName as sharedDreamName } from "@/lib/dreams";
+import { countOf, spoken } from "@/lib/a11y";
 
 export interface SeasonRow {
   readonly kind: "season";
@@ -221,6 +222,20 @@ export interface DreamStats {
   readonly chapters: number;
   readonly proofs: number;
   readonly nights: number;
+}
+
+/** The ledger under a dream, read aloud: '1 chapter, 2 proofs, 1 night.' */
+export function statsLabel(stats: DreamStats): string {
+  return spoken(`${countOf(stats.chapters, "chapter")}, ${countOf(stats.proofs, "proof")}, ${countOf(stats.nights, "night")}`);
+}
+
+/**
+ * A proof in the Memory Book, read aloud: 'Star 2. I did it, day 3. Sent my
+ * portfolio to two studios I admire. Today · Woven into Chapter III.' The
+ * user's sentence keeps its own closing mark (never 'admire..').
+ */
+export function proofNodeLabel(p: { starIndex: number; label: string; day: number; text: string; notes: string }): string {
+  return spoken(`Star ${p.starIndex}`, `${p.label}, day ${p.day}`, p.text, p.notes);
 }
 
 /**

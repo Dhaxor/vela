@@ -16,7 +16,8 @@ import { stageMeta } from "@/lib/story/seasons";
 import type { StageId } from "@/lib/story/content/types";
 import { colors, radius, space } from "@/constants/theme";
 import { MARKER, MARKER_TOP, NODE_PAD, SPINE_X, TEXT_X } from "./metrics";
-import { relativeDate, shortDate, type BookStartRow, type BridgeRow, type CourseRow, type ProofRow, type SeasonRow } from "./model";
+import { stripTrailingPunct } from "@/lib/story/text";
+import { proofNodeLabel, relativeDate, shortDate, type BookStartRow, type BridgeRow, type CourseRow, type ProofRow, type SeasonRow } from "./model";
 
 /* =========================================================================
  * Spine
@@ -169,7 +170,7 @@ export const BridgeNode = React.memo(function BridgeNode({ row, above, below, on
         </T>
         {bridge.ifThen ? (
           <T variant="caption" tone="muted" style={styles.nodeCaption}>
-            {`If it's ${bridge.ifThen.when} and I hesitate, then I ${bridge.ifThen.then}.`}
+            {`If it's ${bridge.ifThen.when} and I hesitate, then I ${stripTrailingPunct(bridge.ifThen.then)}.`}
           </T>
         ) : null}
         {open && onCross ? (
@@ -209,7 +210,7 @@ export const ProofNode = React.memo(function ProofNode({ row, today, above, belo
       onPress={() => onOpen(proof)}
       pressScale={0.985}
       testID={`arc-proof-${proof.id}`}
-      accessibilityLabel={`Star ${proof.starIndex}. ${label}, day ${day}. ${proof.text}. ${notes}.`}
+      accessibilityLabel={proofNodeLabel({ starIndex: proof.starIndex, label, day, text: proof.text, notes })}
       accessibilityHint="Opens this star in your sky"
     >
       <Spine above={above} below={below} />

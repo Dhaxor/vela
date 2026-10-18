@@ -21,6 +21,7 @@ import { useUser } from "@/contexts/UserContext";
 import { gutterFor, toRoman } from "@/lib/sky";
 import { Screen, T, haptics, useMotion, useToast } from "@/components/ui";
 import { FIRST_LIGHT_ID, WEAVE_TIMING, WeaveStage, clearFirstLight, stagedFirstLight, useWeaveModel, type WeaveMode } from "@/components/feature/onboarding";
+import { spoken } from "@/lib/a11y";
 import { motion, space } from "@/constants/theme";
 
 /** Beat held on the resolved numeral before the chapter opens. */
@@ -127,7 +128,7 @@ export default function WeaveScreen() {
         onPress={skippable ? open : undefined}
         disabled={!skippable}
         accessibilityRole="button"
-        accessibilityLabel={model ? `Chapter ${model.numeral}, ${model.title}. ${model.caption}` : "Weaving your chapter"}
+        accessibilityLabel={model ? spoken(`Chapter ${model.numeral}, ${model.title}`, model.caption) : "Weaving your chapter"}
         accessibilityHint={skippable ? "Opens the chapter" : undefined}
         testID="weave-stage"
         onLayout={(e) => {

@@ -11,6 +11,7 @@ import { toRoman } from "@/lib/sky";
 import { stageMeta } from "@/lib/story/seasons";
 import { colors, space } from "@/constants/theme";
 import { COVER_W, PLATE_H } from "./metrics";
+import { spoken } from "@/lib/a11y";
 import { relativeDate, type ChapterRow } from "./model";
 
 export interface ChapterPlateProps {
@@ -32,7 +33,7 @@ export const ChapterPlate = React.memo(function ChapterPlate({ row, dream, today
       padding={0}
       onPress={() => onOpen(meta)}
       testID={`arc-chapter-${meta.id}`}
-      accessibilityLabel={`Chapter ${meta.number}, ${meta.title}. ${stage.name}. Written ${when}. ${state}.`}
+      accessibilityLabel={spoken(`Chapter ${meta.number}, ${meta.title}`, stage.name, `Written ${when}`, state)}
       accessibilityHint="Opens the chapter to reread"
     >
       <View style={styles.row}>
