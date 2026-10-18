@@ -1149,13 +1149,15 @@ async function drive11() {
     await sleep(1500);
     const kb = await keyboardRect();
     const cta = await rectOf("~script-save", 3000);
+    const fieldR = await rectOf("~script-input", 2000);
     await shot("script-keyboard");
     await tap("~script-close", "close Script", 4000, { scroll: false });
     await sleep(800);
     await clearConfirm();
     if (!kb) return { status: "NOT-TESTABLE", detail: `no software keyboard came up (CTA rect ${JSON.stringify(cta)})` };
     const ok = !!cta && cta.y >= 0 && cta.y + cta.height <= kb.y + 1;
-    return { status: ok ? "PASS" : "FAIL", detail: `'Seal the page' ${JSON.stringify(cta)} vs keyboard top ${kb.y}` };
+    const seen = !!fieldR && !!cta && fieldR.y >= 60 && fieldR.y + 44 <= cta.y - 16;
+    return { status: ok && seen ? "PASS" : "FAIL", detail: `'Seal the page' ${JSON.stringify(cta)} vs keyboard top ${kb.y}; the page's field ${JSON.stringify(fieldR)} ${seen ? "visible" : "HIDDEN"} above the dock` };
   });
 
   await section("C-SCENES-PHOTO", async () => {
@@ -1266,12 +1268,24 @@ async function drive11() {
     if (!(await tap("~record-proof", "I crossed it", 5000))) return { status: "FAIL", detail: `no 'I crossed it' on the first dream (woke ${woke})` };
     await exists("~evidence-screen", 8000);
     await tap("~evidence-kind-did", "I did it", 4000);
+    const fieldBefore = await rectOf("~evidence-note", 3000);
+    await shot("proof-form");
     const typed = await typeInto("~evidence-note", PROOF_11, "proof");
     await sleep(800);
     const kb = await keyboardRect();
     const cta = await rectOf("~evidence-save", 3000);
+    const field = await rectOf("~evidence-note", 2000);
     await shot("proof-form-keyboard");
+    await source("proof-form-keyboard");
     const dockOk = kb ? !!cta && cta.y >= 0 && cta.y + cta.height <= kb.y + 1 : null;
+    // The words being typed: the field's first lines must sit between the header and the dock's top.
+    const dockTop = cta ? cta.y - 16 : kb ? kb.y : win.height;
+    const fieldSeen = !!field && field.y >= 60 && field.y + Math.min(field.height, 44) <= dockTop;
+    record(
+      "C-KEYBOARD-PROOF-FIELD",
+      kb ? (fieldSeen ? "PASS" : "FAIL") : "NOT-TESTABLE",
+      kb ? `the sentence field (before the keyboard ${JSON.stringify(fieldBefore)}) ${JSON.stringify(field)} vs the dock's top ~${Math.round(dockTop)} (keyboard top ${kb.y}): ${fieldSeen ? "visible while typing" : "HIDDEN under the dock and keyboard while the user types into it"}` : "no software keyboard"
+    );
     record(
       "C-KEYBOARD-PROOF",
       kb ? (dockOk ? "PASS" : "FAIL") : "NOT-TESTABLE",

@@ -32,7 +32,7 @@ permissions:
 
 env:
   BUNDLE_ID: app.vela.manifest
-  REUSE_BUILDS_FROM_RUN: "39117690802"
+  REUSE_BUILDS_FROM_RUN: ""
 
 jobs:
   plan:
