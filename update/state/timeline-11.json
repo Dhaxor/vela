@@ -1,0 +1,142 @@
+{
+  "sessionReadyMs": 20234,
+  "events": [
+    {
+      "t": 0,
+      "plus": "1"
+    },
+    {
+      "t": 0,
+      "keys": [
+        "vela.board.v1",
+        "vela.journal.v1",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.ritual.v1",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 20750,
+      "keys": [
+        "vela.board.v1",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 21243,
+      "plus": "0"
+    },
+    {
+      "t": 21243,
+      "keys": [
+        "vela.board.v1",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.profile.v2",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 22927,
+      "keys": [
+        "vela.arcs.v2",
+        "vela.board.v1",
+        "vela.chapter.v2.mve7u3o9-dxcgnl",
+        "vela.chapter.v2.mve7ubk6-4e83fu",
+        "vela.chapter.v2.mve7ubk6-4e83fu-w",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.profile.v2",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 24716,
+      "keys": [
+        "vela.arcs.v2",
+        "vela.board.v1",
+        "vela.chapter.v2.mve7u3o9-dxcgnl",
+        "vela.chapter.v2.mve7ubk6-4e83fu",
+        "vela.chapter.v2.mve7ubk6-4e83fu-w",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.notifications.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.profile.v2",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 654029,
+      "keys": [
+        "vela.arcs.v2",
+        "vela.asks.v1",
+        "vela.board.v1",
+        "vela.chapter.v2.mve7u3o9-dxcgnl",
+        "vela.chapter.v2.mve7ubk6-4e83fu",
+        "vela.chapter.v2.mve7ubk6-4e83fu-w",
+        "vela.chapter.v2.mve8bxg0-c1okwu",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.notifications.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.profile.v2",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    },
+    {
+      "t": 1086347,
+      "keys": [
+        "vela.arcs.v2",
+        "vela.asks.v1",
+        "vela.board.v1",
+        "vela.chapter.v2.mve7u3o9-dxcgnl",
+        "vela.chapter.v2.mve7ubk6-4e83fu",
+        "vela.chapter.v2.mve7ubk6-4e83fu-w",
+        "vela.journal.v1",
+        "vela.journal.v2",
+        "vela.notifications.v2",
+        "vela.plus.v1",
+        "vela.profile.v1",
+        "vela.profile.v2",
+        "vela.progress.v2",
+        "vela.ritual.v1",
+        "vela.scenes.v2",
+        "vela.softplus.v1",
+        "vela.stories.v1"
+      ]
+    }
+  ]
+}

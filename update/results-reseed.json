@@ -1,0 +1,10 @@
+[
+  {
+    "phase": "reseed",
+    "name": "RESEED",
+    "status": "PASS",
+    "detail": "vela.plus.v1 \"0\" → \"1\"; baseline of the v1 keys saved",
+    "shots": [],
+    "t": 1.2
+  }
+]

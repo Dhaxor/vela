@@ -1,0 +1,6 @@
+device small
+name iPhone SE (2nd generation)
+type com.apple.CoreSimulator.SimDeviceType.iPhone-SE--2nd-generation-
+runtime com.apple.CoreSimulator.SimRuntime.iOS-26-5
+points 375x667
+udid 40C097E3-DEB3-46A3-AD07-F9A85162085B

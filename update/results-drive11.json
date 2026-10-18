@@ -1,0 +1,239 @@
+[
+  {
+    "phase": "drive11",
+    "name": "C-CONTAINER",
+    "status": "INFO",
+    "detail": "data container after the update: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F; 1.0.1's: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD; MOVED",
+    "shots": [],
+    "t": 0.7
+  },
+  {
+    "phase": "drive11",
+    "name": "C-LAUNCH",
+    "status": "PASS",
+    "detail": "Today shown; onboarding not shown; storage-error no; app state 4",
+    "shots": [
+      "C01-first-launch.png"
+    ],
+    "t": 62.4
+  },
+  {
+    "phase": "drive11",
+    "name": "C-TODAY",
+    "status": "PASS",
+    "detail": "greeting \"Good evening, Maya.\"; chip \"1 night shown up, 2 stars in your sky\"; sky \"Your sky: The Sail, 1 of 7 stars lit\"; dream pills \"My own design…, not weaving\" + \"A home by…\"; loop card \"Chapter II is ready\"",
+    "shots": [],
+    "t": 79.4
+  },
+  {
+    "phase": "drive11",
+    "name": "C-TODAY-MAIN-DREAM",
+    "status": "PASS",
+    "detail": "sky \"Your sky: The Sail, 1 of 7 stars lit\"; loop card \"future-memory-card\"; plan-locked: 'Keep this dream weaving' (Plus is off on this simulator)",
+    "shots": [
+      "C02-today-first-dream.png"
+    ],
+    "t": 94
+  },
+  {
+    "phase": "drive11",
+    "name": "C-SETTINGS-NAME",
+    "status": "PASS",
+    "detail": "name row \"Name, Maya\"; Vela Plus row: 'Vela Plus' (free) at +121.6s",
+    "shots": [
+      "C03-settings.png"
+    ],
+    "t": 122.3
+  },
+  {
+    "phase": "drive11",
+    "name": "C-ARC",
+    "status": "PASS",
+    "detail": "chapter plate \"Chapter 2, After the Wanting. The Night Before. Written Today. Waiting for you.\"; proof node \"Star 1. I did it, day 1. Sent my portfolio to two studios I admire. Today.\"; \"Season 1 · Stage II of VII\" · \"1 chapter, 1 proof, 1 night.\"",
+    "shots": [
+      "C04-arc-first-dream.png"
+    ],
+    "t": 150.6
+  },
+  {
+    "phase": "drive11",
+    "name": "C-SECOND-DREAM",
+    "status": "PASS",
+    "detail": "'A home by the sea': \"“A home by the sea”\"; its 1.0 chapter \"Chapter 1, After the Wanting. The First Glimpse. Written Today. Heard.\"; the chapter migration wove from its saved proof \"Chapter 2, What Tomorrow Makes Possible. The Night Before. Written Today. Waiting for you.\"; proof \"Star 1. Something moved, day 1. Saved the first two hundred for the deposit. Today · Woven into Chapter II.\"",
+    "shots": [
+      "C05-arc-second-dream.png"
+    ],
+    "t": 174.8
+  },
+  {
+    "phase": "drive11",
+    "name": "C-RITUALS-PAGES",
+    "status": "PASS",
+    "detail": "2/2 1.0.1 pages listed [{\"kind\":\"gratitude\",\"label\":\"Gratitude, Sunday, October 18. The coffee was warm · My sister called\"},{\"kind\":\"script\",\"label\":\"Script, Sunday, October 18. It is a Tuesday and the studio door is open. Two clients sent thank you notes this week.\"}]; the script page reads \"It is a Tuesday and the studio door is open. Two clients sent thank you notes this week.\"",
+    "shots": [
+      "C06-rituals.png",
+      "C07-rituals-past-pages.png",
+      "C08-past-page-script.png"
+    ],
+    "t": 235.3
+  },
+  {
+    "phase": "drive11",
+    "name": "C-369",
+    "status": "PASS",
+    "detail": "door \"3 · 6 · 9. 2 / 18. “I run a studio clients trust”\"; sheet \"2 of 18 written today\"; phrase \"“I run a studio clients trust”\" (1.0.1 wrote 2 lines today)",
+    "shots": [
+      "C09-369.png"
+    ],
+    "t": 258.9
+  },
+  {
+    "phase": "drive11",
+    "name": "C-KEYBOARD-SCRIPT",
+    "status": "PASS",
+    "detail": "'Seal the page' {\"y\":566,\"x\":24,\"width\":392,\"height\":56} vs keyboard top 655; the page's field {\"y\":278,\"x\":41,\"width\":375,\"height\":240} visible above the dock",
+    "shots": [
+      "C10-script-keyboard.png"
+    ],
+    "t": 284.2
+  },
+  {
+    "phase": "drive11",
+    "name": "C-SCENES-PHOTO",
+    "status": "PASS",
+    "detail": "5/5 board cards in Scenes; photo card rect {\"y\":506,\"x\":24,\"width\":190,\"height\":264} seeded-colour share {\"seeded\":0.882,\"lumaMean\":135.8,\"lumaSd\":48.1}; sheet photo true placeholder 'kept on another phone' not shown share {\"seeded\":0.992,\"lumaMean\":178.7,\"lumaSd\":18.8}; vela.scenes.v2 stores \"file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F/Documents/board-mve7vb21-cx3q68.jpg\" (1.0.1 stored file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg)",
+    "shots": [
+      "C11-scenes.png",
+      "C12-scenes-photo-card.png",
+      "C13-scene-photo-sheet.png"
+    ],
+    "t": 353.1
+  },
+  {
+    "phase": "drive11",
+    "name": "C-EXPORT",
+    "status": "PASS",
+    "detail": "share sheet presented: the app under it stopped taking taps ('settings-back' covered), then closed; file vela-backup-2026-10-18.json {\"keys\":[\"kind\",\"version\",\"exportedAt\",\"appVersion\",\"data\"],\"exportedAt\":\"2026-10-18T19:35:38.812Z\",\"appVersion\":\"1.1.0\"}; toast null; copied into On My iPhone: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Shared/AppGroup/BC21F87F-A970-46F5-A840-F7AA94B265CE/File Provider Storage/vela-backup-2026-10-18.json",
+    "shots": [
+      "C14-export-share-sheet.png",
+      "C15-export-after-sheet.png"
+    ],
+    "t": 536.4,
+    "backupFile": "/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F/Library/Caches/vela-backup-2026-10-18.json",
+    "placed": "/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Shared/AppGroup/BC21F87F-A970-46F5-A840-F7AA94B265CE/File Provider Storage/vela-backup-2026-10-18.json"
+  },
+  {
+    "phase": "drive11",
+    "name": "C-KEYBOARD-PROOF-FIELD",
+    "status": "PASS",
+    "detail": "the sentence field (before the keyboard {\"y\":636,\"x\":41,\"width\":358,\"height\":101}) {\"y\":417,\"x\":41,\"width\":358,\"height\":101} vs the dock's top ~550 (keyboard top 655): visible while typing",
+    "shots": [
+      "C16-today-before-proof.png",
+      "C17-proof-form.png",
+      "C18-proof-form-keyboard.png"
+    ],
+    "t": 648.8
+  },
+  {
+    "phase": "drive11",
+    "name": "C-KEYBOARD-PROOF",
+    "status": "PASS",
+    "detail": "'Chart this proof' {\"y\":566,\"x\":24,\"width\":392,\"height\":56} vs keyboard top 655: fully above the keyboard",
+    "shots": [],
+    "t": 648.8
+  },
+  {
+    "phase": "drive11",
+    "name": "C-CHART-PROOF",
+    "status": "PASS",
+    "detail": "proof \"Quoted my first real client and they said yes.\"; Star Birth shown, 'Carry it forward' shown (after 'Keep this dream weaving')",
+    "shots": [
+      "C19-star-birth-flight.png",
+      "C20-star-birth.png"
+    ],
+    "t": 670.1
+  },
+  {
+    "phase": "drive11",
+    "name": "C-SHARE-PNG",
+    "status": "PASS",
+    "detail": "captured card 1080x1920, luma sd 19.3 (blank ≈ 0)",
+    "shots": [
+      "C21-share-card-sheet.png",
+      "C22-star-share-sheet.png"
+    ],
+    "t": 748.7
+  },
+  {
+    "phase": "drive11",
+    "name": "C-SHARE-STAR",
+    "status": "PASS",
+    "detail": "share card sheet shown; system share sheet presented: the app under it stopped taking taps ('evidence-share-card-close' covered), then closed",
+    "shots": [],
+    "t": 748.8
+  },
+  {
+    "phase": "drive11",
+    "name": "C-WEAVE-AFTER-PROOF",
+    "status": "PASS",
+    "detail": "the Weave opened \"THE HARD DAY\" \"A Bad Afternoon, Handled\" (woven paragraph true); Today sky \"Your sky: The Sail, 2 of 7 stars lit\"",
+    "shots": [
+      "C23-chapter-after-proof.png",
+      "C24-today-after-proof.png"
+    ],
+    "t": 776.5
+  },
+  {
+    "phase": "drive11",
+    "name": "C-NARRATION",
+    "status": "PASS",
+    "detail": "idle \"1 min · Unlimited listens, always\"; while listening (every 1.5s) [\"Listening · 1:24 left\",\"Listening · 1:20 left\",\"Listening · 1:20 left\",\"Listening · 1:15 left\",\"Listening · 1:07 left\",\"Listening · 1:07 left\",\"Listening · 1:00 left\",\"Listening · 0:56 left\"] — the sentence position advances",
+    "shots": [
+      "C25-reader.png",
+      "C26-reader-listening.png"
+    ],
+    "t": 861.2
+  },
+  {
+    "phase": "drive11",
+    "name": "C-NARRATION-BACKGROUND",
+    "status": "PASS",
+    "detail": "before Home \"Listening · 0:27 left\"; app state while away 3 then 3 (3 = running in background, 2 = suspended); after 24.8s away \"Heard to the end\"",
+    "shots": [
+      "C27-reader-back-from-home.png"
+    ],
+    "t": 896.9
+  },
+  {
+    "phase": "drive11",
+    "name": "C-IMPORT-REPLACE",
+    "status": "PASS",
+    "detail": "picker the app under it stopped taking taps ('settings-back' covered); import sheet shown; Replace's confirm appeared \"Replace what's on this device?\"; after Replace: toast \"Replaced. …\", Today sky \"Your sky: The Sail, 1 of 7 stars lit\"",
+    "shots": [
+      "C28-import-picker.png",
+      "C29-import-sheet.png",
+      "C30-import-replace-confirm.png",
+      "C31-import-replaced.png",
+      "C32-today-after-replace.png"
+    ],
+    "t": 1127.5
+  },
+  {
+    "phase": "drive11",
+    "name": "C-ALIVE-END",
+    "status": "PASS",
+    "detail": "app state 4 at the end of the walk (4 = foreground)",
+    "shots": [
+      "C33-end.png"
+    ],
+    "t": 1133.9
+  },
+  {
+    "phase": "drive11",
+    "name": "C-PLUS-TIMELINE",
+    "status": "INFO",
+    "detail": "vela.plus.v1 over the run [{\"t\":0,\"plus\":\"1\"},{\"t\":21243,\"plus\":\"0\"}] (ms since the store watch began); first v2 key written at +20750ms; session ready at +20234ms",
+    "shots": [],
+    "t": 1134
+  }
+]

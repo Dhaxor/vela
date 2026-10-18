@@ -1,0 +1,1835 @@
+[
+  {
+    "name": "F-LAUNCH",
+    "status": "PASS",
+    "detail": "fresh install opens on the welcome beat: true; storage error false; window {\"width\":375,\"height\":667}",
+    "shots": [
+      "F01-welcome.png"
+    ],
+    "t": 735.7
+  },
+  {
+    "name": "F-ONBOARDING-FOCUS",
+    "status": "PASS",
+    "detail": "focus step true; Career chosen; the words step is next",
+    "shots": [
+      "F02-focus.png"
+    ],
+    "t": 755.8
+  },
+  {
+    "name": "F-FIELD-desire",
+    "status": "PASS",
+    "detail": "field y 184–284 (h 100); scroll view 76–434; dock top 300; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 255",
+    "shots": [
+      "F03-field-desire.png"
+    ],
+    "t": 787.4,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 184,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "fieldBeforeFocus": {
+        "y": 255,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 214,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "keyboardTop": 451,
+      "dockTop": 300,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 300,
+      "value": "my own design studio, with clients who trust my eye"
+    }
+  },
+  {
+    "name": "F-ONBOARDING-WORDS",
+    "status": "PASS",
+    "detail": "feeling chosen; the name step is next",
+    "shots": [
+      "F04-own-words.png"
+    ],
+    "t": 813.5
+  },
+  {
+    "name": "F-FIELD-name",
+    "status": "PASS",
+    "detail": "field y 215–261 (h 46); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 215",
+    "shots": [
+      "F05-field-name.png"
+    ],
+    "t": 839.3,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 215,
+        "x": 33,
+        "width": 309,
+        "height": 46
+      },
+      "fieldBeforeFocus": {
+        "y": 215,
+        "x": 33,
+        "width": 309,
+        "height": 46
+      },
+      "fieldAfterFocus": {
+        "y": 215,
+        "x": 33,
+        "width": 309,
+        "height": 46
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "Maya"
+    }
+  },
+  {
+    "name": "F-FIELD-pronunciation",
+    "status": "PASS",
+    "detail": "field y 269–314 (h 45); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 321",
+    "shots": [
+      "F06-field-pronunciation.png"
+    ],
+    "t": 869.5,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 269,
+        "x": 33,
+        "width": 309,
+        "height": 45
+      },
+      "fieldBeforeFocus": {
+        "y": 321,
+        "x": 33,
+        "width": 309,
+        "height": 46
+      },
+      "fieldAfterFocus": {
+        "y": 269,
+        "x": 33,
+        "width": 309,
+        "height": 45
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "MY-uh"
+    }
+  },
+  {
+    "name": "F-ONBOARDING-RITUAL",
+    "status": "PASS",
+    "detail": "Evening true; the seed step is next",
+    "shots": [
+      "F07-ritual.png"
+    ],
+    "t": 890.3
+  },
+  {
+    "name": "F-FIELD-seed",
+    "status": "PASS",
+    "detail": "field y 214–314 (h 100); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 293",
+    "shots": [
+      "F08-field-seed.png"
+    ],
+    "t": 926.5,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 214,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "fieldBeforeFocus": {
+        "y": 293,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 214,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "Bought the domain name."
+    }
+  },
+  {
+    "name": "F-WEAVE-CHAPTER-I",
+    "status": "PASS",
+    "detail": "the Weave opened Chapter I: true; the gold paragraph found, tagged 'Woven from your proof' true, quotes the seed true",
+    "shots": [
+      "F09-weave.png",
+      "F10-chapter-one.png",
+      "F11-chapter-one-woven.png"
+    ],
+    "t": 986.1
+  },
+  {
+    "name": "F-BRIDGE-CHOOSER",
+    "status": "PASS",
+    "detail": "chooser reached; 'Write my own' true",
+    "shots": [
+      "F12-bridge-chooser.png"
+    ],
+    "t": 1025.6
+  },
+  {
+    "name": "F-FIELD-own-bridge",
+    "status": "PASS",
+    "detail": "field y 318–419 (h 101); scroll view 76–434; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 358",
+    "shots": [
+      "F13-field-own-bridge.png"
+    ],
+    "t": 1054.7,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 318,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "fieldBeforeFocus": {
+        "y": 358,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 318,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 434,
+      "value": "Email one studio owner I admire"
+    }
+  },
+  {
+    "name": "F-READER-DOCK-ASIDE",
+    "status": "PASS",
+    "detail": "keyboard up: the player's play disc visible=false, hittable=absent",
+    "shots": [],
+    "t": 1057.6
+  },
+  {
+    "name": "F-IFTHEN-OPEN",
+    "status": "PASS",
+    "detail": "if-then opened; cue 'Other' true",
+    "shots": [],
+    "t": 1077.9
+  },
+  {
+    "name": "F-FIELD-ifthen-when",
+    "status": "PASS",
+    "detail": "field y 278–320 (h 42); scroll view 76–434; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 278",
+    "shots": [
+      "F14-field-ifthen-when.png"
+    ],
+    "t": 1113.6,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 278,
+        "x": 33,
+        "width": 309,
+        "height": 42
+      },
+      "fieldBeforeFocus": {
+        "y": 278,
+        "x": 33,
+        "width": 309,
+        "height": 42
+      },
+      "fieldAfterFocus": {
+        "y": 278,
+        "x": 33,
+        "width": 309,
+        "height": 42
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 434,
+      "value": "after the school run"
+    }
+  },
+  {
+    "name": "F-FIELD-ifthen-then",
+    "status": "PASS",
+    "detail": "field y 377–418 (h 41); scroll view 76–434; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 386",
+    "shots": [
+      "F15-field-ifthen-then.png"
+    ],
+    "t": 1144.5,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 377,
+        "x": 33,
+        "width": 309,
+        "height": 41
+      },
+      "fieldBeforeFocus": {
+        "y": 386,
+        "x": 33,
+        "width": 309,
+        "height": 42
+      },
+      "fieldAfterFocus": {
+        "y": 377,
+        "x": 33,
+        "width": 309,
+        "height": 41
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 434,
+      "value": "open the file and write one line"
+    }
+  },
+  {
+    "name": "F-BRIDGE-COMMIT",
+    "status": "PASS",
+    "detail": "'Make it observable' true; the reminder ask shown ('Not now' chosen); 'I crossed it' waiting",
+    "shots": [
+      "F16-ifthen-typed.png",
+      "F17-bridge-chosen.png",
+      "F18-reminder-ask.png",
+      "F19-bridge-open.png"
+    ],
+    "t": 1182
+  },
+  {
+    "name": "F-READER-NOT-TODAY-OPEN",
+    "status": "PASS",
+    "detail": "'Not today' sheet open",
+    "shots": [],
+    "t": 1188.5
+  },
+  {
+    "name": "F-FIELD-reader-not-today",
+    "status": "PASS",
+    "detail": "field y 171–272 (h 101); scroll view 97–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 392",
+    "shots": [
+      "F20-field-reader-not-today.png"
+    ],
+    "t": 1222.9,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 171,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldBeforeFocus": {
+        "y": 392,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 171,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 97,
+        "x": 17,
+        "width": 341,
+        "height": 189
+      },
+      "bandBottom": 286,
+      "value": "The client call ran long."
+    }
+  },
+  {
+    "name": "F-READER-NOT-TODAY-CLOSE",
+    "status": "PASS",
+    "detail": "sheet closed without saving: true",
+    "shots": [],
+    "t": 1236
+  },
+  {
+    "name": "F-PROOF-FORM",
+    "status": "PASS",
+    "detail": "proof form open",
+    "shots": [
+      "F21-proof-form.png"
+    ],
+    "t": 1260.3
+  },
+  {
+    "name": "F-PROOF-NOT-TODAY-OPEN",
+    "status": "PASS",
+    "detail": "the form's 'Not today' sheet open",
+    "shots": [],
+    "t": 1275.2
+  },
+  {
+    "name": "F-FIELD-proof-not-today",
+    "status": "PASS",
+    "detail": "field y 171–272 (h 101); scroll view 97–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 392",
+    "shots": [
+      "F22-field-proof-not-today.png"
+    ],
+    "t": 1313.6,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 171,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldBeforeFocus": {
+        "y": 392,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 171,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 97,
+        "x": 17,
+        "width": 341,
+        "height": 189
+      },
+      "bandBottom": 286,
+      "value": "The client call ran long."
+    }
+  },
+  {
+    "name": "F-PROOF-NOT-TODAY-CLOSE",
+    "status": "PASS",
+    "detail": "sheet closed without saving: true",
+    "shots": [],
+    "t": 1322.7
+  },
+  {
+    "name": "F-FIELD-proof",
+    "status": "PASS",
+    "detail": "field y 214–314 (h 100); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 410",
+    "shots": [
+      "F23-field-proof.png"
+    ],
+    "t": 1360.1,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 214,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "fieldBeforeFocus": {
+        "y": 410,
+        "x": 33,
+        "width": 309,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 214,
+        "x": 33,
+        "width": 309,
+        "height": 100
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "Sent my portfolio to two studios I admire."
+    }
+  },
+  {
+    "name": "F-STAR-BIRTH",
+    "status": "PASS",
+    "detail": "'Chart this proof' above the keyboard; Star Birth true; 'Proof 2 · Charted' true; 'Carry it forward' true",
+    "shots": [
+      "F24-star-birth-flight.png",
+      "F25-star-birth.png"
+    ],
+    "t": 1388.3
+  },
+  {
+    "name": "F-CHAPTER-II",
+    "status": "PASS",
+    "detail": "Chapter II open; 'Woven from your proof' true; it carries the proof ('portfolio to two studios') true",
+    "shots": [
+      "F26-chapter-two.png",
+      "F27-chapter-two-woven.png"
+    ],
+    "t": 1421.3
+  },
+  {
+    "name": "F-TODAY",
+    "status": "PASS",
+    "detail": "Today shown; chip \"1 night shown up, 2 stars in your sky\"; sky \"Your sky: The Sail, 2 of 7 stars lit\"",
+    "shots": [
+      "F28-today.png"
+    ],
+    "t": 1442.6
+  },
+  {
+    "name": "F-SKY-STAR",
+    "status": "PASS",
+    "detail": "sky true; 3 lit stars (sky-figure-star-0, sky-figure-star-1, sky-figure-star-2); the newest star reads \"“Sent my portfolio to two studios I admire.”\"",
+    "shots": [
+      "F29-sky.png",
+      "F30-star-sheet.png"
+    ],
+    "t": 1478.6
+  },
+  {
+    "name": "F-ARC",
+    "status": "PASS",
+    "detail": "ledger VoiceOver label \"2 chapters, 2 proofs, 1 night.\" (counts agree with nouns); proof labels [\"Star 1. I did it, day 1. Bought the domain name. Today · Where it began · Woven into Chapter I.\",\"Star 2. I did it, day 1. Sent my portfolio to two studios I admire. Today · Woven into Chapter II.\"] (one closing mark each)",
+    "shots": [
+      "F31-arc.png",
+      "F32-arc-scrolled.png"
+    ],
+    "t": 1496.8
+  },
+  {
+    "name": "F-ARC-RENAME-OPEN",
+    "status": "PASS",
+    "detail": "menu true; rename sheet open",
+    "shots": [],
+    "t": 1513.9
+  },
+  {
+    "name": "F-FIELD-dream-name",
+    "status": "PASS",
+    "detail": "field y 209–255 (h 46); scroll view 178–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 430",
+    "shots": [
+      "F33-field-dream-name.png"
+    ],
+    "t": 1542.1,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 209,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "fieldBeforeFocus": {
+        "y": 430,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "fieldAfterFocus": {
+        "y": 209,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 178,
+        "x": 17,
+        "width": 341,
+        "height": 108
+      },
+      "bandBottom": 286,
+      "value": "The Studio"
+    }
+  },
+  {
+    "name": "F-ARC-RENAME-CLOSE",
+    "status": "PASS",
+    "detail": "rename sheet closed without saving",
+    "shots": [],
+    "t": 1549.4
+  },
+  {
+    "name": "F-PAYWALL",
+    "status": "PASS",
+    "detail": "plans true; free-forever panel true; 'Restore purchases' true; 'Manage subscription' not shown",
+    "shots": [
+      "F34-paywall.png",
+      "F35-paywall-end.png"
+    ],
+    "t": 1596.7
+  },
+  {
+    "name": "F-RITUALS",
+    "status": "PASS",
+    "detail": "Rituals true; Script page true",
+    "shots": [
+      "F36-rituals.png"
+    ],
+    "t": 1607.2
+  },
+  {
+    "name": "F-FIELD-script",
+    "status": "PASS",
+    "detail": "field y 134–314 (h 180); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 134",
+    "shots": [
+      "F37-field-script.png"
+    ],
+    "t": 1635.8,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 134,
+        "x": 33,
+        "width": 326,
+        "height": 180
+      },
+      "fieldBeforeFocus": {
+        "y": 134,
+        "x": 33,
+        "width": 326,
+        "height": 180
+      },
+      "fieldAfterFocus": {
+        "y": 134,
+        "x": 33,
+        "width": 326,
+        "height": 180
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "The kettle clicks off. The first client of the day is early, and I am glad."
+    }
+  },
+  {
+    "name": "F-SCRIPT-SEAL",
+    "status": "PASS",
+    "detail": "script sealed true (sealed moment seen; door \"Script. Sealed today. Your story has reached The First Glimpse. Write the hour just before it begins.\"); Gratitude page true",
+    "shots": [
+      "F38-script-sealed.png"
+    ],
+    "t": 1654
+  },
+  {
+    "name": "F-FIELD-gratitude-1",
+    "status": "PASS",
+    "detail": "field y 258–314 (h 56); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 258",
+    "shots": [
+      "F39-field-gratitude-1.png"
+    ],
+    "t": 1681.1,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 258,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "fieldBeforeFocus": {
+        "y": 258,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "fieldAfterFocus": {
+        "y": 258,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "The printer answered on the first ring"
+    }
+  },
+  {
+    "name": "F-FIELD-gratitude-2",
+    "status": "PASS",
+    "detail": "field y 258–314 (h 56); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 410",
+    "shots": [
+      "F40-field-gratitude-2.png"
+    ],
+    "t": 1714.5,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 258,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "fieldBeforeFocus": {
+        "y": 410,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "fieldAfterFocus": {
+        "y": 258,
+        "x": 73,
+        "width": 286,
+        "height": 56
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "My sister called"
+    }
+  },
+  {
+    "name": "F-GRATITUDE-SEAL",
+    "status": "PASS",
+    "detail": "gratitude kept true (sealed moment seen; door \"Gratitude. Kept today. A quiet moment I had today…\"); 3·6·9 phrase page true",
+    "shots": [
+      "F41-gratitude-sealed.png"
+    ],
+    "t": 1726.5
+  },
+  {
+    "name": "F-FIELD-369-phrase",
+    "status": "PASS",
+    "detail": "field y 258–314 (h 56); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 433",
+    "shots": [
+      "F42-field-369-phrase.png"
+    ],
+    "t": 1751.3,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 258,
+        "x": 33,
+        "width": 326,
+        "height": 56
+      },
+      "fieldBeforeFocus": {
+        "y": 433,
+        "x": 33,
+        "width": 326,
+        "height": 56
+      },
+      "fieldAfterFocus": {
+        "y": 258,
+        "x": 33,
+        "width": 326,
+        "height": 56
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "I run a studio clients trust"
+    }
+  },
+  {
+    "name": "F-369-BEGIN",
+    "status": "PASS",
+    "detail": "phrase set true; practice true",
+    "shots": [],
+    "t": 1756.4
+  },
+  {
+    "name": "F-FIELD-369-line",
+    "status": "PASS",
+    "detail": "field y 278–314 (h 36); scroll view 76–434; dock top 330; keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 472",
+    "shots": [
+      "F43-field-369-line.png"
+    ],
+    "t": 1778.2,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 278,
+        "x": 33,
+        "width": 326,
+        "height": 36
+      },
+      "fieldBeforeFocus": {
+        "y": 472,
+        "x": 33,
+        "width": 326,
+        "height": 36
+      },
+      "fieldAfterFocus": {
+        "y": 278,
+        "x": 33,
+        "width": 326,
+        "height": 36
+      },
+      "keyboardTop": 451,
+      "dockTop": 330,
+      "scrollView": {
+        "y": 76,
+        "x": 0,
+        "width": 375,
+        "height": 358
+      },
+      "bandBottom": 330,
+      "value": "I run a studio clients trust"
+    }
+  },
+  {
+    "name": "F-369-WRITE",
+    "status": "PASS",
+    "detail": "progress \"1 of 18 written today\"",
+    "shots": [
+      "F44-369-written.png"
+    ],
+    "t": 1788.2
+  },
+  {
+    "name": "F-SCENES-OPEN",
+    "status": "PASS",
+    "detail": "Scenes compose sheet open (entry rituals-scenes-open)",
+    "shots": [],
+    "t": 1819.1
+  },
+  {
+    "name": "F-FIELD-scene",
+    "status": "PASS",
+    "detail": "field y 110–211 (h 101); scroll view 97–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 110",
+    "shots": [
+      "F45-field-scene.png"
+    ],
+    "t": 1850.6,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 110,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldBeforeFocus": {
+        "y": 110,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "fieldAfterFocus": {
+        "y": 110,
+        "x": 34,
+        "width": 307,
+        "height": 101
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 97,
+        "x": 17,
+        "width": 341,
+        "height": 189
+      },
+      "bandBottom": 286,
+      "value": "A brass plate by the door with the studio name."
+    }
+  },
+  {
+    "name": "F-SCENES-PIN",
+    "status": "PASS",
+    "detail": "the written scene is in Scenes",
+    "shots": [
+      "F46-scenes-grid.png"
+    ],
+    "t": 1868.1
+  },
+  {
+    "name": "F-SETTINGS",
+    "status": "PASS",
+    "detail": "Settings true; name row \"Name, Maya\"; 'Manage subscription' not shown (free user); name sheet true",
+    "shots": [
+      "F47-settings.png"
+    ],
+    "t": 1893.3
+  },
+  {
+    "name": "F-FIELD-settings-name",
+    "status": "PASS",
+    "detail": "field y 128–174 (h 46); scroll view 97–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 128",
+    "shots": [
+      "F48-field-settings-name.png"
+    ],
+    "t": 1927.5,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 128,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "fieldBeforeFocus": {
+        "y": 128,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "fieldAfterFocus": {
+        "y": 128,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 97,
+        "x": 17,
+        "width": 341,
+        "height": 189
+      },
+      "bandBottom": 286,
+      "value": "Maya R"
+    }
+  },
+  {
+    "name": "F-FIELD-settings-pronunciation",
+    "status": "PASS",
+    "detail": "field y 225–270 (h 45); scroll view 97–286; dock top n/a (sheet or stepped aside); keyboard top 451; inside the band, above the keyboard, clear of the dock; typed ok; before focus y 234",
+    "shots": [
+      "F49-field-settings-pronunciation.png"
+    ],
+    "t": 1965.2,
+    "facts": {
+      "device": "small",
+      "window": {
+        "width": 375,
+        "height": 667
+      },
+      "field": {
+        "y": 225,
+        "x": 34,
+        "width": 307,
+        "height": 45
+      },
+      "fieldBeforeFocus": {
+        "y": 234,
+        "x": 34,
+        "width": 307,
+        "height": 46
+      },
+      "fieldAfterFocus": {
+        "y": 225,
+        "x": 34,
+        "width": 307,
+        "height": 45
+      },
+      "keyboardTop": 451,
+      "dockTop": null,
+      "scrollView": {
+        "y": 97,
+        "x": 17,
+        "width": 341,
+        "height": 189
+      },
+      "bandBottom": 286,
+      "value": "MY-uh ARR"
+    }
+  },
+  {
+    "name": "F-SETTINGS-CLOSE",
+    "status": "PASS",
+    "detail": "name sheet closed without saving: true",
+    "shots": [
+      "F50-settings-after-sheet.png"
+    ],
+    "t": 1980.7
+  },
+  {
+    "name": "F-ALIVE-END",
+    "status": "PASS",
+    "detail": "app state 4 at the end of the walk (4 = foreground)",
+    "shots": [
+      "F51-end.png"
+    ],
+    "t": 1981.7
+  },
+  {
+    "name": "F-TAPS",
+    "status": "PASS",
+    "detail": "every step-advancing tap was taken the first time",
+    "shots": [],
+    "t": 1982
+  },
+  {
+    "name": "F-FIELDS-SUMMARY",
+    "status": "PASS",
+    "detail": "19/19 text fields stayed in view while typing on small {\"width\":375,\"height\":667}",
+    "shots": [],
+    "t": 1982,
+    "fields": [
+      {
+        "name": "desire",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 184,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "fieldBeforeFocus": {
+          "y": 255,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 214,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "keyboardTop": 451,
+        "dockTop": 300,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 300,
+        "value": "my own design studio, with clients who trust my eye"
+      },
+      {
+        "name": "name",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 215,
+          "x": 33,
+          "width": 309,
+          "height": 46
+        },
+        "fieldBeforeFocus": {
+          "y": 215,
+          "x": 33,
+          "width": 309,
+          "height": 46
+        },
+        "fieldAfterFocus": {
+          "y": 215,
+          "x": 33,
+          "width": 309,
+          "height": 46
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "Maya"
+      },
+      {
+        "name": "pronunciation",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 269,
+          "x": 33,
+          "width": 309,
+          "height": 45
+        },
+        "fieldBeforeFocus": {
+          "y": 321,
+          "x": 33,
+          "width": 309,
+          "height": 46
+        },
+        "fieldAfterFocus": {
+          "y": 269,
+          "x": 33,
+          "width": 309,
+          "height": 45
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "MY-uh"
+      },
+      {
+        "name": "seed",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 214,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "fieldBeforeFocus": {
+          "y": 293,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 214,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "Bought the domain name."
+      },
+      {
+        "name": "own-bridge",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 318,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "fieldBeforeFocus": {
+          "y": 358,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 318,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 434,
+        "value": "Email one studio owner I admire"
+      },
+      {
+        "name": "ifthen-when",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 278,
+          "x": 33,
+          "width": 309,
+          "height": 42
+        },
+        "fieldBeforeFocus": {
+          "y": 278,
+          "x": 33,
+          "width": 309,
+          "height": 42
+        },
+        "fieldAfterFocus": {
+          "y": 278,
+          "x": 33,
+          "width": 309,
+          "height": 42
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 434,
+        "value": "after the school run"
+      },
+      {
+        "name": "ifthen-then",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 377,
+          "x": 33,
+          "width": 309,
+          "height": 41
+        },
+        "fieldBeforeFocus": {
+          "y": 386,
+          "x": 33,
+          "width": 309,
+          "height": 42
+        },
+        "fieldAfterFocus": {
+          "y": 377,
+          "x": 33,
+          "width": 309,
+          "height": 41
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 434,
+        "value": "open the file and write one line"
+      },
+      {
+        "name": "reader-not-today",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 171,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldBeforeFocus": {
+          "y": 392,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 171,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 97,
+          "x": 17,
+          "width": 341,
+          "height": 189
+        },
+        "bandBottom": 286,
+        "value": "The client call ran long."
+      },
+      {
+        "name": "proof-not-today",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 171,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldBeforeFocus": {
+          "y": 392,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 171,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 97,
+          "x": 17,
+          "width": 341,
+          "height": 189
+        },
+        "bandBottom": 286,
+        "value": "The client call ran long."
+      },
+      {
+        "name": "proof",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 214,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "fieldBeforeFocus": {
+          "y": 410,
+          "x": 33,
+          "width": 309,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 214,
+          "x": 33,
+          "width": 309,
+          "height": 100
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "Sent my portfolio to two studios I admire."
+      },
+      {
+        "name": "dream-name",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 209,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "fieldBeforeFocus": {
+          "y": 430,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "fieldAfterFocus": {
+          "y": 209,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 178,
+          "x": 17,
+          "width": 341,
+          "height": 108
+        },
+        "bandBottom": 286,
+        "value": "The Studio"
+      },
+      {
+        "name": "script",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 134,
+          "x": 33,
+          "width": 326,
+          "height": 180
+        },
+        "fieldBeforeFocus": {
+          "y": 134,
+          "x": 33,
+          "width": 326,
+          "height": 180
+        },
+        "fieldAfterFocus": {
+          "y": 134,
+          "x": 33,
+          "width": 326,
+          "height": 180
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "The kettle clicks off. The first client of the day is early, and I am glad."
+      },
+      {
+        "name": "gratitude-1",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 258,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "fieldBeforeFocus": {
+          "y": 258,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "fieldAfterFocus": {
+          "y": 258,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "The printer answered on the first ring"
+      },
+      {
+        "name": "gratitude-2",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 258,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "fieldBeforeFocus": {
+          "y": 410,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "fieldAfterFocus": {
+          "y": 258,
+          "x": 73,
+          "width": 286,
+          "height": 56
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "My sister called"
+      },
+      {
+        "name": "369-phrase",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 258,
+          "x": 33,
+          "width": 326,
+          "height": 56
+        },
+        "fieldBeforeFocus": {
+          "y": 433,
+          "x": 33,
+          "width": 326,
+          "height": 56
+        },
+        "fieldAfterFocus": {
+          "y": 258,
+          "x": 33,
+          "width": 326,
+          "height": 56
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "I run a studio clients trust"
+      },
+      {
+        "name": "369-line",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 278,
+          "x": 33,
+          "width": 326,
+          "height": 36
+        },
+        "fieldBeforeFocus": {
+          "y": 472,
+          "x": 33,
+          "width": 326,
+          "height": 36
+        },
+        "fieldAfterFocus": {
+          "y": 278,
+          "x": 33,
+          "width": 326,
+          "height": 36
+        },
+        "keyboardTop": 451,
+        "dockTop": 330,
+        "scrollView": {
+          "y": 76,
+          "x": 0,
+          "width": 375,
+          "height": 358
+        },
+        "bandBottom": 330,
+        "value": "I run a studio clients trust"
+      },
+      {
+        "name": "scene",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 110,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldBeforeFocus": {
+          "y": 110,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "fieldAfterFocus": {
+          "y": 110,
+          "x": 34,
+          "width": 307,
+          "height": 101
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 97,
+          "x": 17,
+          "width": 341,
+          "height": 189
+        },
+        "bandBottom": 286,
+        "value": "A brass plate by the door with the studio name."
+      },
+      {
+        "name": "settings-name",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 128,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "fieldBeforeFocus": {
+          "y": 128,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "fieldAfterFocus": {
+          "y": 128,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 97,
+          "x": 17,
+          "width": 341,
+          "height": 189
+        },
+        "bandBottom": 286,
+        "value": "Maya R"
+      },
+      {
+        "name": "settings-pronunciation",
+        "ok": true,
+        "device": "small",
+        "window": {
+          "width": 375,
+          "height": 667
+        },
+        "field": {
+          "y": 225,
+          "x": 34,
+          "width": 307,
+          "height": 45
+        },
+        "fieldBeforeFocus": {
+          "y": 234,
+          "x": 34,
+          "width": 307,
+          "height": 46
+        },
+        "fieldAfterFocus": {
+          "y": 225,
+          "x": 34,
+          "width": 307,
+          "height": 45
+        },
+        "keyboardTop": 451,
+        "dockTop": null,
+        "scrollView": {
+          "y": 97,
+          "x": 17,
+          "width": 341,
+          "height": 189
+        },
+        "bandBottom": 286,
+        "value": "MY-uh ARR"
+      }
+    ]
+  }
+]

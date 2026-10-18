@@ -1,0 +1,2 @@
+/Users/runner/Library/Logs/DiagnosticReports/UsageTrackingAgent-2026-10-18-191830.ips
+/Users/runner/Library/Logs/DiagnosticReports/searchd-2026-10-18-193320.ips

@@ -1,0 +1,946 @@
+{
+  "vela.arcs.v2": {
+    "storedAs": "file aeec8c90124497124add82e545ab2581",
+    "length": 3165,
+    "value": {
+      "migratedFromV1At": "2026-10-18T19:29:12.341Z",
+      "schemaVersion": 2,
+      "dreams": [
+        {
+          "id": "mve7ubj2-f3ne9z",
+          "focus": "abundance",
+          "desire": "A home by the sea",
+          "feeling": "peaceful",
+          "label": null,
+          "createdAt": "2026-10-18T19:26:00.926Z",
+          "status": "active",
+          "statusChangedAt": "2026-10-18T19:26:00.926Z",
+          "season": 1,
+          "seasonStartedAt": "2026-10-18T19:26:31.621Z",
+          "constellations": [],
+          "usedIds": [
+            "ab2-t1",
+            "sh2-op-m3",
+            "sh2-op-e3",
+            "ab2-ar5",
+            "sh2-se3",
+            "ab2-li2",
+            "mo-home-li1",
+            "wv-m-wi5",
+            "sh2-re3",
+            "sh2-cl-m4",
+            "sh2-cl-e2",
+            "mo-home-d6"
+          ],
+          "motifIds": [
+            "home",
+            "relocation"
+          ]
+        },
+        {
+          "id": "mve7tc04-8kywog",
+          "focus": "career",
+          "desire": "my own design studio, with clients who trust my eye",
+          "feeling": "proud",
+          "label": null,
+          "createdAt": "2026-10-18T19:25:14.884Z",
+          "status": "active",
+          "statusChangedAt": "2026-10-18T19:25:14.884Z",
+          "season": 1,
+          "seasonStartedAt": "2026-10-18T19:25:42.000Z",
+          "constellations": [],
+          "usedIds": [],
+          "motifIds": [
+            "own-business",
+            "freelance"
+          ]
+        }
+      ],
+      "chapters": [
+        {
+          "id": "mve7ubk6-4e83fu",
+          "dreamId": "mve7ubj2-f3ne9z",
+          "season": 1,
+          "number": 1,
+          "stage": 1,
+          "title": "After the Wanting",
+          "revision": 1,
+          "source": "migrated-v1",
+          "createdAt": "2026-10-18T19:26:00.966Z",
+          "revisedAt": null,
+          "wovenProofId": null,
+          "bridgeId": "mve7ubk7-78z3z3",
+          "heardAt": "2026-10-18T19:26:00.966Z",
+          "savedForAt": null
+        },
+        {
+          "id": "mve7ubk6-4e83fu-w",
+          "dreamId": "mve7ubj2-f3ne9z",
+          "season": 1,
+          "number": 2,
+          "stage": 2,
+          "title": "What Tomorrow Makes Possible",
+          "revision": 1,
+          "source": "engine",
+          "createdAt": "2026-10-18T19:29:12.341Z",
+          "revisedAt": null,
+          "wovenProofId": "mve7ubk7-78z3z3",
+          "bridgeId": null,
+          "heardAt": null,
+          "savedForAt": null
+        },
+        {
+          "id": "mve7u3o9-dxcgnl",
+          "dreamId": "mve7tc04-8kywog",
+          "season": 1,
+          "number": 2,
+          "stage": 2,
+          "title": "After the Wanting",
+          "revision": 1,
+          "source": "migrated-v1",
+          "createdAt": "2026-10-18T19:25:50.746Z",
+          "revisedAt": null,
+          "wovenProofId": null,
+          "bridgeId": "mve7u3oa-tespk",
+          "heardAt": null,
+          "savedForAt": null
+        }
+      ],
+      "bridges": [
+        {
+          "id": "mve7ubk7-78z3z3",
+          "dreamId": "mve7ubj2-f3ne9z",
+          "chapterId": "mve7ubk6-4e83fu",
+          "season": 1,
+          "tier": "15min",
+          "libraryId": null,
+          "text": "Move one small amount toward the life you described.",
+          "ifThen": null,
+          "remindAt": null,
+          "status": "crossed",
+          "createdAt": "2026-10-18T19:26:00.967Z",
+          "resolvedAt": "2026-10-18T19:26:31.621Z",
+          "proofId": "mve7ubk7-78z3z3"
+        },
+        {
+          "id": "mve7u3oa-tespk",
+          "dreamId": "mve7tc04-8kywog",
+          "chapterId": "mve7u3o9-dxcgnl",
+          "season": 1,
+          "tier": "15min",
+          "libraryId": null,
+          "text": "Protect twenty focused minutes for the skill this work relies on.",
+          "ifThen": null,
+          "remindAt": null,
+          "status": "open",
+          "createdAt": "2026-10-18T19:25:50.746Z",
+          "resolvedAt": null,
+          "proofId": null
+        }
+      ],
+      "proofs": [
+        {
+          "id": "mve7ubk7-78z3z3",
+          "dreamId": "mve7ubj2-f3ne9z",
+          "bridgeId": "mve7ubk7-78z3z3",
+          "kind": "moved",
+          "text": "Saved the first two hundred for the deposit.",
+          "photoUri": null,
+          "createdAt": "2026-10-18T19:26:31.621Z",
+          "dateKey": "2026-10-18",
+          "wovenInChapterId": "mve7ubk6-4e83fu-w",
+          "starIndex": 1,
+          "season": 1,
+          "origin": "bridge",
+          "migratedFromV1": true
+        },
+        {
+          "id": "mve7tc08-4pyzwx",
+          "dreamId": "mve7tc04-8kywog",
+          "bridgeId": null,
+          "kind": "did",
+          "text": "Sent my portfolio to two studios I admire.",
+          "photoUri": null,
+          "createdAt": "2026-10-18T19:25:42.000Z",
+          "dateKey": "2026-10-18",
+          "wovenInChapterId": null,
+          "starIndex": 1,
+          "season": 1,
+          "origin": "bridge",
+          "migratedFromV1": true
+        }
+      ],
+      "activeDreamId": "mve7ubj2-f3ne9z"
+    }
+  },
+  "vela.asks.v1": {
+    "storedAs": "inline",
+    "length": 211,
+    "value": {
+      "version": 1,
+      "history": {
+        "notifications": {
+          "count": 0,
+          "lastAt": null,
+          "settled": false
+        },
+        "plus-nudge": {
+          "count": 1,
+          "lastAt": "2026-10-18T19:39:45.378Z",
+          "settled": false
+        },
+        "review": {
+          "count": 0,
+          "lastAt": null,
+          "settled": false
+        }
+      }
+    }
+  },
+  "vela.board.v1": {
+    "storedAs": "inline",
+    "length": 810,
+    "value": [
+      {
+        "id": "mve7w8f3-89iqbb",
+        "kind": "goal",
+        "text": "Three clients who refer friends",
+        "createdAt": "2026-10-18T19:27:30.207Z"
+      },
+      {
+        "id": "mve7vzzn-ogtu5",
+        "kind": "goal",
+        "text": "A sign with my name above the door",
+        "createdAt": "2026-10-18T19:27:19.284Z"
+      },
+      {
+        "id": "mve7vb2l-4wyxf3",
+        "kind": "goal",
+        "text": "A shelf of my own published work",
+        "createdAt": "2026-10-18T19:26:46.989Z"
+      },
+      {
+        "id": "mve7vb2b-1xtn5n",
+        "kind": "goal",
+        "text": "Studio rent paid six months ahead",
+        "createdAt": "2026-10-18T19:26:46.979Z"
+      },
+      {
+        "id": "mve7vb21-cx3q68",
+        "kind": "photo",
+        "uri": "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg",
+        "caption": "The corner studio on Elm",
+        "createdAt": "2026-10-18T19:26:46.969Z"
+      }
+    ]
+  },
+  "vela.chapter.v2.mve7u3o9-dxcgnl": {
+    "storedAs": "file 1ff1d810d7011c368a7be2531c1f7a86",
+    "length": 2422,
+    "value": {
+      "id": "mve7u3o9-dxcgnl",
+      "dreamId": "mve7tc04-8kywog",
+      "season": 1,
+      "number": 2,
+      "stage": 2,
+      "title": "After the Wanting",
+      "revision": 1,
+      "writtenAt": "2026-10-18T19:25:50.746Z",
+      "source": "migrated-v1",
+      "wovenProofId": null,
+      "opening": {
+        "morning": {
+          "key": "p0",
+          "fragmentId": "v1:op7",
+          "beat": "opening",
+          "text": "The day doesn't ask anything of you yet. It just waits, warm and unhurried, while you remember who you've become.",
+          "spans": []
+        },
+        "evening": {
+          "key": "p0",
+          "fragmentId": "v1:op7",
+          "beat": "opening",
+          "text": "The day doesn't ask anything of you yet. It just waits, warm and unhurried, while you remember who you've become.",
+          "spans": []
+        }
+      },
+      "body": [
+        {
+          "key": "p1",
+          "fragmentId": "v1:ar-ca2",
+          "beat": "arrival",
+          "text": "The first task of the day is one you'd do for free — and they pay you well for it. Strange and wonderful, how the intention held: my own design studio, with clients who trust my eye.",
+          "spans": []
+        },
+        {
+          "key": "p2",
+          "fragmentId": "v1:se3",
+          "beat": "sensory",
+          "text": "The air outside smells faintly of rain that already fell. Everything is rinsed, including — somehow — you.",
+          "spans": []
+        },
+        {
+          "key": "p3",
+          "fragmentId": "v1:li-ca3",
+          "beat": "living",
+          "text": "You decline a shiny thing that isn't yours to do, and the calendar breathes. Mastery is mostly subtraction, you've learned.",
+          "spans": []
+        },
+        {
+          "key": "p4",
+          "fragmentId": "v1:wi7",
+          "beat": "living",
+          "text": "Someone younger watches how you move through the day and quietly adjusts their own sails. You remember being them. You'd have loved proof like you.",
+          "spans": []
+        },
+        {
+          "key": "p5",
+          "fragmentId": "v1:gr6",
+          "beat": "reflection",
+          "text": "Somewhere in the day you feel it land — that this was once the dream. This exact, ordinary, extraordinary Tuesday. You feel proud, all the way through.",
+          "spans": []
+        },
+        {
+          "key": "p6",
+          "fragmentId": "v1:proof-2",
+          "beat": "recall",
+          "text": "There is proof behind this memory now: Sent my portfolio to two studios I admire. It is small enough to be real, and real enough to change what comes next.",
+          "spans": []
+        }
+      ],
+      "closing": {
+        "morning": {
+          "key": "p7",
+          "fragmentId": "v1:cl2",
+          "beat": "closing",
+          "text": "You set tomorrow's one intention like a cup by the kettle, then let the day go completely. Sleep comes down like warm weather.",
+          "spans": []
+        },
+        "evening": {
+          "key": "p7",
+          "fragmentId": "v1:cl2",
+          "beat": "closing",
+          "text": "You set tomorrow's one intention like a cup by the kettle, then let the day go completely. Sleep comes down like warm weather.",
+          "spans": []
+        }
+      },
+      "wordCount": {
+        "morning": 196,
+        "evening": 196
+      },
+      "engineVersion": 1
+    }
+  },
+  "vela.chapter.v2.mve7ubk6-4e83fu": {
+    "storedAs": "file dbeb7029a11ab5ccf9e47cd59e409009",
+    "length": 2125,
+    "value": {
+      "id": "mve7ubk6-4e83fu",
+      "dreamId": "mve7ubj2-f3ne9z",
+      "season": 1,
+      "number": 1,
+      "stage": 1,
+      "title": "After the Wanting",
+      "revision": 1,
+      "writtenAt": "2026-10-18T19:26:00.966Z",
+      "source": "migrated-v1",
+      "wovenProofId": null,
+      "opening": {
+        "morning": {
+          "key": "p0",
+          "fragmentId": "v1:op9",
+          "beat": "opening",
+          "text": "No scramble, no dread, no list running before your feet touch the floor. Just morning, and you, and the life that answered.",
+          "spans": []
+        },
+        "evening": {
+          "key": "p0",
+          "fragmentId": "v1:op9",
+          "beat": "opening",
+          "text": "No scramble, no dread, no list running before your feet touch the floor. Just morning, and you, and the life that answered.",
+          "spans": []
+        }
+      },
+      "body": [
+        {
+          "key": "p1",
+          "fragmentId": "v1:ar-ab6",
+          "beat": "arrival",
+          "text": "You tip well. You book the trip. You breathe. Enough stopped being a ceiling and became a floor: A home by the sea.",
+          "spans": []
+        },
+        {
+          "key": "p2",
+          "fragmentId": "v1:se10",
+          "beat": "sensory",
+          "text": "Your own handwriting in the margin of today's list looks different lately. Rounder. Unclenched.",
+          "spans": []
+        },
+        {
+          "key": "p3",
+          "fragmentId": "v1:li-ab3",
+          "beat": "living",
+          "text": "An opportunity lands in your inbox — the paid kind, the aligned kind. They find you regularly now, like the address finally got listed.",
+          "spans": []
+        },
+        {
+          "key": "p4",
+          "fragmentId": "v1:wi7",
+          "beat": "living",
+          "text": "Someone younger watches how you move through the day and quietly adjusts their own sails. You remember being them. You'd have loved proof like you.",
+          "spans": []
+        },
+        {
+          "key": "p5",
+          "fragmentId": "v1:gr1",
+          "beat": "reflection",
+          "text": "Gratitude arrives on its own now, uninvited, mid-afternoon — for the ordinary furniture of a life you once begged the sky for.",
+          "spans": []
+        }
+      ],
+      "closing": {
+        "morning": {
+          "key": "p6",
+          "fragmentId": "v1:cl6",
+          "beat": "closing",
+          "text": "Sleep takes you gently, the way it takes people with nothing to flee. Tomorrow will rhyme with today. That's the whole plan now.",
+          "spans": []
+        },
+        "evening": {
+          "key": "p6",
+          "fragmentId": "v1:cl6",
+          "beat": "closing",
+          "text": "Sleep takes you gently, the way it takes people with nothing to flee. Tomorrow will rhyme with today. That's the whole plan now.",
+          "spans": []
+        }
+      },
+      "wordCount": {
+        "morning": 151,
+        "evening": 151
+      },
+      "engineVersion": 1
+    }
+  },
+  "vela.chapter.v2.mve7ubk6-4e83fu-w": {
+    "storedAs": "file 5deb91d3ff8f3bf784c26ac3a325f7bf",
+    "length": 3807,
+    "value": {
+      "id": "mve7ubk6-4e83fu-w",
+      "dreamId": "mve7ubj2-f3ne9z",
+      "season": 1,
+      "number": 2,
+      "stage": 2,
+      "title": "What Tomorrow Makes Possible",
+      "revision": 1,
+      "writtenAt": "2026-10-18T19:29:12.341Z",
+      "source": "engine",
+      "wovenProofId": "mve7ubk7-78z3z3",
+      "opening": {
+        "morning": {
+          "key": "p0",
+          "fragmentId": "sh2-op-m3",
+          "beat": "opening",
+          "text": "A rehearsal is a good way to start a morning, Maya. In this chapter it is the night before a day that matters. You are putting your things in order without any rush at all. Watch how calmly you do it.",
+          "spans": [
+            {
+              "kind": "name",
+              "start": 46,
+              "end": 50
+            }
+          ]
+        },
+        "evening": {
+          "key": "p0",
+          "fragmentId": "sh2-op-e3",
+          "beat": "opening",
+          "text": "Dim the room a little, Maya, and lower your voice inside your head. It is late evening in this story, and tomorrow the life you wrote down takes a real step forward. Notice how ready you already are. Notice how little there is left to do.",
+          "spans": [
+            {
+              "kind": "name",
+              "start": 23,
+              "end": 27
+            }
+          ]
+        }
+      },
+      "body": [
+        {
+          "key": "p1",
+          "fragmentId": "ab2-ar5",
+          "beat": "arrival",
+          "text": "Tomorrow your friends see the place for the first time. You have moved the sofa three times and changed your mind about the rug twice. Flowers wait in a jug in the sink. You stand in the doorway, pleased and nervous in equal measure, because you have a home by the sea.",
+          "spans": [
+            {
+              "kind": "desire",
+              "start": 242,
+              "end": 268
+            }
+          ]
+        },
+        {
+          "key": "p2",
+          "fragmentId": "sh2-se3",
+          "beat": "sensory",
+          "text": "The washing up is done and drying on the rack. The dark window shows you a faint reflection of the room, and of you in it. You look at that reflection a second longer than usual. The person in it looks tired in a good way, and ready, and steadier than you remember.",
+          "spans": []
+        },
+        {
+          "key": "p3",
+          "fragmentId": "ab2-li2",
+          "beat": "living",
+          "text": "Someone calls to wish you luck for tomorrow. You hear yourself talking about money without shame for the first time, plainly, numbers and all. They tell you they are proud of you. You had no idea how much you needed someone to say it until they did.",
+          "spans": []
+        },
+        {
+          "key": "p4",
+          "fragmentId": "mo-home-li1",
+          "beat": "motif",
+          "text": "You close the front door behind you and the click sounds different. It is your door. You drop your keys in the bowl, kick off your shoes and smile at nothing.",
+          "spans": []
+        },
+        {
+          "key": "p5",
+          "fragmentId": "wv-m-wi5",
+          "beat": "weave",
+          "text": "Someone impatient with their own progress asks how you did it. You give them yours: “Saved the first two hundred for the deposit”. You tell them it counted. Hearing yourself say it, you finally believe it too.",
+          "spans": [
+            {
+              "kind": "proof",
+              "start": 84,
+              "end": 129,
+              "proofId": "mve7ubk7-78z3z3"
+            }
+          ],
+          "wovenProofId": "mve7ubk7-78z3z3"
+        },
+        {
+          "key": "p6",
+          "fragmentId": "sh2-re3",
+          "beat": "reflection",
+          "text": "Readiness turns out to be quieter than you pictured. There is no drumroll. There is only a sense that whatever tomorrow brings, you will meet it as yourself. That is what all the small steps toward a home by the sea were building, all along. Something in you feels peaceful, and steady with it.",
+          "spans": [
+            {
+              "kind": "desire",
+              "start": 198,
+              "end": 215
+            }
+          ]
+        }
+      ],
+      "closing": {
+        "morning": {
+          "key": "p7",
+          "fragmentId": "sh2-cl-m4",
+          "beat": "closing",
+          "text": "This is how big days get built: on ordinary mornings, one piece at a time. Look around the room you are actually in, and choose one piece to carry today. The choices are just below. Pick the one that feels almost too easy.",
+          "spans": []
+        },
+        "evening": {
+          "key": "p7",
+          "fragmentId": "sh2-cl-e2",
+          "beat": "closing",
+          "text": "Set down the rehearsal. You know your part, every line of it. Breathe like someone who has checked what needed checking and has run out of things to do. Then let the night take over, and go with it.",
+          "spans": []
+        }
+      },
+      "wordCount": {
+        "morning": 358,
+        "evening": 359
+      },
+      "engineVersion": 2,
+      "usedIds": [
+        "ab2-t1",
+        "sh2-op-m3",
+        "sh2-op-e3",
+        "ab2-ar5",
+        "sh2-se3",
+        "ab2-li2",
+        "mo-home-li1",
+        "wv-m-wi5",
+        "sh2-re3",
+        "sh2-cl-m4",
+        "sh2-cl-e2",
+        "mo-home-d6"
+      ]
+    }
+  },
+  "vela.journal.v1": {
+    "storedAs": "inline",
+    "length": 923,
+    "value": {
+      "entries": [
+        {
+          "id": "mve7ux6n-blisal",
+          "kind": "gratitude",
+          "dateKey": "2026-10-18",
+          "prompt": "Something my body did for me today… | A door that is open to me right now… | Something small that went right today…",
+          "text": "Something my body did for me today… The coffee was warm\nA door that is open to me right now… My sister called",
+          "createdAt": "2026-10-18T19:26:28.991Z"
+        },
+        {
+          "id": "mve7unrc-9sgltx",
+          "kind": "script",
+          "dateKey": "2026-10-18",
+          "prompt": "It's tomorrow evening, and today went exactly as you hoped. Write what happened, in past tense, as if you're telling a friend.",
+          "text": "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week.",
+          "createdAt": "2026-10-18T19:26:16.776Z"
+        }
+      ],
+      "sheet": {
+        "dateKey": "2026-10-18",
+        "phrase": "I run a studio clients trust",
+        "morning": [],
+        "afternoon": [],
+        "evening": [
+          "I run a studio clients trust",
+          "I run a studio clients trust"
+        ]
+      },
+      "phrase369": "I run a studio clients trust"
+    }
+  },
+  "vela.journal.v2": {
+    "storedAs": "inline",
+    "length": 935,
+    "value": {
+      "version": 2,
+      "entries": [
+        {
+          "id": "mve7ux6n-blisal",
+          "kind": "gratitude",
+          "dateKey": "2026-10-18",
+          "prompt": "Something my body did for me today… | A door that is open to me right now… | Something small that went right today…",
+          "text": "Something my body did for me today… The coffee was warm\nA door that is open to me right now… My sister called",
+          "createdAt": "2026-10-18T19:26:28.991Z"
+        },
+        {
+          "id": "mve7unrc-9sgltx",
+          "kind": "script",
+          "dateKey": "2026-10-18",
+          "prompt": "It's tomorrow evening, and today went exactly as you hoped. Write what happened, in past tense, as if you're telling a friend.",
+          "text": "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week.",
+          "createdAt": "2026-10-18T19:26:16.776Z"
+        }
+      ],
+      "sheet": {
+        "dateKey": "2026-10-18",
+        "phrase": "I run a studio clients trust",
+        "morning": [],
+        "afternoon": [],
+        "evening": [
+          "I run a studio clients trust",
+          "I run a studio clients trust"
+        ]
+      },
+      "phrase369": "I run a studio clients trust"
+    }
+  },
+  "vela.notifications.v2": {
+    "storedAs": "inline",
+    "length": 54,
+    "value": {
+      "version": 1,
+      "used": {},
+      "pending": [],
+      "quietSpell": null
+    }
+  },
+  "vela.plus.v1": {
+    "storedAs": "inline",
+    "length": 1,
+    "value": 0
+  },
+  "vela.profile.v1": {
+    "storedAs": "inline",
+    "length": 114,
+    "value": {
+      "name": "Maya",
+      "focusAreas": [
+        "career"
+      ],
+      "ritual": "evening",
+      "mood": "hopeful",
+      "createdAt": "2026-10-18T19:24:57.113Z"
+    }
+  },
+  "vela.profile.v2": {
+    "storedAs": "inline",
+    "length": 303,
+    "value": {
+      "version": 2,
+      "name": "Maya",
+      "pronunciation": null,
+      "focusAreas": [
+        "career"
+      ],
+      "ritual": "evening",
+      "ritualTimes": {
+        "morning": "08:00",
+        "evening": "21:00"
+      },
+      "remindersEnabled": true,
+      "lockScreenPrivate": true,
+      "voiceId": null,
+      "rate": 0.9,
+      "textSize": "S",
+      "bed": "night",
+      "createdAt": "2026-10-18T19:24:57.113Z",
+      "mood": "hopeful"
+    }
+  },
+  "vela.progress.v2": {
+    "storedAs": "inline",
+    "length": 255,
+    "value": {
+      "version": 2,
+      "days": [
+        "2026-10-18"
+      ],
+      "nightsShownUp": 1,
+      "today": {
+        "dateKey": "2026-10-18",
+        "acts": [
+          "chapter-heard",
+          "ritual-saved"
+        ]
+      },
+      "rhythmTarget": 4,
+      "pausedUntil": null,
+      "pausedFrom": null,
+      "lifetime": {
+        "chapter-heard": 1,
+        "proof": 0,
+        "line-carried": 0,
+        "ritual-saved": 1
+      }
+    }
+  },
+  "vela.ritual.v1": {
+    "storedAs": "inline",
+    "length": 78,
+    "value": {
+      "days": [
+        "2026-10-18"
+      ],
+      "todayKey": "2026-10-18",
+      "todayDone": [
+        "story",
+        "script"
+      ]
+    }
+  },
+  "vela.scenes.v2": {
+    "storedAs": "inline",
+    "length": 944,
+    "value": {
+      "version": 2,
+      "cards": [
+        {
+          "id": "mve7w8f3-89iqbb",
+          "kind": "goal",
+          "text": "Three clients who refer friends",
+          "createdAt": "2026-10-18T19:27:30.207Z",
+          "dreamId": null
+        },
+        {
+          "id": "mve7vzzn-ogtu5",
+          "kind": "goal",
+          "text": "A sign with my name above the door",
+          "createdAt": "2026-10-18T19:27:19.284Z",
+          "dreamId": null
+        },
+        {
+          "id": "mve7vb2l-4wyxf3",
+          "kind": "goal",
+          "text": "A shelf of my own published work",
+          "createdAt": "2026-10-18T19:26:46.989Z",
+          "dreamId": null
+        },
+        {
+          "id": "mve7vb2b-1xtn5n",
+          "kind": "goal",
+          "text": "Studio rent paid six months ahead",
+          "createdAt": "2026-10-18T19:26:46.979Z",
+          "dreamId": null
+        },
+        {
+          "id": "mve7vb21-cx3q68",
+          "kind": "photo",
+          "uri": "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F/Documents/board-mve7vb21-cx3q68.jpg",
+          "caption": "The corner studio on Elm",
+          "createdAt": "2026-10-18T19:26:46.969Z",
+          "dreamId": null,
+          "proofId": null
+        }
+      ],
+      "importedProofIds": []
+    }
+  },
+  "vela.softplus.v1": {
+    "storedAs": "inline",
+    "length": 1,
+    "value": 1
+  },
+  "vela.stories.v1": {
+    "storedAs": "file 2f3dfe66d0ba2888b8ab7217dd01d544",
+    "length": 4154,
+    "value": {
+      "intents": [
+        {
+          "id": "mve7ubj2-f3ne9z",
+          "focus": "abundance",
+          "desire": "A home by the sea",
+          "feeling": "peaceful",
+          "createdAt": "2026-10-18T19:26:00.926Z",
+          "usedIds": [
+            "op9",
+            "ar-ab6",
+            "se10",
+            "li-ab3",
+            "wi7",
+            "gr1",
+            "cl6",
+            "t2"
+          ],
+          "chapter": 1
+        },
+        {
+          "id": "mve7tc04-8kywog",
+          "focus": "career",
+          "desire": "my own design studio, with clients who trust my eye",
+          "feeling": "proud",
+          "createdAt": "2026-10-18T19:25:14.884Z",
+          "usedIds": [
+            "op1",
+            "ar-ca6",
+            "se8",
+            "li-ca5",
+            "wi5",
+            "gr7",
+            "cl8",
+            "t1",
+            "op7",
+            "ar-ca2",
+            "se3",
+            "li-ca3",
+            "wi7",
+            "gr6",
+            "cl2",
+            "t7"
+          ],
+          "chapter": 2
+        }
+      ],
+      "stories": [
+        {
+          "id": "mve7ubk6-4e83fu",
+          "intentId": "mve7ubj2-f3ne9z",
+          "title": "After the Wanting",
+          "paragraphs": [
+            {
+              "fragmentId": "op9",
+              "text": "No scramble, no dread, no list running before your feet touch the floor. Just morning, and you, and the life that answered."
+            },
+            {
+              "fragmentId": "ar-ab6",
+              "text": "You tip well. You book the trip. You breathe. Enough stopped being a ceiling and became a floor: A home by the sea."
+            },
+            {
+              "fragmentId": "se10",
+              "text": "Your own handwriting in the margin of today's list looks different lately. Rounder. Unclenched."
+            },
+            {
+              "fragmentId": "li-ab3",
+              "text": "An opportunity lands in your inbox — the paid kind, the aligned kind. They find you regularly now, like the address finally got listed."
+            },
+            {
+              "fragmentId": "wi7",
+              "text": "Someone younger watches how you move through the day and quietly adjusts their own sails. You remember being them. You'd have loved proof like you."
+            },
+            {
+              "fragmentId": "gr1",
+              "text": "Gratitude arrives on its own now, uninvited, mid-afternoon — for the ordinary furniture of a life you once begged the sky for."
+            },
+            {
+              "fragmentId": "cl6",
+              "text": "Sleep takes you gently, the way it takes people with nothing to flee. Tomorrow will rhyme with today. That's the whole plan now."
+            }
+          ],
+          "createdAt": "2026-10-18T19:26:00.966Z"
+        },
+        {
+          "id": "mve7u3o9-dxcgnl",
+          "intentId": "mve7tc04-8kywog",
+          "title": "After the Wanting",
+          "paragraphs": [
+            {
+              "fragmentId": "op7",
+              "text": "The day doesn't ask anything of you yet. It just waits, warm and unhurried, while you remember who you've become."
+            },
+            {
+              "fragmentId": "ar-ca2",
+              "text": "The first task of the day is one you'd do for free — and they pay you well for it. Strange and wonderful, how the intention held: my own design studio, with clients who trust my eye."
+            },
+            {
+              "fragmentId": "se3",
+              "text": "The air outside smells faintly of rain that already fell. Everything is rinsed, including — somehow — you."
+            },
+            {
+              "fragmentId": "li-ca3",
+              "text": "You decline a shiny thing that isn't yours to do, and the calendar breathes. Mastery is mostly subtraction, you've learned."
+            },
+            {
+              "fragmentId": "wi7",
+              "text": "Someone younger watches how you move through the day and quietly adjusts their own sails. You remember being them. You'd have loved proof like you."
+            },
+            {
+              "fragmentId": "gr6",
+              "text": "Somewhere in the day you feel it land — that this was once the dream. This exact, ordinary, extraordinary Tuesday. You feel proud, all the way through."
+            },
+            {
+              "fragmentId": "cl2",
+              "text": "You set tomorrow's one intention like a cup by the kettle, then let the day go completely. Sleep comes down like warm weather."
+            },
+            {
+              "fragmentId": "proof-2",
+              "text": "There is proof behind this memory now: Sent my portfolio to two studios I admire.. It is small enough to be real, and real enough to change what comes next."
+            }
+          ],
+          "createdAt": "2026-10-18T19:25:50.746Z"
+        }
+      ],
+      "actions": [
+        {
+          "id": "mve7ubk7-78z3z3",
+          "intentId": "mve7ubj2-f3ne9z",
+          "storyId": "mve7ubk6-4e83fu",
+          "text": "Move one small amount toward the future you described.",
+          "state": "completed",
+          "createdAt": "2026-10-18T19:26:00.967Z",
+          "evidence": "Saved the first two hundred for the deposit.",
+          "evidenceKind": "moved",
+          "completedAt": "2026-10-18T19:26:31.621Z"
+        },
+        {
+          "id": "mve7u3oa-tespk",
+          "intentId": "mve7tc04-8kywog",
+          "storyId": "mve7u3o9-dxcgnl",
+          "text": "Protect twenty focused minutes for the skill your future self relies on.",
+          "state": "open",
+          "createdAt": "2026-10-18T19:25:50.746Z"
+        },
+        {
+          "id": "mve7tc08-4pyzwx",
+          "intentId": "mve7tc04-8kywog",
+          "storyId": "mve7tc07-ec8e0d",
+          "text": "Create one visible piece of work, however small, before consuming advice.",
+          "state": "completed",
+          "createdAt": "2026-10-18T19:25:14.887Z",
+          "evidence": "Sent my portfolio to two studios I admire.",
+          "evidenceKind": "did",
+          "completedAt": "2026-10-18T19:25:42.000Z"
+        }
+      ]
+    }
+  }
+}

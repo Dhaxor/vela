@@ -1,0 +1,18 @@
+[
+  {
+    "phase": "dump",
+    "name": "D-V1-KEYS-UNTOUCHED",
+    "status": "PASS",
+    "detail": "every v1 key is byte-identical after 1.1 ran (rollback-safe)",
+    "shots": [],
+    "t": 1
+  },
+  {
+    "phase": "dump",
+    "name": "D-STORE-AFTER-11",
+    "status": "INFO",
+    "detail": "keys now: vela.arcs.v2, vela.asks.v1, vela.chapter.v2.mve7u3o9-dxcgnl, vela.chapter.v2.mve7ubk6-4e83fu, vela.chapter.v2.mve7ubk6-4e83fu-w, vela.journal.v2, vela.notifications.v2, vela.plus.v1, vela.profile.v2, vela.progress.v2, vela.scenes.v2, vela.softplus.v1; vela.plus.v1=\"0\"",
+    "shots": [],
+    "t": 1
+  }
+]

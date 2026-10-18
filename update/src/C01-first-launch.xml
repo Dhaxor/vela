@@ -1,0 +1,450 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<AppiumAUT>
+  <XCUIElementTypeApplication type="XCUIElementTypeApplication" name="Vela" label="Vela" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="" processId="28908" bundleId="app.vela.manifest">
+    <XCUIElementTypeWindow type="XCUIElementTypeWindow" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="956" index="0" traits="">
+                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                            <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-screen" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="0" traits="">
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="0" traits="">
+                                                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="0" traits="">
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="0" traits="">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="0" traits="">
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="0" traits=""/>
+                                                      </XCUIElementTypeOther>
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-262" y="-219" width="687" height="687" index="1" traits=""/>
+                                                    </XCUIElementTypeOther>
+                                                  </XCUIElementTypeOther>
+                                                </XCUIElementTypeOther>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="1" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="2" traits="">
+                                                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-1174" y="-2205" width="2946" height="3394" index="0" traits="">
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-1174" y="-2205" width="2946" height="2946" index="0" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-933" y="-1964" width="2464" height="2464" index="1" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-692" y="-1723" width="1982" height="1982" index="2" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="44" y="-732" width="256" height="1637" index="3" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="158" y="-732" width="142" height="1637" index="4" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="287" y="-732" width="13" height="1637" index="5" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="298" y="-732" width="100" height="1637" index="6" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="7" traits="">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="0" traits=""/>
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="1" traits=""/>
+                                                    </XCUIElementTypeOther>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="32" y="6" width="3" height="3" index="8" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="74" y="10" width="3" height="2" index="9" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="93" y="9" width="2" height="2" index="10" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="132" y="11" width="3" height="3" index="11" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="196" y="10" width="3" height="3" index="12" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="247" y="10" width="3" height="3" index="13" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="266" y="8" width="2" height="3" index="14" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="178" y="20" width="2" height="2" index="15" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="325" y="14" width="3" height="3" index="16" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="374" y="18" width="2" height="3" index="17" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="11" width="4" height="2" index="18" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="385" y="26" width="2" height="2" index="19" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="23" width="4" height="2" index="20" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="16" y="35" width="2" height="2" index="21" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="111" y="30" width="2" height="2" index="22" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="164" y="40" width="2" height="2" index="23" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="35" width="4" height="2" index="24" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="239" y="45" width="3" height="3" index="25" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="340" y="45" width="2" height="2" index="26" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="395" y="48" width="3" height="3" index="27" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="47" width="4" height="2" index="28" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="93" y="56" width="3" height="3" index="29" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="154" y="58" width="2" height="3" index="30" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="166" y="61" width="2" height="3" index="31" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="214" y="61" width="3" height="2" index="32" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="59" width="9" height="2" index="33" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="70" width="3" height="2" index="34" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="136" y="65" width="3" height="2" index="35" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="248" y="69" width="2" height="3" index="36" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="341" y="75" width="2" height="3" index="37" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="71" width="4" height="2" index="38" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="24" y="86" width="3" height="2" index="39" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="80" y="88" width="2" height="2" index="40" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="215" y="83" width="2" height="2" index="41" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="292" y="75" width="3" height="3" index="42" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="366" y="71" width="2" height="2" index="43" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="407" y="72" width="2" height="2" index="44" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="83" width="4" height="2" index="45" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="263" y="93" width="3" height="3" index="46" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="95" width="4" height="2" index="47" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="114" y="104" width="3" height="3" index="48" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="9" y="114" width="3" height="3" index="49" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="316" y="108" width="2" height="2" index="50" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="352" y="105" width="2" height="2" index="51" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="392" y="97" width="2" height="3" index="52" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="107" width="4" height="2" index="53" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="240" y="126" width="2" height="2" index="54" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="328" y="118" width="2" height="3" index="55" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="382" y="121" width="3" height="3" index="56" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="119" width="9" height="2" index="57" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="69" y="134" width="2" height="2" index="58" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="100" y="132" width="3" height="2" index="59" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="393" y="127" width="3" height="3" index="60" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="164" y="142" width="2" height="2" index="61" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="234" y="136" width="3" height="2" index="62" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="283" y="138" width="2" height="2" index="63" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="131" width="4" height="2" index="64" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="36" y="150" width="3" height="3" index="65" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="65" y="143" width="3" height="3" index="66" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="110" y="154" width="2" height="3" index="67" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="171" y="147" width="2" height="2" index="68" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="143" width="4" height="2" index="69" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="250" y="154" width="2" height="2" index="70" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="155" width="4" height="2" index="71" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="260" y="167" width="2" height="2" index="72" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="167" width="4" height="2" index="73" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="220" y="175" width="2" height="3" index="74" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="310" y="168" width="3" height="2" index="75" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="179" width="9" height="2" index="76" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="100" y="190" width="2" height="2" index="77" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="423" y="182" width="2" height="2" index="78" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="191" width="4" height="2" index="79" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="203" width="4" height="2" index="80" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="138" y="217" width="3" height="3" index="81" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="215" width="4" height="2" index="82" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="227" width="4" height="2" index="83" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="437" y="223" width="4" height="4" index="84" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="9" y="232" width="2" height="2" index="85" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="164" y="224" width="3" height="3" index="86" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="300" y="219" width="4" height="4" index="87" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="63" y="242" width="3" height="3" index="88" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="239" width="9" height="2" index="89" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="214" y="252" width="2" height="2" index="90" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="259" y="255" width="2" height="2" index="91" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="251" width="4" height="2" index="92" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="377" y="260" width="3" height="3" index="93" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="263" width="4" height="2" index="94" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="275" width="4" height="2" index="95" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="42" y="295" width="3" height="3" index="96" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="84" y="292" width="2" height="3" index="97" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="287" width="4" height="2" index="98" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="333" y="298" width="4" height="5" index="99" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="299" width="9" height="2" index="100" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="147" y="313" width="3" height="2" index="101" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="346" y="308" width="2" height="2" index="102" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="420" y="308" width="2" height="3" index="103" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="311" width="4" height="2" index="104" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="260" y="323" width="2" height="2" index="105" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="323" width="4" height="2" index="106" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="52" y="337" width="3" height="2" index="107" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="109" y="333" width="2" height="2" index="108" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="420" y="340" width="2" height="2" index="109" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="335" width="4" height="2" index="110" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="347" width="4" height="2" index="111" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="25" y="359" width="2" height="2" index="112" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="152" y="355" width="3" height="3" index="113" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="234" y="357" width="2" height="2" index="114" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="359" width="9" height="2" index="115" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="371" width="4" height="2" index="116" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="146" y="380" width="3" height="3" index="117" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="368" y="374" width="3" height="2" index="118" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="129" y="384" width="2" height="2" index="119" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="275" y="384" width="2" height="3" index="120" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="383" width="4" height="2" index="121" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="4" y="398" width="2" height="2" index="122" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="392" y="390" width="2" height="2" index="123" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="395" width="4" height="2" index="124" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="95" y="410" width="3" height="3" index="125" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="312" y="407" width="3" height="2" index="126" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="371" y="406" width="2" height="2" index="127" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="407" width="4" height="2" index="128" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="235" y="421" width="3" height="3" index="129" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="419" width="9" height="2" index="130" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="431" width="4" height="2" index="131" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="185" y="440" width="2" height="2" index="132" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="443" width="4" height="2" index="133" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="51" y="454" width="3" height="3" index="134" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="207" y="451" width="2" height="2" index="135" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="271" y="453" width="3" height="2" index="136" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="393" y="451" width="3" height="3" index="137" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="455" width="4" height="2" index="138" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="332" y="468" width="2" height="2" index="139" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="467" width="4" height="2" index="140" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="31" y="479" width="2" height="3" index="141" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="479" width="9" height="2" index="142" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="164" y="493" width="3" height="3" index="143" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="491" width="4" height="2" index="144" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="111" y="503" width="3" height="3" index="145" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="274" y="502" width="2" height="2" index="146" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="503" width="4" height="2" index="147" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="37" y="521" width="2" height="3" index="148" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="515" width="4" height="2" index="149" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="229" y="527" width="2" height="2" index="150" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="425" y="520" width="3" height="2" index="151" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="527" width="4" height="2" index="152" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="221" y="537" width="3" height="3" index="153" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="297" y="535" width="3" height="3" index="154" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="294" y="544" width="2" height="2" index="155" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="539" width="9" height="2" index="156" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="551" width="4" height="2" index="157" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="-242" y="568" width="924" height="621" index="158" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="141" y="564" width="2" height="3" index="159" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="263" y="569" width="3" height="3" index="160" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="343" y="568" width="3" height="2" index="161" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="563" width="4" height="2" index="162" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="575" width="4" height="2" index="163" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="587" width="4" height="2" index="164" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="599" width="9" height="2" index="165" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="92" y="608" width="2" height="2" index="166" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="434" y="614" width="3" height="2" index="167" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="611" width="4" height="2" index="168" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="18" y="624" width="3" height="3" index="169" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="623" width="4" height="2" index="170" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="171" y="633" width="3" height="3" index="171" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="292" y="626" width="2" height="2" index="172" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="243" y="634" width="2" height="2" index="173" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="635" width="4" height="2" index="174" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="159" y="645" width="3" height="3" index="175" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="385" y="639" width="2" height="2" index="176" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="647" width="4" height="2" index="177" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="659" width="9" height="2" index="178" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="240" y="677" width="2" height="2" index="179" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="671" width="4" height="2" index="180" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="683" width="4" height="2" index="181" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="135" y="692" width="2" height="2" index="182" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="275" y="686" width="2" height="2" index="183" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="422" y="686" width="2" height="2" index="184" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="16" y="699" width="3" height="2" index="185" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="267" y="700" width="3" height="3" index="186" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="320" y="695" width="3" height="3" index="187" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="695" width="4" height="2" index="188" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="707" width="4" height="2" index="189" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="84" y="723" width="2" height="2" index="190" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="109" y="715" width="3" height="3" index="191" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="719" width="9" height="2" index="192" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="731" width="4" height="2" index="193" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="743" width="4" height="2" index="194" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="170" y="761" width="2" height="2" index="195" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="286" y="762" width="2" height="2" index="196" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="755" width="4" height="2" index="197" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="767" width="4" height="2" index="198" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="303" y="779" width="2" height="2" index="199" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="779" width="9" height="2" index="200" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="791" width="4" height="2" index="201" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="803" width="4" height="2" index="202" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="21" y="812" width="2" height="3" index="203" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="815" width="4" height="2" index="204" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="827" width="4" height="2" index="205" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="250" y="836" width="2" height="2" index="206" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="430" y="839" width="9" height="2" index="207" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="138" y="854" width="2" height="2" index="208" traits=""/>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="435" y="851" width="4" height="2" index="209" traits=""/>
+                                                  </XCUIElementTypeOther>
+                                                </XCUIElementTypeOther>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="413" y="41" width="5" height="4" index="3" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="29" y="167" width="5" height="5" index="4" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="582" height="581" index="5" traits="">
+                                                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="581" height="581" index="0" traits="">
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="582" height="582" index="0" traits="">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="581" height="581" index="0" traits="">
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="581" height="581" index="0" traits=""/>
+                                                      </XCUIElementTypeOther>
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="105" y="187" width="582" height="582" index="1" traits=""/>
+                                                    </XCUIElementTypeOther>
+                                                  </XCUIElementTypeOther>
+                                                </XCUIElementTypeOther>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="175" y="183" width="5" height="5" index="6" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="363" y="209" width="4" height="5" index="7" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="287" y="288" width="5" height="5" index="8" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="98" y="306" width="5" height="5" index="9" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="51" y="495" width="5" height="5" index="10" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="145" y="547" width="5" height="5" index="11" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="26" y="696" width="5" height="5" index="12" traits=""/>
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="340" y="708" width="5" height="5" index="13" traits=""/>
+                                              </XCUIElementTypeOther>
+                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="0" width="440" height="861" index="1" traits="">
+                                                <XCUIElementTypeOther type="XCUIElementTypeOther" name="screen-scroll" enabled="true" visible="true" accessible="false" x="0" y="62" width="440" height="799" index="0" traits="">
+                                                  <XCUIElementTypeScrollView type="XCUIElementTypeScrollView" enabled="true" visible="true" accessible="false" x="0" y="62" width="440" height="799" index="0" traits="">
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="62" width="440" height="1309" index="0" traits="">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="62" width="440" height="1309" index="0" traits="">
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="Good evening, Maya." name="today-greeting" label="Good evening, Maya." enabled="true" visible="true" accessible="false" x="24" y="70" width="340" height="40" index="0" traits="Header, StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="Good evening, Maya." name="Good evening, Maya." label="Good evening, Maya." enabled="true" visible="true" accessible="true" x="24" y="70" width="340" height="40" index="0" traits="Header, StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeButton type="XCUIElementTypeButton" name="open-settings" label="Settings" enabled="true" visible="true" accessible="true" x="372" y="70" width="44" height="44" index="1" traits="Button"/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="streak-chip" label="1 night shown up, 2 stars in your sky" enabled="true" visible="true" accessible="true" x="24" y="118" width="136" height="32" index="2" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-rhythm" label="1 of 4 nights this week: Sunday" enabled="true" visible="true" accessible="true" x="280" y="120" width="136" height="28" index="3" traits="SummaryElement"/>
+                                                        <XCUIElementTypeButton type="XCUIElementTypeButton" name="today-hero" label="Your sky: The Sail, 1 of 7 stars lit" enabled="true" visible="true" accessible="true" x="0" y="154" width="440" height="287" index="4" traits="Button">
+                                                          <XCUIElementTypeImage type="XCUIElementTypeImage" name="proof-constellation" label="Your sky: The Sail, 1 of 7 stars lit" enabled="true" visible="true" accessible="false" x="0" y="154" width="440" height="287" index="0" traits="Image"/>
+                                                        </XCUIElementTypeButton>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="arc-switcher" enabled="true" visible="false" accessible="false" x="0" y="457" width="440" height="44" index="5" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="457" width="440" height="44" index="6" traits="">
+                                                          <XCUIElementTypeScrollView type="XCUIElementTypeScrollView" enabled="true" visible="true" accessible="false" x="0" y="457" width="440" height="44" index="0" traits="">
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="457" width="484" height="44" index="0" traits="">
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="457" width="484" height="44" index="0" traits="">
+                                                                <XCUIElementTypeOther type="XCUIElementTypeOther" name="arc-switch-mve7tc04-8kywog" label="My own design…, not weaving" enabled="true" visible="true" accessible="true" x="24" y="457" width="270" height="44" index="0" traits=""/>
+                                                                <XCUIElementTypeOther type="XCUIElementTypeOther" name="arc-switch-mve7ubj2-f3ne9z" label="A home by…" enabled="true" visible="true" accessible="true" x="301" y="457" width="159" height="44" index="1" traits="Selected"/>
+                                                              </XCUIElementTypeOther>
+                                                            </XCUIElementTypeOther>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" value="0%" name="Vertical scroll bar, 2 pages" label="Vertical scroll bar, 2 pages" enabled="true" visible="true" accessible="false" x="407" y="457" width="30" height="44" index="1" traits="Adjustable">
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="434" y="460" width="3" height="38" index="0" traits=""/>
+                                                            </XCUIElementTypeOther>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" value="0%" name="Vertical scroll bar, 2 pages" label="Vertical scroll bar, 2 pages" enabled="true" visible="true" accessible="false" x="407" y="457" width="30" height="44" index="2" traits="Adjustable">
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="434" y="460" width="3" height="38" index="0" traits=""/>
+                                                            </XCUIElementTypeOther>
+                                                          </XCUIElementTypeScrollView>
+                                                        </XCUIElementTypeOther>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="future-memory-card" label="Chapter II is ready" enabled="true" visible="false" accessible="false" x="24" y="517" width="392" height="324" index="7" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="24" y="517" width="392" height="324" index="8" traits="">
+                                                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="25" y="518" width="390" height="322" index="0" traits="">
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="49" y="518" width="342" height="1" index="0" traits=""/>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="35" y="528" width="12" height="12" index="1" traits=""/>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="323" y="534" width="76" height="44" index="2" traits="">
+                                                              <XCUIElementTypeImage type="XCUIElementTypeImage" name="Constellation, 1 of 7 stars lit" label="Constellation, 1 of 7 stars lit" enabled="true" visible="true" accessible="true" x="323" y="534" width="76" height="44" index="0" traits="Image"/>
+                                                            </XCUIElementTypeOther>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="393" y="528" width="12" height="12" index="3" traits=""/>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="49" y="542" width="342" height="76" index="4" traits="">
+                                                              <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="CHAPTER II IS READY" name="CHAPTER II IS READY" label="CHAPTER II IS READY" enabled="true" visible="true" accessible="false" x="49" y="542" width="266" height="18" index="0" traits="StaticText">
+                                                                <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="CHAPTER II IS READY" name="CHAPTER II IS READY" label="CHAPTER II IS READY" enabled="true" visible="true" accessible="true" x="49" y="542" width="266" height="18" index="0" traits="StaticText"/>
+                                                              </XCUIElementTypeStaticText>
+                                                              <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="What Tomorrow Makes Possible" name="What Tomorrow Makes Possible" label="What Tomorrow Makes Possible" enabled="true" visible="true" accessible="false" x="49" y="568" width="342" height="28" index="1" traits="Header, StaticText">
+                                                                <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="What Tomorrow Makes Possible" name="What Tomorrow Makes Possible" label="What Tomorrow Makes Possible" enabled="true" visible="true" accessible="true" x="49" y="568" width="342" height="28" index="0" traits="Header, StaticText"/>
+                                                              </XCUIElementTypeStaticText>
+                                                              <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="Chapter II · The Night Before" name="Chapter II · The Night Before" label="Chapter II · The Night Before" enabled="true" visible="true" accessible="false" x="49" y="600" width="342" height="18" index="2" traits="StaticText">
+                                                                <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="Chapter II · The Night Before" name="Chapter II · The Night Before" label="Chapter II · The Night Before" enabled="true" visible="true" accessible="true" x="49" y="600" width="342" height="18" index="0" traits="StaticText"/>
+                                                              </XCUIElementTypeStaticText>
+                                                            </XCUIElementTypeOther>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="49" y="634" width="342" height="50" index="5" traits="">
+                                                              <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="It begins with what moved today:" name="It begins with what moved today:" label="It begins with what moved today:" enabled="true" visible="true" accessible="false" x="49" y="634" width="342" height="18" index="0" traits="StaticText">
+                                                                <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="It begins with what moved today:" name="It begins with what moved today:" label="It begins with what moved today:" enabled="true" visible="true" accessible="true" x="49" y="634" width="342" height="18" index="0" traits="StaticText"/>
+                                                              </XCUIElementTypeStaticText>
+                                                              <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="“Saved the first two hundred for the deposit.”" name="“Saved the first two hundred for the deposit.”" label="“Saved the first two hundred for the deposit.”" enabled="true" visible="true" accessible="false" x="49" y="656" width="342" height="28" index="1" traits="StaticText">
+                                                                <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="“Saved the first two hundred for the deposit.”" name="“Saved the first two hundred for the deposit.”" label="“Saved the first two hundred for the deposit.”" enabled="true" visible="true" accessible="true" x="49" y="656" width="342" height="28" index="0" traits="StaticText"/>
+                                                              </XCUIElementTypeStaticText>
+                                                            </XCUIElementTypeOther>
+                                                            <XCUIElementTypeButton type="XCUIElementTypeButton" name="weave-next-chapter" label="Read now" enabled="true" visible="true" accessible="true" x="49" y="708" width="342" height="56" index="6" traits="Button"/>
+                                                            <XCUIElementTypeButton type="XCUIElementTypeButton" name="today-save-for" label="Save for 21:00" enabled="true" visible="true" accessible="true" x="151" y="772" width="138" height="44" index="7" traits="Button"/>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="35" y="818" width="12" height="12" index="8" traits=""/>
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="393" y="818" width="12" height="12" index="9" traits=""/>
+                                                          </XCUIElementTypeOther>
+                                                        </XCUIElementTypeOther>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-ledger" label="Proof Ledger: 2 stars this week. 1 i did it, 1 something moved" enabled="true" visible="false" accessible="false" x="24" y="865" width="392" height="240" index="9" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="45" y="866" width="350" height="1" index="10" traits=""/>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="PROOF LEDGER" name="PROOF LEDGER" label="PROOF LEDGER" enabled="true" visible="false" accessible="false" x="49" y="890" width="342" height="18" index="11" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="PROOF LEDGER" name="PROOF LEDGER" label="PROOF LEDGER" enabled="true" visible="false" accessible="true" x="49" y="890" width="342" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="This week, 2 stars." name="This week, 2 stars." label="This week, 2 stars." enabled="true" visible="false" accessible="false" x="49" y="916" width="342" height="28" index="12" traits="Header, StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="This week, 2 stars." name="This week, 2 stars." label="This week, 2 stars." enabled="true" visible="false" accessible="true" x="49" y="916" width="342" height="28" index="0" traits="Header, StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="12–18 October" name="12–18 October" label="12–18 October" enabled="true" visible="false" accessible="false" x="49" y="946" width="342" height="18" index="13" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="12–18 October" name="12–18 October" label="12–18 October" enabled="true" visible="false" accessible="true" x="49" y="946" width="342" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-ledger-did" enabled="true" visible="false" accessible="false" x="49" y="980" width="66" height="26" index="14" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="49" y="983" width="20" height="20" index="15" traits="">
+                                                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="50" y="984" width="18" height="18" index="0" traits="">
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="50" y="984" width="18" height="18" index="0" traits=""/>
+                                                          </XCUIElementTypeOther>
+                                                        </XCUIElementTypeOther>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="1" name="1" label="1" enabled="true" visible="false" accessible="false" x="77" y="980" width="11" height="26" index="16" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="1" name="1" label="1" enabled="true" visible="false" accessible="true" x="77" y="980" width="11" height="26" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="did" name="did" label="did" enabled="true" visible="false" accessible="false" x="95" y="984" width="20" height="18" index="17" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="did" name="did" label="did" enabled="true" visible="false" accessible="true" x="95" y="984" width="20" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-ledger-moved" enabled="true" visible="false" accessible="false" x="138" y="980" width="89" height="26" index="18" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="138" y="983" width="21" height="20" index="19" traits="">
+                                                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="139" y="983" width="19" height="20" index="0" traits="">
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="139" y="983" width="19" height="20" index="0" traits="">
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="144" y="988" width="10" height="10" index="0" traits=""/>
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="144" y="988" width="10" height="10" index="1" traits=""/>
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="146" y="991" width="5" height="4" index="2" traits=""/>
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="147" y="983" width="3" height="20" index="3" traits=""/>
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="139" y="992" width="19" height="2" index="4" traits=""/>
+                                                            </XCUIElementTypeOther>
+                                                          </XCUIElementTypeOther>
+                                                        </XCUIElementTypeOther>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="1" name="1" label="1" enabled="true" visible="false" accessible="false" x="166" y="980" width="11" height="26" index="20" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="1" name="1" label="1" enabled="true" visible="false" accessible="true" x="166" y="980" width="11" height="26" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="moved" name="moved" label="moved" enabled="true" visible="false" accessible="false" x="184" y="984" width="43" height="18" index="21" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="moved" name="moved" label="moved" enabled="true" visible="false" accessible="true" x="184" y="984" width="43" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-ledger-learned" enabled="true" visible="false" accessible="false" x="251" y="980" width="93" height="26" index="22" traits=""/>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="251" y="983" width="20" height="20" index="23" traits="">
+                                                          <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="253" y="985" width="16" height="16" index="0" traits="">
+                                                            <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="253" y="985" width="16" height="16" index="0" traits="">
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="253" y="985" width="16" height="16" index="0" traits=""/>
+                                                              <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="258" y="990" width="6" height="6" index="1" traits=""/>
+                                                            </XCUIElementTypeOther>
+                                                          </XCUIElementTypeOther>
+                                                        </XCUIElementTypeOther>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="0" name="0" label="0" enabled="true" visible="false" accessible="false" x="279" y="980" width="11" height="26" index="24" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="0" name="0" label="0" enabled="true" visible="false" accessible="true" x="279" y="980" width="11" height="26" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="learned" name="learned" label="learned" enabled="true" visible="false" accessible="false" x="297" y="984" width="47" height="18" index="25" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="learned" name="learned" label="learned" enabled="true" visible="false" accessible="true" x="297" y="984" width="47" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="SENTENCE OF THE WEEK" name="SENTENCE OF THE WEEK" label="SENTENCE OF THE WEEK" enabled="true" visible="false" accessible="false" x="49" y="1030" width="342" height="18" index="26" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="SENTENCE OF THE WEEK" name="SENTENCE OF THE WEEK" label="SENTENCE OF THE WEEK" enabled="true" visible="false" accessible="true" x="49" y="1030" width="342" height="18" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="“Sent my portfolio to two studios I admire.”" name="“Sent my portfolio to two studios I admire.”" label="“Sent my portfolio to two studios I admire.”" enabled="true" visible="false" accessible="false" x="49" y="1052" width="342" height="28" index="27" traits="StaticText">
+                                                          <XCUIElementTypeStaticText type="XCUIElementTypeStaticText" value="“Sent my portfolio to two studios I admire.”" name="“Sent my portfolio to two studios I admire.”" label="“Sent my portfolio to two studios I admire.”" enabled="true" visible="false" accessible="true" x="49" y="1052" width="342" height="28" index="0" traits="StaticText"/>
+                                                        </XCUIElementTypeStaticText>
+                                                        <XCUIElementTypeOther type="XCUIElementTypeOther" name="today-rituals" enabled="true" visible="false" accessible="false" x="24" y="1129" width="392" height="194" index="28" traits=""/>
+                                                        <XCUIElementTypeButton type="XCUIElementTypeButton" name="ritual-affirmation" label="Carry a line: Slow progress with money is still progress, and I count it." enabled="true" visible="false" accessible="true" x="24" y="1129" width="190" height="194" index="29" traits="Button"/>
+                                                        <XCUIElementTypeButton type="XCUIElementTypeButton" name="ritual-script" label="Reflect: Your story has reached The First Glimpse. Write the hour just before it begins." enabled="true" visible="false" accessible="true" x="226" y="1129" width="190" height="194" index="30" traits="Button"/>
+                                                      </XCUIElementTypeOther>
+                                                    </XCUIElementTypeOther>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" value="0%" name="Horizontal scroll bar, 1 page" label="Horizontal scroll bar, 1 page" enabled="true" visible="true" accessible="false" x="0" y="828" width="440" height="30" index="1" traits="Adjustable">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="3" y="855" width="431" height="3" index="0" traits=""/>
+                                                    </XCUIElementTypeOther>
+                                                    <XCUIElementTypeOther type="XCUIElementTypeOther" value="0%" name="Horizontal scroll bar, 1 page" label="Horizontal scroll bar, 1 page" enabled="true" visible="true" accessible="false" x="0" y="828" width="440" height="30" index="2" traits="Adjustable">
+                                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="3" y="855" width="431" height="3" index="0" traits=""/>
+                                                    </XCUIElementTypeOther>
+                                                  </XCUIElementTypeScrollView>
+                                                </XCUIElementTypeOther>
+                                              </XCUIElementTypeOther>
+                                            </XCUIElementTypeOther>
+                                          </XCUIElementTypeOther>
+                                        </XCUIElementTypeOther>
+                                      </XCUIElementTypeOther>
+                                    </XCUIElementTypeOther>
+                                    <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="1" traits="">
+                                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="861" index="0" traits=""/>
+                                    </XCUIElementTypeOther>
+                                  </XCUIElementTypeOther>
+                                </XCUIElementTypeOther>
+                                <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="861" width="440" height="95" index="1" traits="">
+                                  <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="0" y="862" width="440" height="94" index="0" traits=""/>
+                                  <XCUIElementTypeButton type="XCUIElementTypeButton" value="1" name="tab-today" label="Today" enabled="true" visible="true" accessible="true" x="0" y="864" width="147" height="56" index="1" traits="Selected, Button"/>
+                                  <XCUIElementTypeButton type="XCUIElementTypeButton" name="tab-arc" label="Arc, your Memory Book" enabled="true" visible="true" accessible="true" x="146" y="864" width="148" height="56" index="2" traits="Button"/>
+                                  <XCUIElementTypeButton type="XCUIElementTypeButton" name="tab-rituals" label="Rituals" enabled="true" visible="true" accessible="true" x="293" y="864" width="147" height="56" index="3" traits="Button"/>
+                                </XCUIElementTypeOther>
+                              </XCUIElementTypeOther>
+                            </XCUIElementTypeOther>
+                          </XCUIElementTypeOther>
+                        </XCUIElementTypeOther>
+                      </XCUIElementTypeOther>
+                      <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="956" index="1" traits="">
+                        <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="false" accessible="false" x="0" y="0" width="440" height="956" index="0" traits=""/>
+                      </XCUIElementTypeOther>
+                    </XCUIElementTypeOther>
+                  </XCUIElementTypeOther>
+                </XCUIElementTypeOther>
+              </XCUIElementTypeOther>
+            </XCUIElementTypeOther>
+          </XCUIElementTypeOther>
+        </XCUIElementTypeOther>
+      </XCUIElementTypeOther>
+    </XCUIElementTypeWindow>
+  </XCUIElementTypeApplication>
+</AppiumAUT>

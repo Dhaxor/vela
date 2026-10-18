@@ -1,0 +1,99 @@
+[
+  {
+    "phase": "drive101",
+    "name": "A-LAUNCH-101",
+    "status": "PASS",
+    "detail": "1.0.1 opens on its welcome beat",
+    "shots": [
+      "A01-welcome.png"
+    ],
+    "t": 429.7
+  },
+  {
+    "phase": "drive101",
+    "name": "A-ONBOARDING-101",
+    "status": "PASS",
+    "detail": "welcome → focus → mood (chosen) → name → ritual → primer (reached)",
+    "shots": [
+      "A02-focus.png",
+      "A03-mood.png",
+      "A04-practice-primer.png"
+    ],
+    "t": 461
+  },
+  {
+    "phase": "drive101",
+    "name": "A-STORY-101",
+    "status": "PASS",
+    "detail": "intake shown; desire typed \"my own design studio, with clients who trust my eye\"; chapter rendered",
+    "shots": [
+      "A05-intake.png",
+      "A06-chapter-1.png"
+    ],
+    "t": 486.5
+  },
+  {
+    "phase": "drive101",
+    "name": "A-PROOF-101",
+    "status": "PASS",
+    "detail": "proof \"Sent my portfolio to two studios I admire.\" saved",
+    "shots": [
+      "A07-proof-form.png",
+      "A08-proof-saved.png"
+    ],
+    "t": 509.2
+  },
+  {
+    "phase": "drive101",
+    "name": "A-CHAPTER-2-101",
+    "status": "PASS",
+    "detail": "weave button shown, chapter 2 rendered, streak chip true",
+    "shots": [
+      "A09-today-proof-folded.png",
+      "A10-chapter-2.png",
+      "A11-today-chapter-2.png"
+    ],
+    "t": 526.7
+  },
+  {
+    "phase": "drive101",
+    "name": "A-JOURNAL-101",
+    "status": "PASS",
+    "detail": "stored pages [\"gratitude\",\"script\"], 3·6·9 reps 2 (2 of 18 written today); script typed \"It is a Tuesday and the studio door is open. Two clients sent thank you notes this week.\"",
+    "shots": [
+      "A12-script.png",
+      "A13-gratitude.png",
+      "A14-369.png",
+      "A15-journal-pages.png"
+    ],
+    "t": 587.9
+  },
+  {
+    "phase": "drive101",
+    "name": "A-BOARD-101",
+    "status": "PASS",
+    "detail": "stored board cards: 2 (extra 'Pin it' taps needed with the keyboard up: 2)",
+    "shots": [
+      "A16-board.png"
+    ],
+    "t": 616.1
+  },
+  {
+    "phase": "drive101",
+    "name": "A-ALIVE-101",
+    "status": "PASS",
+    "detail": "app state 4 at the end of the 1.0.1 walk",
+    "shots": [
+      "A17-stories.png"
+    ],
+    "t": 618.6
+  },
+  {
+    "phase": "drive101",
+    "name": "A-STORE-101",
+    "status": "PASS",
+    "detail": "v1 keys present: vela.stories.v1, vela.ritual.v1, vela.profile.v1, vela.journal.v1, vela.board.v1; values in md5 files: vela.stories.v1 (names match md5(key)); plus=0",
+    "shots": [],
+    "t": 623
+  }
+]

@@ -1,0 +1,12 @@
+iOS simulator tests run Sun Oct 18 19:53:48 UTC 2026
+run 39156459992
+head 1cfa1a9fa8b9f937e9a1fcb8894b4e2110d2746d
+builds from run 39156459992
+jobs: build=success fresh-install=success update-test=success
+fresh-promax: 2f604423db816ba1f61e5f951a8a38c3311712d4 Single-line fields keep their words in view; build 6 
+fresh-small: 2f604423db816ba1f61e5f951a8a38c3311712d4 Single-line fields keep their words in view; build 6 
+update: 15c43a7952208fa8bf2c9e26859bebbe38271251 Pin expo-store-review to 57.0.1 2f604423db816ba1f61e5f951a8a38c3311712d4 Single-line fields keep their words in view; build 6 
+== checks ==
+== first-tap probe ==
+[probe-promax] +342.0s PROBE-SUMMARY RESULT: INFO — Begin as the process's first touch: taken 3/3; after a warm-up touch: taken 3/3
+[probe-small] +255.3s PROBE-SUMMARY RESULT: INFO — Begin as the process's first touch: taken 3/3; after a warm-up touch: taken 3/3

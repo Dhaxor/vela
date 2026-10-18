@@ -1,0 +1,6 @@
+device promax
+name iPhone 16 Pro Max
+type com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max
+runtime com.apple.CoreSimulator.SimRuntime.iOS-26-5
+points 440x956
+udid 8FCFCF80-2265-4309-86D8-8709B2BE1316

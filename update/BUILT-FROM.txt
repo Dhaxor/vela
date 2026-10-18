@@ -1,0 +1,2 @@
+15c43a7952208fa8bf2c9e26859bebbe38271251 Pin expo-store-review to 57.0.1
+2f604423db816ba1f61e5f951a8a38c3311712d4 Single-line fields keep their words in view; build 6

@@ -1,0 +1,107 @@
+[
+  {
+    "name": "PROBE-1",
+    "status": "INFO",
+    "detail": "Begin is the process's first touch: Begin taken (focus step in 7964 ms)",
+    "shots": [
+      "P01-trial-1-taken.png"
+    ],
+    "t": 72.9
+  },
+  {
+    "name": "PROBE-2",
+    "status": "INFO",
+    "detail": "after a warm-up touch on empty sky: Begin taken (focus step in 3505 ms)",
+    "shots": [
+      "P02-trial-2-taken.png"
+    ],
+    "t": 127.5
+  },
+  {
+    "name": "PROBE-3",
+    "status": "INFO",
+    "detail": "Begin is the process's first touch: Begin taken (focus step in 10736 ms)",
+    "shots": [
+      "P03-trial-3-taken.png"
+    ],
+    "t": 181.6
+  },
+  {
+    "name": "PROBE-4",
+    "status": "INFO",
+    "detail": "after a warm-up touch on empty sky: Begin taken (focus step in 3761 ms)",
+    "shots": [
+      "P04-trial-4-taken.png"
+    ],
+    "t": 230.5
+  },
+  {
+    "name": "PROBE-5",
+    "status": "INFO",
+    "detail": "Begin is the process's first touch: Begin taken (focus step in 8678 ms)",
+    "shots": [
+      "P05-trial-5-taken.png"
+    ],
+    "t": 287.5
+  },
+  {
+    "name": "PROBE-6",
+    "status": "INFO",
+    "detail": "after a warm-up touch on empty sky: Begin taken (focus step in 4588 ms)",
+    "shots": [
+      "P06-trial-6-taken.png"
+    ],
+    "t": 340.7
+  },
+  {
+    "name": "PROBE-SUMMARY",
+    "status": "INFO",
+    "detail": "Begin as the process's first touch: taken 3/3; after a warm-up touch: taken 3/3",
+    "shots": [],
+    "t": 342,
+    "trials": [
+      {
+        "trial": 1,
+        "warmUpTouchFirst": false,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 7964
+      },
+      {
+        "trial": 2,
+        "warmUpTouchFirst": true,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 3505
+      },
+      {
+        "trial": 3,
+        "warmUpTouchFirst": false,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 10736
+      },
+      {
+        "trial": 4,
+        "warmUpTouchFirst": true,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 3761
+      },
+      {
+        "trial": 5,
+        "warmUpTouchFirst": false,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 8678
+      },
+      {
+        "trial": 6,
+        "warmUpTouchFirst": true,
+        "welcome": true,
+        "beginTakenFirstTap": true,
+        "msToFocusStep": 4588
+      }
+    ]
+  }
+]

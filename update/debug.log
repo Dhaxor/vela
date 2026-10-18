@@ -1,0 +1,699 @@
++ xcodebuild -version
+Xcode 26.6
+Build version 17F113
++ echo 'builds from run: 39156459992'
+builds from run: 39156459992
++ tee shots/BUILT-FROM.txt
++ cat apps/vela-app-v101/sha-v101.txt apps/vela-app-v11/sha-v11.txt
+15c43a7952208fa8bf2c9e26859bebbe38271251 Pin expo-store-review to 57.0.1
+2f604423db816ba1f61e5f951a8a38c3311712d4 Single-line fields keep their words in view; build 6
++ find apps -maxdepth 3
++ head -20
+apps
+apps/vela-app-v11
+apps/vela-app-v11/sha-v11.txt
+apps/vela-app-v11/vela-v11.zip
+apps/vela-app-v101
+apps/vela-app-v101/vela-v101.zip
+apps/vela-app-v101/sha-v101.txt
++ mkdir -p app101 app11
++ ditto -x -k apps/vela-app-v101/vela-v101.zip app101
++ ditto -x -k apps/vela-app-v11/vela-v11.zip app11
+++ find app101 -maxdepth 1 -name '*.app' -type d
+++ head -1
++ APP101=app101/Vela.app
+++ find app11 -maxdepth 1 -name '*.app' -type d
+++ head -1
++ APP11=app11/Vela.app
++ test -n app101/Vela.app
++ test -n app11/Vela.app
++ for A in '"$APP101"' '"$APP11"'
++ /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' app101/Vela.app/Info.plist
+1.0.1
++ /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' app101/Vela.app/Info.plist
+4
++ for A in '"$APP101"' '"$APP11"'
++ /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' app11/Vela.app/Info.plist
+1.1.0
++ /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' app11/Vela.app/Info.plist
+6
+++ /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' app11/Vela.app/Info.plist
++ EXE=Vela
++ echo EXE=Vela
+EXE=Vela
++ echo '== simulator =='
+== simulator ==
++ xcrun simctl list runtimes available
+== Runtimes ==
+iOS 26.2 (26.2 - 23C54) - com.apple.CoreSimulator.SimRuntime.iOS-26-2
+iOS 26.4 (26.4.1 - 23E254a) - com.apple.CoreSimulator.SimRuntime.iOS-26-4
+iOS 26.5 (26.5 - 23F77) - com.apple.CoreSimulator.SimRuntime.iOS-26-5
+tvOS 26.2 (26.2 - 23K51) - com.apple.CoreSimulator.SimRuntime.tvOS-26-2
+tvOS 26.4 (26.4 - 23L243a) - com.apple.CoreSimulator.SimRuntime.tvOS-26-4
+tvOS 26.5 (26.5 - 23L470) - com.apple.CoreSimulator.SimRuntime.tvOS-26-5
+watchOS 26.2 (26.2 - 23S303) - com.apple.CoreSimulator.SimRuntime.watchOS-26-2
+watchOS 26.4 (26.4 - 23T240b) - com.apple.CoreSimulator.SimRuntime.watchOS-26-4
+watchOS 26.5 (26.5 - 23T570) - com.apple.CoreSimulator.SimRuntime.watchOS-26-5
+visionOS 26.2 (26.2 - 23N301) - com.apple.CoreSimulator.SimRuntime.xrOS-26-2
+visionOS 26.4 (26.4.1 - 23O249a) - com.apple.CoreSimulator.SimRuntime.xrOS-26-4
+visionOS 26.5 (26.5 - 23O470) - com.apple.CoreSimulator.SimRuntime.xrOS-26-5
++ IFS='	'
++ read -r RUNTIME TYPE_ID TYPE_NAME SIZE
+++ python3 e2e/pick-device.py promax
+supported: iPhone 17 Pro (402.0, 874.0)
+supported: iPhone 17 Pro Max (440.0, 956.0)
+supported: iPhone 17e (390.0, 844.0)
+supported: iPhone Air (420.0, 912.0)
+supported: iPhone 17 (402.0, 874.0)
+supported: iPhone 16 Pro (402.0, 874.0)
+supported: iPhone 16 Pro Max (440.0, 956.0)
+supported: iPhone 16e (390.0, 844.0)
+supported: iPhone 16 (393.0, 852.0)
+supported: iPhone 16 Plus (430.0, 932.0)
+supported: iPhone 15 Pro (393.0, 852.0)
+supported: iPhone 15 Pro Max (430.0, 932.0)
+supported: iPhone 15 (393.0, 852.0)
+supported: iPhone 15 Plus (430.0, 932.0)
+supported: iPhone 14 Pro (393.0, 852.0)
+supported: iPhone 14 Pro Max (430.0, 932.0)
+supported: iPhone 14 (390.0, 844.0)
+supported: iPhone 14 Plus (428.0, 926.0)
+supported: iPhone SE (3rd generation) (375.0, 667.0)
+supported: iPhone 13 Pro (390.0, 844.0)
+supported: iPhone 13 Pro Max (428.0, 926.0)
+supported: iPhone 13 (390.0, 844.0)
+supported: iPhone 13 mini (360.0, 780.0)
+supported: iPhone 12 Pro (390.0, 844.0)
+supported: iPhone 12 Pro Max (428.0, 926.0)
+supported: iPhone 12 (390.0, 844.0)
+supported: iPhone 12 mini (360.0, 780.0)
+supported: iPhone SE (2nd generation) (375.0, 667.0)
+supported: iPhone 11 Pro (375.0, 812.0)
+supported: iPhone 11 Pro Max (414.0, 896.0)
+supported: iPhone 11 (414.0, 896.0)
+++ xcrun simctl create 'Vela update test' com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max com.apple.CoreSimulator.SimRuntime.iOS-26-5
++ UDID=9B54660C-0F6B-4CE3-901E-1F7E522AA07E
++ echo 'UDID=9B54660C-0F6B-4CE3-901E-1F7E522AA07E RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-26-5 TYPE=com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max (iPhone 16 Pro Max, 440x956 pt)'
+UDID=9B54660C-0F6B-4CE3-901E-1F7E522AA07E RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-26-5 TYPE=com.apple.CoreSimulator.SimDeviceType.iPhone-16-Pro-Max (iPhone 16 Pro Max, 440x956 pt)
++ test -n 9B54660C-0F6B-4CE3-901E-1F7E522AA07E
++ echo UDID=9B54660C-0F6B-4CE3-901E-1F7E522AA07E
++ defaults write com.apple.iphonesimulator ConnectHardwareKeyboard -bool false
++ xcrun simctl boot 9B54660C-0F6B-4CE3-901E-1F7E522AA07E
++ xcrun simctl bootstatus 9B54660C-0F6B-4CE3-901E-1F7E522AA07E -b
+Monitoring boot status for Vela update test (9B54660C-0F6B-4CE3-901E-1F7E522AA07E).
+[2026-10-18 19:12:25 +0000] Status=2, isTerminal=NO, Elapsed=00:52.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:45 seconds
+
+[2026-10-18 19:12:26 +0000] Status=2, isTerminal=NO, Elapsed=00:53.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:46 seconds
+
+[2026-10-18 19:12:27 +0000] Status=2, isTerminal=NO, Elapsed=00:54.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:47 seconds
+
+[2026-10-18 19:12:29 +0000] Status=2, isTerminal=NO, Elapsed=00:55.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:48 seconds
+
+[2026-10-18 19:12:29 +0000] Status=2, isTerminal=NO, Elapsed=00:56.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:49 seconds
+
+[2026-10-18 19:12:30 +0000] Status=2, isTerminal=NO, Elapsed=00:57.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:50 seconds
+
+[2026-10-18 19:12:31 +0000] Status=2, isTerminal=NO, Elapsed=00:58.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:51 seconds
+
+[2026-10-18 19:12:32 +0000] Status=2, isTerminal=NO, Elapsed=00:59.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:52 seconds
+
+[2026-10-18 19:12:34 +0000] Status=2, isTerminal=NO, Elapsed=01:00.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:53 seconds
+
+[2026-10-18 19:12:34 +0000] Status=2, isTerminal=NO, Elapsed=01:01.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:54 seconds
+
+[2026-10-18 19:12:35 +0000] Status=2, isTerminal=NO, Elapsed=01:02.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:55 seconds
+
+[2026-10-18 19:12:36 +0000] Status=2, isTerminal=NO, Elapsed=01:03.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:56 seconds
+
+[2026-10-18 19:12:38 +0000] Status=2, isTerminal=NO, Elapsed=01:05.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.-0LaunchServicesMigrator (00LaunchServicesMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:57 seconds
+
+[2026-10-18 19:12:43 +0000] Status=2, isTerminal=NO, Elapsed=01:09.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.securityd.KeychainMigrator (KeychainMigrator.migrator, user-agnostic)
+		Migration Elapsed:00:59 seconds
+
+[2026-10-18 19:12:47 +0000] Status=2, isTerminal=NO, Elapsed=01:13.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.managedconfiguration.migrator (MCProfile.migrator, user-agnostic)
+		Migration Elapsed:01:03 seconds
+
+[2026-10-18 19:12:50 +0000] Status=2, isTerminal=NO, Elapsed=01:16.
+	Waiting on Data Migration
+		Reason:Running plugin com.apple.PreferencesMigrator (PreferencesMigrator.migrator)
+		Migration Elapsed:01:07 seconds
+
+[2026-10-18 19:12:52 +0000] Status=4, isTerminal=NO, Elapsed=01:18.
+	Waiting on System App
+
+[2026-10-18 19:12:53 +0000] Status=4, isTerminal=NO, Elapsed=01:19.
+	Waiting on System App
+
+[2026-10-18 19:12:54 +0000] Status=4, isTerminal=NO, Elapsed=01:21.
+	Waiting on System App
+
+[2026-10-18 19:12:55 +0000] Status=4, isTerminal=NO, Elapsed=01:21.
+	Waiting on System App
+
+[2026-10-18 19:12:55 +0000] Status=4, isTerminal=NO, Elapsed=01:22.
+	Waiting on System App
+
+[2026-10-18 19:12:56 +0000] Status=4, isTerminal=NO, Elapsed=01:23.
+	Waiting on System App
+
+[2026-10-18 19:12:57 +0000] Status=4, isTerminal=NO, Elapsed=01:24.
+	Waiting on System App
+
+[2026-10-18 19:12:59 +0000] Status=4, isTerminal=NO, Elapsed=01:25.
+	Waiting on System App
+
+[2026-10-18 19:12:59 +0000] Status=4, isTerminal=NO, Elapsed=01:26.
+	Waiting on System App
+
+[2026-10-18 19:13:11 +0000] Status=4294967295, isTerminal=YES, Elapsed=01:37.
+	Finished
+
++ for k in KeyboardAutocorrection KeyboardPrediction KeyboardCheckSpelling KeyboardAutocapitalization
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E defaults write com.apple.Preferences KeyboardAutocorrection -bool NO
++ for k in KeyboardAutocorrection KeyboardPrediction KeyboardCheckSpelling KeyboardAutocapitalization
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E defaults write com.apple.Preferences KeyboardPrediction -bool NO
++ for k in KeyboardAutocorrection KeyboardPrediction KeyboardCheckSpelling KeyboardAutocapitalization
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E defaults write com.apple.Preferences KeyboardCheckSpelling -bool NO
++ for k in KeyboardAutocorrection KeyboardPrediction KeyboardCheckSpelling KeyboardAutocapitalization
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E defaults write com.apple.Preferences KeyboardAutocapitalization -bool NO
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool YES
++ xcrun simctl status_bar 9B54660C-0F6B-4CE3-901E-1F7E522AA07E override --time 21:04 --dataNetwork wifi --wifiMode active --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100
++ touch /tmp/e2e-start
+++ date '+%Y-%m-%d %H:%M:%S'
++ START='2026-10-18 19:14:35'
++ xcrun simctl launch 9B54660C-0F6B-4CE3-901E-1F7E522AA07E com.apple.DocumentsApp
+com.apple.DocumentsApp: 3609
++ sleep 8
++ xcrun simctl terminate 9B54660C-0F6B-4CE3-901E-1F7E522AA07E com.apple.DocumentsApp
++ echo '== appium =='
+== appium ==
++ npm install -g appium@latest
+
+added 298 packages in 24s
+
+71 packages are looking for funding
+  run `npm fund` for details
++ appium --version
+3.8.0
++ appium driver install xcuitest
+- Checking if 'appium-xcuitest-driver' is compatible
+✔ Checking if 'appium-xcuitest-driver' is compatible
+- Installing 'xcuitest'
+✔ Installing 'xcuitest'
+- Validating 'xcuitest'
+✔ Validating 'xcuitest'
+ℹ Driver xcuitest@12.18.2 successfully installed
+- automationName: XCUITest
+- platformNames: ["iOS","tvOS","watchOS"]
++ appium driver list --installed
+- Listing installed drivers (rerun with --verbose for more info)
+✔ Listing installed drivers (rerun with --verbose for more info)
+- xcuitest@12.18.2 [installed (npm)]
++ cd e2e
++ npm install --no-audit --no-fund
+npm warn deprecated whatwg-encoding@3.1.1: Use @exodus/bytes instead for a more spec-conformant and faster implementation
+npm warn deprecated glob@10.5.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 238 packages in 6s
++ npm install --no-save --no-audit --no-fund pngjs@7.0.0
+
+added 1 package in 466ms
++ appium --port 4723 --base-path / --log-timestamp --log-no-colors
+++ seq 1 30
++ for i in '$(seq 1 30)'
++ curl -s http://127.0.0.1:4723/status
++ sleep 2
++ for i in '$(seq 1 30)'
++ curl -s http://127.0.0.1:4723/status
++ sleep 2
++ for i in '$(seq 1 30)'
++ curl -s http://127.0.0.1:4723/status
+{"value":{"ready":true,"message":"The server is ready to accept new connections","build":{"version":"3.8.0"}}}+ break
++ export UDID BUNDLE_ID SHOTS_DIR=/Users/runner/work/vela/vela/shots STATE_DIR=/Users/runner/work/vela/vela/shots/state
++ SHOTS_DIR=/Users/runner/work/vela/vela/shots
++ STATE_DIR=/Users/runner/work/vela/vela/shots/state
++ FAILED=
++ echo '== A: Vela 1.0.1, a long-time user =='
+== A: Vela 1.0.1, a long-time user ==
++ xcrun simctl install 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app101/Vela.app
++ xcrun simctl get_app_container 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest data
++ tee shots/state/container-101.txt
+/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD
++ xcrun simctl get_app_container 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest app
+/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Bundle/Application/876957C9-462D-4CE1-8EE7-33B0837CB155/Vela.app
++ phase drive101
++ cd e2e
++ node update-test.mjs drive101
+[drive101] +422.6s session 2f3a8b69-1043-4b0b-8f88-64291f4b46bb {"width":440,"height":956}
+[drive101] +428.6s shot A01-welcome.png
+[drive101] +429.7s A-LAUNCH-101 RESULT: PASS — 1.0.1 opens on its welcome beat
+[drive101] +433.3s tapped Begin
+[drive101] +435.9s tapped Career
+[drive101] +436.3s shot A02-focus.png
+[drive101] +438.1s tapped Continue focus
+[drive101] +439.9s tapped mood: Hopeful
+[drive101] +440.2s shot A03-mood.png
+[drive101] +441.1s tapped Continue mood
+[drive101] +446.7s typed name "Maya"
+[drive101] +449.3s tapped Continue name
+[drive101] +451.5s tapped Evening
+[drive101] +452.5s tapped Continue ritual
+[drive101] +454.0s shot A04-practice-primer.png
+[drive101] +458.4s tapped Create my future-memory arc
+[drive101] +461.0s A-ONBOARDING-101 RESULT: PASS — welcome → focus → mood (chosen) → name → ritual → primer (reached)
+[drive101] +464.4s tapped intake focus career
+[drive101] +465.9s tapped feeling proud
+[drive101] +471.9s typed desire "my own design studio, with clients who trust my eye"
+[drive101] +472.4s shot A05-intake.png
+[drive101] +476.6s tapped Step inside
+[drive101] +486.3s shot A06-chapter-1.png
+[drive101] +486.5s A-STORY-101 RESULT: PASS — intake shown; desire typed "my own design studio, with clients who trust my eye"; chapter rendered
+[drive101] +493.2s tapped soft Plus: Maybe later
+[drive101] +494.2s tapped Make it observable
+[drive101] +496.6s tapped I did it
+[drive101] +500.5s typed proof "Sent my portfolio to two studios I admire."
+[drive101] +500.8s shot A07-proof-form.png
+[drive101] +503.7s tapped Add to my future memory
+[drive101] +505.3s shot A08-proof-saved.png
+[drive101] +507.2s tapped Carry it forward
+[drive101] +509.2s A-PROOF-101 RESULT: PASS — proof "Sent my portfolio to two studios I admire." saved
+[drive101] +510.0s shot A09-today-proof-folded.png
+[drive101] +512.1s tapped Weave chapter 2
+[drive101] +522.5s shot A10-chapter-2.png
+[drive101] +524.4s tapped back to Today
+[drive101] +526.5s shot A11-today-chapter-2.png
+[drive101] +526.7s A-CHAPTER-2-101 RESULT: PASS — weave button shown, chapter 2 rendered, streak chip true
+[drive101] +528.0s tapped Journal tab
+[drive101] +530.3s tapped Script door
+[drive101] +536.0s typed script "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+[drive101] +536.4s shot A12-script.png
+[drive101] +538.4s tapped Seal the page
+[drive101] +541.2s tapped Gratitude door
+[drive101] +544.4s typed gratitude 1 "The coffee was warm"
+[drive101] +547.5s typed gratitude 2 "My sister called"
+[drive101] +548.0s shot A13-gratitude.png
+[drive101] +550.3s tapped Keep these 2
+[drive101] +553.0s tapped 3·6·9 door
+[drive101] +556.3s typed phrase "I run a studio clients trust"
+[drive101] +557.6s tapped Begin practice
+[drive101] +560.0s tapped rep 1
+[drive101] +561.8s tapped rep 2
+[drive101] +562.9s shot A14-369.png
+[drive101] +564.4s tapped close 3·6·9
+[drive101] +565.9s shot A15-journal-pages.png
+[drive101] +587.9s A-JOURNAL-101 RESULT: PASS — stored pages ["gratitude","script"], 3·6·9 reps 2 (2 of 18 written today); script typed "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+[drive101] +588.9s tapped Board tab
+[drive101] +591.6s tapped add a goal card
+[drive101] +595.6s typed goal "A sign with my name above the door"
+[drive101] +598.0s tapped Pin it
+[drive101] +600.5s tapped Pin it
+[drive101] +602.8s tapped add a goal card
+[drive101] +606.8s typed goal "Three clients who refer friends"
+[drive101] +609.0s tapped Pin it
+[drive101] +611.5s tapped Pin it
+[drive101] +613.0s shot A16-board.png
+[drive101] +616.1s A-BOARD-101 RESULT: PASS — stored board cards: 2 (extra 'Pin it' taps needed with the keyboard up: 2)
+[drive101] +616.7s tapped Stories tab
+[drive101] +618.2s shot A17-stories.png
+[drive101] +618.6s A-ALIVE-101 RESULT: PASS — app state 4 at the end of the 1.0.1 walk
+[drive101] +623.0s store dumped after-101-ui 7 keys
+[drive101] +623.0s A-STORE-101 RESULT: PASS — v1 keys present: vela.stories.v1, vela.ritual.v1, vela.profile.v1, vela.journal.v1, vela.board.v1; values in md5 files: vela.stories.v1 (names match md5(key)); plus=0
+[drive101] +623.0s SUMMARY drive101: 9 pass, 0 fail, 0 other
++ xcrun simctl terminate 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest
+An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=3):
+Simulator device failed to terminate app.vela.manifest.
+found nothing to terminate
+Underlying error (domain=NSPOSIXErrorDomain, code=3):
+	The request to terminate "app.vela.manifest" failed. found nothing to terminate
+	found nothing to terminate
++ true
++ sleep 2
++ echo '== seed: what a lifetime owner'\''s 1.0.1 device holds =='
+== seed: what a lifetime owner's 1.0.1 device holds ==
++ phase seed
++ cd e2e
++ node update-test.mjs seed
+[seed] +1.5s store dumped seeded 7 keys
+[seed] +1.5s SEED RESULT: PASS — plus=1; second dream 'A home by the sea' (mve7ubj2-f3ne9z, proof saved, not woven); board 5 cards incl. photo board-mve7vb21-cx3q68.jpg stored as file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg (file in the real Documents)
+[seed] +1.5s SUMMARY seed: 1 pass, 0 fail, 0 other
++ phase verify101
++ cd e2e
++ node update-test.mjs verify101
+[verify101] +25.6s session bf465680-bd22-4471-b48e-e6a005d58173 {"width":440,"height":956}
+[verify101] +31.9s shot B01-today-101-seeded.png
+[verify101] +33.3s tapped Stories tab
+[verify101] +35.2s shot B02-stories-101-two-dreams.png
+[verify101] +36.4s tapped Board tab
+[verify101] +39.9s shot B03-board-101-seeded.png
+[verify101] +42.6s shot B04-board-101-seeded-end.png
+[verify101] +42.7s B-SEED-READ-BY-101 RESULT: PASS — 1.0.1 shows 2/2 dreams and 5/5 board cards from the seeded store
+[verify101] +48.1s B-PLUS-AFTER-101-RELAUNCH RESULT: INFO — vela.plus.v1 after 1.0.1 ran its own launch entitlement refresh on a simulator with no App Store purchase: "0"
+[verify101] +48.1s SUMMARY verify101: 1 pass, 0 fail, 1 other
++ xcrun simctl terminate 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest
+An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=3):
+Simulator device failed to terminate app.vela.manifest.
+found nothing to terminate
+Underlying error (domain=NSPOSIXErrorDomain, code=3):
+	The request to terminate "app.vela.manifest" failed. found nothing to terminate
+	found nothing to terminate
++ true
++ sleep 2
++ phase reseed
++ cd e2e
++ node update-test.mjs reseed
+[reseed] +1.2s store dumped before-update 7 keys
+[reseed] +1.2s RESEED RESULT: PASS — vela.plus.v1 "0" → "1"; baseline of the v1 keys saved
+[reseed] +1.2s SUMMARY reseed: 1 pass, 0 fail, 0 other
++ echo '== UPDATE: install 1.1 over 1.0.1 =='
+== UPDATE: install 1.1 over 1.0.1 ==
++ xcrun simctl install 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app11/Vela.app
++ xcrun simctl get_app_container 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest data
++ tee shots/state/container-11.txt
+/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F
+++ xcrun simctl get_app_container 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest app
++ /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Bundle/Application/8205CC98-94E1-4F02-8086-8B479149DB48/Vela.app/Info.plist
+1.1.0
++ phase drive11
++ cd e2e
++ node update-test.mjs drive11
+[drive11] +0.7s C-CONTAINER RESULT: INFO — data container after the update: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F; 1.0.1's: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD; MOVED
+[drive11] +21.0s session 263389ed-1d40-4e75-9970-4f904d17c88c {"width":440,"height":956}
+[drive11] +21.0s session ready +20234ms after the watch began
+[drive11] +22.0s PLUS vela.plus.v1 "1" → "0" at +21243ms
+[drive11] +34.0s shot C01-first-launch.png
+[drive11] +62.4s C-LAUNCH RESULT: PASS — Today shown; onboarding not shown; storage-error no; app state 4
+[drive11] +79.4s C-TODAY RESULT: PASS — greeting "Good evening, Maya."; chip "1 night shown up, 2 stars in your sky"; sky "Your sky: The Sail, 1 of 7 stars lit"; dream pills "My own design…, not weaving" + "A home by…"; loop card "Chapter II is ready"
+[drive11] +82.3s tapped the first dream's pill
+[drive11] +93.3s shot C02-today-first-dream.png
+[drive11] +94.0s C-TODAY-MAIN-DREAM RESULT: PASS — sky "Your sky: The Sail, 1 of 7 stars lit"; loop card "future-memory-card"; plan-locked: 'Keep this dream weaving' (Plus is off on this simulator)
+[drive11] +99.5s tapped Settings
+[drive11] +111.8s shot C03-settings.png
+[drive11] +121.2s tapped Settings back
+[drive11] +122.3s C-SETTINGS-NAME RESULT: PASS — name row "Name, Maya"; Vela Plus row: 'Vela Plus' (free) at +121.6s
+[drive11] +128.5s tapped Arc tab
+[drive11] +137.4s tapped Arc: the first dream
+[drive11] +149.4s shot C04-arc-first-dream.png
+[drive11] +150.6s C-ARC RESULT: PASS — chapter plate "Chapter 2, After the Wanting. The Night Before. Written Today. Waiting for you."; proof node "Star 1. I did it, day 1. Sent my portfolio to two studios I admire. Today."; "Season 1 · Stage II of VII" · "1 chapter, 1 proof, 1 night."
+[drive11] +153.8s tapped Arc: the second dream
+[drive11] +170.9s shot C05-arc-second-dream.png
+[drive11] +174.8s C-SECOND-DREAM RESULT: PASS — 'A home by the sea': "“A home by the sea”"; its 1.0 chapter "Chapter 1, After the Wanting. The First Glimpse. Written Today. Heard."; the chapter migration wove from its saved proof "Chapter 2, What Tomorrow Makes Possible. The Night Before. Written Today. Waiting for you."; proof "Star 1. Something moved, day 1. Saved the first two hundred for the deposit. Today · Woven into Chapter II."
+[drive11] +179.6s tapped Rituals tab
+[drive11] +184.8s shot C06-rituals.png
+[drive11] +206.6s shot C07-rituals-past-pages.png
+[drive11] +211.6s tapped the 1.0.1 script page
+[drive11] +228.8s shot C08-past-page-script.png
+[drive11] +234.3s tapped page back
+[drive11] +235.3s C-RITUALS-PAGES RESULT: PASS — 2/2 1.0.1 pages listed [{"kind":"gratitude","label":"Gratitude, Sunday, October 18. The coffee was warm · My sister called"},{"kind":"script","label":"Script, Sunday, October 18. It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."}]; the script page reads "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+[drive11] +248.8s tapped 3·6·9 door
+[drive11] +254.5s shot C09-369.png
+[drive11] +257.9s tapped close 3·6·9
+[drive11] +258.9s C-369 RESULT: PASS — door "3 · 6 · 9. 2 / 18. “I run a studio clients trust”"; sheet "2 of 18 written today"; phrase "“I run a studio clients trust”" (1.0.1 wrote 2 lines today)
+[drive11] +263.3s tapped Script door
+[drive11] +278.3s shot C10-script-keyboard.png
+[drive11] +282.1s tapped close Script
+[drive11] +284.2s C-KEYBOARD-SCRIPT RESULT: PASS — 'Seal the page' {"y":566,"x":24,"width":392,"height":56} vs keyboard top 655; the page's field {"y":278,"x":41,"width":375,"height":240} visible above the dock
+[drive11] +289.8s tapped Scenes: See all
+[drive11] +301.1s shot C11-scenes.png
+[drive11] +313.2s shot C12-scenes-photo-card.png
+[drive11] +319.4s tapped open the photo scene
+[drive11] +333.1s shot C13-scene-photo-sheet.png
+[drive11] +348.1s tapped Done
+[drive11] +352.0s tapped Scenes back
+[drive11] +353.1s C-SCENES-PHOTO RESULT: PASS — 5/5 board cards in Scenes; photo card rect {"y":506,"x":24,"width":190,"height":264} seeded-colour share {"seeded":0.882,"lumaMean":135.8,"lumaSd":48.1}; sheet photo true placeholder 'kept on another phone' not shown share {"seeded":0.992,"lumaMean":178.7,"lumaSd":18.8}; vela.scenes.v2 stores "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F/Documents/board-mve7vb21-cx3q68.jpg" (1.0.1 stored file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg)
+[drive11] +360.3s tapped Today tab
+[drive11] +369.7s tapped Settings
+[drive11] +408.5s tapped Export a backup
+[drive11] +442.9s shot C14-export-share-sheet.png
+[drive11] +507.3s system sheet closed by a swipe from 0.66
+[drive11] +509.0s shot C15-export-after-sheet.png
+[drive11] +536.4s C-EXPORT RESULT: PASS — share sheet presented: the app under it stopped taking taps ('settings-back' covered), then closed; file vela-backup-2026-10-18.json {"keys":["kind","version","exportedAt","appVersion","data"],"exportedAt":"2026-10-18T19:35:38.812Z","appVersion":"1.1.0"}; toast null; copied into On My iPhone: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Shared/AppGroup/BC21F87F-A970-46F5-A840-F7AA94B265CE/File Provider Storage/vela-backup-2026-10-18.json
+[drive11] +542.6s tapped Settings back
+[drive11] +548.3s tapped the first dream's pill
+[drive11] +564.5s tapped Keep this dream weaving
+[drive11] +572.7s shot C16-today-before-proof.png
+[drive11] +597.5s tapped I crossed it
+[drive11] +608.0s tapped I did it
+[drive11] +611.6s shot C17-proof-form.png
+[drive11] +623.6s typed proof "Quoted my first real client and they said yes."
+[drive11] +631.1s shot C18-proof-form-keyboard.png
+[drive11] +648.8s C-KEYBOARD-PROOF-FIELD RESULT: PASS — the sentence field (before the keyboard {"y":636,"x":41,"width":358,"height":101}) {"y":417,"x":41,"width":358,"height":101} vs the dock's top ~550 (keyboard top 655): visible while typing
+[drive11] +648.8s C-KEYBOARD-PROOF RESULT: PASS — 'Chart this proof' {"y":566,"x":24,"width":392,"height":56} vs keyboard top 655: fully above the keyboard
+[drive11] +651.9s tapped Chart this proof
+[drive11] +659.4s shot C19-star-birth-flight.png
+[drive11] +663.8s shot C20-star-birth.png
+2026-10-18T19:39:59.849Z ERROR webdriver: WebDriverError: An attempt was made to operate on a modal dialog when one was not open when running "alert/text" with method "GET"
+[drive11] +670.1s C-CHART-PROOF RESULT: PASS — proof "Quoted my first real client and they said yes."; Star Birth shown, 'Carry it forward' shown (after 'Keep this dream weaving')
+[drive11] +675.7s tapped Share this star
+[drive11] +680.1s shot C21-share-card-sheet.png
+[drive11] +686.5s tapped Share image
+[drive11] +706.5s shot C22-star-share-sheet.png
+[drive11] +745.2s system sheet closed by a swipe from 0.66
+[drive11] +747.5s tapped Done (share card)
+[drive11] +748.8s C-SHARE-PNG RESULT: PASS — captured card 1080x1920, luma sd 19.3 (blank ≈ 0)
+[drive11] +748.8s C-SHARE-STAR RESULT: PASS — share card sheet shown; system share sheet presented: the app under it stopped taking taps ('evidence-share-card-close' covered), then closed
+[drive11] +751.5s tapped Carry it forward
+[drive11] +764.5s shot C23-chapter-after-proof.png
+[drive11] +769.9s tapped reader back
+[drive11] +775.9s shot C24-today-after-proof.png
+[drive11] +776.5s C-WEAVE-AFTER-PROOF RESULT: PASS — the Weave opened "THE HARD DAY" "A Bad Afternoon, Handled" (woven paragraph true); Today sky "Your sky: The Sail, 2 of 7 stars lit"
+[drive11] +779.5s tapped Arc tab
+[drive11] +783.9s tapped Arc: the first dream
+[drive11] +791.8s tapped open the 1.0 chapter
+[drive11] +801.9s shot C25-reader.png
+[drive11] +808.6s tapped Listen
+[drive11] +841.3s shot C26-reader-listening.png
+[drive11] +861.2s C-NARRATION RESULT: PASS — idle "1 min · Unlimited listens, always"; while listening (every 1.5s) ["Listening · 1:24 left","Listening · 1:20 left","Listening · 1:20 left","Listening · 1:15 left","Listening · 1:07 left","Listening · 1:07 left","Listening · 1:00 left","Listening · 0:56 left"] — the sentence position advances
+[drive11] +894.1s shot C27-reader-back-from-home.png
+[drive11] +896.9s C-NARRATION-BACKGROUND RESULT: PASS — before Home "Listening · 0:27 left"; app state while away 3 then 3 (3 = running in background, 2 = suspended); after 24.8s away "Heard to the end"
+[drive11] +902.7s tapped story-back
+[drive11] +909.0s tapped Today tab
+[drive11] +917.4s tapped Settings
+[drive11] +947.9s tapped Import a backup
+[drive11] +985.4s shot C28-import-picker.png
+[drive11] +1010.2s document picker {"shown":true,"how":"the app under it stopped taking taps ('settings-back' covered)"}
+[drive11] +1025.7s tapped Browse
+[drive11] +1050.0s tapped the backup file
+[drive11] +1055.8s shot C29-import-sheet.png
+[drive11] +1070.1s tapped Replace
+[drive11] +1074.6s tapped Replace with backup
+[drive11] +1081.5s shot C30-import-replace-confirm.png
+[drive11] +1086.8s tapped Replace (destructive confirm)
+[drive11] +1114.0s shot C31-import-replaced.png
+[drive11] +1117.9s tapped Settings back
+[drive11] +1124.4s shot C32-today-after-replace.png
+[drive11] +1127.5s C-IMPORT-REPLACE RESULT: PASS — picker the app under it stopped taking taps ('settings-back' covered); import sheet shown; Replace's confirm appeared "Replace what's on this device?"; after Replace: toast "Replaced. …", Today sky "Your sky: The Sail, 1 of 7 stars lit"
+[drive11] +1128.9s shot C33-end.png
+[drive11] +1133.9s C-ALIVE-END RESULT: PASS — app state 4 at the end of the walk (4 = foreground)
+[drive11] +1134.0s C-PLUS-TIMELINE RESULT: INFO — vela.plus.v1 over the run [{"t":0,"plus":"1"},{"t":21243,"plus":"0"}] (ms since the store watch began); first v2 key written at +20750ms; session ready at +20234ms
+[drive11] +1136.5s SUMMARY drive11: 21 pass, 0 fail, 2 other
++ xcrun simctl terminate 9B54660C-0F6B-4CE3-901E-1F7E522AA07E app.vela.manifest
+An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=3):
+Simulator device failed to terminate app.vela.manifest.
+found nothing to terminate
+Underlying error (domain=NSPOSIXErrorDomain, code=3):
+	The request to terminate "app.vela.manifest" failed. found nothing to terminate
+	found nothing to terminate
++ true
++ sleep 2
++ phase dump
++ cd e2e
++ node update-test.mjs dump
+[dump] +1.0s store dumped final 17 keys
+[dump] +1.0s D-V1-KEYS-UNTOUCHED RESULT: PASS — every v1 key is byte-identical after 1.1 ran (rollback-safe)
+[dump] +1.0s D-STORE-AFTER-11 RESULT: INFO — keys now: vela.arcs.v2, vela.asks.v1, vela.chapter.v2.mve7u3o9-dxcgnl, vela.chapter.v2.mve7ubk6-4e83fu, vela.chapter.v2.mve7ubk6-4e83fu-w, vela.journal.v2, vela.notifications.v2, vela.plus.v1, vela.profile.v2, vela.progress.v2, vela.scenes.v2, vela.softplus.v1; vela.plus.v1="0"
+[dump] +1.0s SUMMARY dump: 1 pass, 0 fail, 1 other
++ echo '== device logs, crash reports, JS errors =='
+== device logs, crash reports, JS errors ==
++ xcrun simctl spawn 9B54660C-0F6B-4CE3-901E-1F7E522AA07E log show --start '2026-10-18 19:14:35' --style compact --predicate 'process == "Vela" AND NOT (subsystem BEGINSWITH "com.apple.dt.xctest")'
++ wc -l shots/vela-log-show.txt
+   12173 shots/vela-log-show.txt
++ grep -iE 'fault|error|exception|crash|terminat|storekit|AsyncStorage|AVSpeech|AVAudioSession|com.facebook.react|\(React\)' shots/vela-log-show.txt
++ grep -viE '^Filtering|UIKit:BackgroundTask|CHHapticPattern|UIKBFeedbackGenerator'
++ head -600
++ mkdir -p shots/crash
++ find /Users/runner/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f
++ tee shots/crash-reports.txt
+/Users/runner/Library/Logs/DiagnosticReports/UsageTrackingAgent-2026-10-18-191846.ips
++ find /Users/runner/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f -exec cp '{}' shots/crash/ ';'
++ grep -l '"Vela"\|app.vela.manifest' shots/crash/UsageTrackingAgent-2026-10-18-191846.ips
++ tee shots/crash-reports-vela.txt
++ node e2e/logcheck.mjs update shots/vela-log-show.txt shots/crash-reports-vela.txt
+[logs] update-CRASH-REPORTS RESULT: PASS — no crash report names the app
+[logs] update-JS-FATAL RESULT: PASS — no fatal exception in 12174 app log lines
+[logs] update-JS-ERRORS RESULT: PASS — 1 console.error line(s) from JS; 1 known (expo-notifications cannot read its keychain item in an unsigned simulator build (errSecMissingEntitlement -34018); signed builds have the entitlement); unknown: none
++ '[' -f shots/appium.log ']'
++ gzip -9 shots/appium.log
++ ls -la shots
+total 161224
+drwxr-xr-x  74 runner  staff     2368 Oct 18 19:48 .
+drwxr-xr-x  26 runner  staff      832 Oct 18 19:11 ..
+-rw-r--r--   1 runner  staff   235278 Oct 18 19:24 A01-welcome.png
+-rw-r--r--   1 runner  staff   300523 Oct 18 19:24 A02-focus.png
+-rw-r--r--   1 runner  staff   257739 Oct 18 19:24 A03-mood.png
+-rw-r--r--   1 runner  staff   260097 Oct 18 19:24 A04-practice-primer.png
+-rw-r--r--   1 runner  staff   333940 Oct 18 19:25 A05-intake.png
+-rw-r--r--   1 runner  staff   418713 Oct 18 19:25 A06-chapter-1.png
+-rw-r--r--   1 runner  staff   299810 Oct 18 19:25 A07-proof-form.png
+-rw-r--r--   1 runner  staff   262759 Oct 18 19:25 A08-proof-saved.png
+-rw-r--r--   1 runner  staff   391229 Oct 18 19:25 A09-today-proof-folded.png
+-rw-r--r--   1 runner  staff   426791 Oct 18 19:26 A10-chapter-2.png
+-rw-r--r--   1 runner  staff   396631 Oct 18 19:26 A11-today-chapter-2.png
+-rw-r--r--   1 runner  staff   277856 Oct 18 19:26 A12-script.png
+-rw-r--r--   1 runner  staff   278010 Oct 18 19:26 A13-gratitude.png
+-rw-r--r--   1 runner  staff   233532 Oct 18 19:26 A14-369.png
+-rw-r--r--   1 runner  staff   344279 Oct 18 19:26 A15-journal-pages.png
+-rw-r--r--   1 runner  staff   175048 Oct 18 19:27 A16-board.png
+-rw-r--r--   1 runner  staff   228608 Oct 18 19:27 A17-stories.png
+-rw-r--r--   1 runner  staff   139569 Oct 18 19:47 appium.log.gz
+-rw-r--r--   1 runner  staff   376246 Oct 18 19:28 B01-today-101-seeded.png
+-rw-r--r--   1 runner  staff   314754 Oct 18 19:28 B02-stories-101-two-dreams.png
+-rw-r--r--   1 runner  staff   232188 Oct 18 19:28 B03-board-101-seeded.png
+-rw-r--r--   1 runner  staff   232188 Oct 18 19:28 B04-board-101-seeded-end.png
+-rw-r--r--   1 runner  staff      167 Oct 18 19:11 BUILT-FROM.txt
+-rw-r--r--   1 runner  staff  1880572 Oct 18 19:40 C-share-card-captured.png
+-rw-r--r--   1 runner  staff  2404749 Oct 18 19:29 C01-first-launch.png
+-rw-r--r--   1 runner  staff  2511570 Oct 18 19:30 C02-today-first-dream.png
+-rw-r--r--   1 runner  staff  2309690 Oct 18 19:30 C03-settings.png
+-rw-r--r--   1 runner  staff  2814069 Oct 18 19:31 C04-arc-first-dream.png
+-rw-r--r--   1 runner  staff  2603221 Oct 18 19:31 C05-arc-second-dream.png
+-rw-r--r--   1 runner  staff  2779848 Oct 18 19:31 C06-rituals.png
+-rw-r--r--   1 runner  staff  2568334 Oct 18 19:32 C07-rituals-past-pages.png
+-rw-r--r--   1 runner  staff  3258801 Oct 18 19:32 C08-past-page-script.png
+-rw-r--r--   1 runner  staff  3000382 Oct 18 19:33 C09-369.png
+-rw-r--r--   1 runner  staff  2167134 Oct 18 19:33 C10-script-keyboard.png
+-rw-r--r--   1 runner  staff  2024291 Oct 18 19:33 C11-scenes.png
+-rw-r--r--   1 runner  staff  2199461 Oct 18 19:34 C12-scenes-photo-card.png
+-rw-r--r--   1 runner  staff   644060 Oct 18 19:34 C13-scene-photo-sheet.png
+-rw-r--r--   1 runner  staff  1944168 Oct 18 19:36 C14-export-share-sheet.png
+-rw-r--r--   1 runner  staff  2681393 Oct 18 19:37 C15-export-after-sheet.png
+-rw-r--r--   1 runner  staff  2784837 Oct 18 19:38 C16-today-before-proof.png
+-rw-r--r--   1 runner  staff  2786975 Oct 18 19:39 C17-proof-form.png
+-rw-r--r--   1 runner  staff  1962202 Oct 18 19:39 C18-proof-form-keyboard.png
+-rw-r--r--   1 runner  staff  2931535 Oct 18 19:39 C19-star-birth-flight.png
+-rw-r--r--   1 runner  staff  2851455 Oct 18 19:39 C20-star-birth.png
+-rw-r--r--   1 runner  staff  1232769 Oct 18 19:40 C21-share-card-sheet.png
+-rw-r--r--   1 runner  staff  1334491 Oct 18 19:40 C22-star-share-sheet.png
+-rw-r--r--   1 runner  staff  1696616 Oct 18 19:41 C23-chapter-after-proof.png
+-rw-r--r--   1 runner  staff  2358354 Oct 18 19:41 C24-today-after-proof.png
+-rw-r--r--   1 runner  staff  1641192 Oct 18 19:42 C25-reader.png
+-rw-r--r--   1 runner  staff  1707262 Oct 18 19:42 C26-reader-listening.png
+-rw-r--r--   1 runner  staff  1554915 Oct 18 19:43 C27-reader-back-from-home.png
+-rw-r--r--   1 runner  staff   356607 Oct 18 19:45 C28-import-picker.png
+-rw-r--r--   1 runner  staff   678904 Oct 18 19:46 C29-import-sheet.png
+-rw-r--r--   1 runner  staff  1032924 Oct 18 19:46 C30-import-replace-confirm.png
+-rw-r--r--   1 runner  staff  2564167 Oct 18 19:47 C31-import-replaced.png
+-rw-r--r--   1 runner  staff  2605050 Oct 18 19:47 C32-today-after-replace.png
+-rw-r--r--   1 runner  staff  2528600 Oct 18 19:47 C33-end.png
+drwxr-xr-x   3 runner  staff       96 Oct 18 19:48 crash
+-rw-r--r--   1 runner  staff        0 Oct 18 19:48 crash-reports-vela.txt
+-rw-r--r--   1 runner  staff       86 Oct 18 19:48 crash-reports.txt
+-rw-r--r--   1 runner  staff    34388 Oct 18 19:48 debug.log
+-rw-r--r--   1 runner  staff     2484 Oct 18 19:27 results-drive101.json
+-rw-r--r--   1 runner  staff     9956 Oct 18 19:47 results-drive11.json
+-rw-r--r--   1 runner  staff      605 Oct 18 19:47 results-dump.json
+-rw-r--r--   1 runner  staff      522 Oct 18 19:48 results-logs-update.json
+-rw-r--r--   1 runner  staff      185 Oct 18 19:28 results-reseed.json
+-rw-r--r--   1 runner  staff      500 Oct 18 19:27 results-seed.json
+-rw-r--r--   1 runner  staff      615 Oct 18 19:28 results-verify101.json
+drwxr-xr-x  15 runner  staff      480 Oct 18 19:47 src
+drwxr-xr-x  14 runner  staff      448 Oct 18 19:47 state
+-rw-r--r--   1 runner  staff   102337 Oct 18 19:48 vela-log-interesting.txt
+-rw-r--r--   1 runner  staff  2268382 Oct 18 19:48 vela-log-show.txt
++ echo '== RESULTS =='
+== RESULTS ==
++ grep -hE 'RESULT:|SUMMARY' shots/debug.log
+[drive101] +429.7s A-LAUNCH-101 RESULT: PASS — 1.0.1 opens on its welcome beat
+[drive101] +461.0s A-ONBOARDING-101 RESULT: PASS — welcome → focus → mood (chosen) → name → ritual → primer (reached)
+[drive101] +486.5s A-STORY-101 RESULT: PASS — intake shown; desire typed "my own design studio, with clients who trust my eye"; chapter rendered
+[drive101] +509.2s A-PROOF-101 RESULT: PASS — proof "Sent my portfolio to two studios I admire." saved
+[drive101] +526.7s A-CHAPTER-2-101 RESULT: PASS — weave button shown, chapter 2 rendered, streak chip true
+[drive101] +587.9s A-JOURNAL-101 RESULT: PASS — stored pages ["gratitude","script"], 3·6·9 reps 2 (2 of 18 written today); script typed "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+[drive101] +616.1s A-BOARD-101 RESULT: PASS — stored board cards: 2 (extra 'Pin it' taps needed with the keyboard up: 2)
+[drive101] +618.6s A-ALIVE-101 RESULT: PASS — app state 4 at the end of the 1.0.1 walk
+[drive101] +623.0s A-STORE-101 RESULT: PASS — v1 keys present: vela.stories.v1, vela.ritual.v1, vela.profile.v1, vela.journal.v1, vela.board.v1; values in md5 files: vela.stories.v1 (names match md5(key)); plus=0
+[drive101] +623.0s SUMMARY drive101: 9 pass, 0 fail, 0 other
+[seed] +1.5s SEED RESULT: PASS — plus=1; second dream 'A home by the sea' (mve7ubj2-f3ne9z, proof saved, not woven); board 5 cards incl. photo board-mve7vb21-cx3q68.jpg stored as file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg (file in the real Documents)
+[seed] +1.5s SUMMARY seed: 1 pass, 0 fail, 0 other
+[verify101] +42.7s B-SEED-READ-BY-101 RESULT: PASS — 1.0.1 shows 2/2 dreams and 5/5 board cards from the seeded store
+[verify101] +48.1s B-PLUS-AFTER-101-RELAUNCH RESULT: INFO — vela.plus.v1 after 1.0.1 ran its own launch entitlement refresh on a simulator with no App Store purchase: "0"
+[verify101] +48.1s SUMMARY verify101: 1 pass, 0 fail, 1 other
+[reseed] +1.2s RESEED RESULT: PASS — vela.plus.v1 "0" → "1"; baseline of the v1 keys saved
+[reseed] +1.2s SUMMARY reseed: 1 pass, 0 fail, 0 other
+[drive11] +0.7s C-CONTAINER RESULT: INFO — data container after the update: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F; 1.0.1's: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD; MOVED
+[drive11] +62.4s C-LAUNCH RESULT: PASS — Today shown; onboarding not shown; storage-error no; app state 4
+[drive11] +79.4s C-TODAY RESULT: PASS — greeting "Good evening, Maya."; chip "1 night shown up, 2 stars in your sky"; sky "Your sky: The Sail, 1 of 7 stars lit"; dream pills "My own design…, not weaving" + "A home by…"; loop card "Chapter II is ready"
+[drive11] +94.0s C-TODAY-MAIN-DREAM RESULT: PASS — sky "Your sky: The Sail, 1 of 7 stars lit"; loop card "future-memory-card"; plan-locked: 'Keep this dream weaving' (Plus is off on this simulator)
+[drive11] +122.3s C-SETTINGS-NAME RESULT: PASS — name row "Name, Maya"; Vela Plus row: 'Vela Plus' (free) at +121.6s
+[drive11] +150.6s C-ARC RESULT: PASS — chapter plate "Chapter 2, After the Wanting. The Night Before. Written Today. Waiting for you."; proof node "Star 1. I did it, day 1. Sent my portfolio to two studios I admire. Today."; "Season 1 · Stage II of VII" · "1 chapter, 1 proof, 1 night."
+[drive11] +174.8s C-SECOND-DREAM RESULT: PASS — 'A home by the sea': "“A home by the sea”"; its 1.0 chapter "Chapter 1, After the Wanting. The First Glimpse. Written Today. Heard."; the chapter migration wove from its saved proof "Chapter 2, What Tomorrow Makes Possible. The Night Before. Written Today. Waiting for you."; proof "Star 1. Something moved, day 1. Saved the first two hundred for the deposit. Today · Woven into Chapter II."
+[drive11] +235.3s C-RITUALS-PAGES RESULT: PASS — 2/2 1.0.1 pages listed [{"kind":"gratitude","label":"Gratitude, Sunday, October 18. The coffee was warm · My sister called"},{"kind":"script","label":"Script, Sunday, October 18. It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."}]; the script page reads "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+[drive11] +258.9s C-369 RESULT: PASS — door "3 · 6 · 9. 2 / 18. “I run a studio clients trust”"; sheet "2 of 18 written today"; phrase "“I run a studio clients trust”" (1.0.1 wrote 2 lines today)
+[drive11] +284.2s C-KEYBOARD-SCRIPT RESULT: PASS — 'Seal the page' {"y":566,"x":24,"width":392,"height":56} vs keyboard top 655; the page's field {"y":278,"x":41,"width":375,"height":240} visible above the dock
+[drive11] +353.1s C-SCENES-PHOTO RESULT: PASS — 5/5 board cards in Scenes; photo card rect {"y":506,"x":24,"width":190,"height":264} seeded-colour share {"seeded":0.882,"lumaMean":135.8,"lumaSd":48.1}; sheet photo true placeholder 'kept on another phone' not shown share {"seeded":0.992,"lumaMean":178.7,"lumaSd":18.8}; vela.scenes.v2 stores "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/3A97ADA7-5AE2-4F97-B09F-6706C2C0981F/Documents/board-mve7vb21-cx3q68.jpg" (1.0.1 stored file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg)
+[drive11] +536.4s C-EXPORT RESULT: PASS — share sheet presented: the app under it stopped taking taps ('settings-back' covered), then closed; file vela-backup-2026-10-18.json {"keys":["kind","version","exportedAt","appVersion","data"],"exportedAt":"2026-10-18T19:35:38.812Z","appVersion":"1.1.0"}; toast null; copied into On My iPhone: /Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Shared/AppGroup/BC21F87F-A970-46F5-A840-F7AA94B265CE/File Provider Storage/vela-backup-2026-10-18.json
+[drive11] +648.8s C-KEYBOARD-PROOF-FIELD RESULT: PASS — the sentence field (before the keyboard {"y":636,"x":41,"width":358,"height":101}) {"y":417,"x":41,"width":358,"height":101} vs the dock's top ~550 (keyboard top 655): visible while typing
+[drive11] +648.8s C-KEYBOARD-PROOF RESULT: PASS — 'Chart this proof' {"y":566,"x":24,"width":392,"height":56} vs keyboard top 655: fully above the keyboard
+[drive11] +670.1s C-CHART-PROOF RESULT: PASS — proof "Quoted my first real client and they said yes."; Star Birth shown, 'Carry it forward' shown (after 'Keep this dream weaving')
+[drive11] +748.8s C-SHARE-PNG RESULT: PASS — captured card 1080x1920, luma sd 19.3 (blank ≈ 0)
+[drive11] +748.8s C-SHARE-STAR RESULT: PASS — share card sheet shown; system share sheet presented: the app under it stopped taking taps ('evidence-share-card-close' covered), then closed
+[drive11] +776.5s C-WEAVE-AFTER-PROOF RESULT: PASS — the Weave opened "THE HARD DAY" "A Bad Afternoon, Handled" (woven paragraph true); Today sky "Your sky: The Sail, 2 of 7 stars lit"
+[drive11] +861.2s C-NARRATION RESULT: PASS — idle "1 min · Unlimited listens, always"; while listening (every 1.5s) ["Listening · 1:24 left","Listening · 1:20 left","Listening · 1:20 left","Listening · 1:15 left","Listening · 1:07 left","Listening · 1:07 left","Listening · 1:00 left","Listening · 0:56 left"] — the sentence position advances
+[drive11] +896.9s C-NARRATION-BACKGROUND RESULT: PASS — before Home "Listening · 0:27 left"; app state while away 3 then 3 (3 = running in background, 2 = suspended); after 24.8s away "Heard to the end"
+[drive11] +1127.5s C-IMPORT-REPLACE RESULT: PASS — picker the app under it stopped taking taps ('settings-back' covered); import sheet shown; Replace's confirm appeared "Replace what's on this device?"; after Replace: toast "Replaced. …", Today sky "Your sky: The Sail, 1 of 7 stars lit"
+[drive11] +1133.9s C-ALIVE-END RESULT: PASS — app state 4 at the end of the walk (4 = foreground)
+[drive11] +1134.0s C-PLUS-TIMELINE RESULT: INFO — vela.plus.v1 over the run [{"t":0,"plus":"1"},{"t":21243,"plus":"0"}] (ms since the store watch began); first v2 key written at +20750ms; session ready at +20234ms
+[drive11] +1136.5s SUMMARY drive11: 21 pass, 0 fail, 2 other
+[dump] +1.0s D-V1-KEYS-UNTOUCHED RESULT: PASS — every v1 key is byte-identical after 1.1 ran (rollback-safe)
+[dump] +1.0s D-STORE-AFTER-11 RESULT: INFO — keys now: vela.arcs.v2, vela.asks.v1, vela.chapter.v2.mve7u3o9-dxcgnl, vela.chapter.v2.mve7ubk6-4e83fu, vela.chapter.v2.mve7ubk6-4e83fu-w, vela.journal.v2, vela.notifications.v2, vela.plus.v1, vela.profile.v2, vela.progress.v2, vela.scenes.v2, vela.softplus.v1; vela.plus.v1="0"
+[dump] +1.0s SUMMARY dump: 1 pass, 0 fail, 1 other
+[logs] update-CRASH-REPORTS RESULT: PASS — no crash report names the app
+[logs] update-JS-FATAL RESULT: PASS — no fatal exception in 12174 app log lines
+[logs] update-JS-ERRORS RESULT: PASS — 1 console.error line(s) from JS; 1 known (expo-notifications cannot read its keychain item in an unsigned simulator build (errSecMissingEntitlement -34018); signed builds have the entitlement); unknown: none
++ grep -hE 'RESULT:|SUMMARY' shots/debug.log
++ echo 'failed phases: none'
+failed phases: none
++ echo failed=
++ '[' -z '' ']'

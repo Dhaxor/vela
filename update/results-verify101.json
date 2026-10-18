@@ -1,0 +1,23 @@
+[
+  {
+    "phase": "verify101",
+    "name": "B-SEED-READ-BY-101",
+    "status": "PASS",
+    "detail": "1.0.1 shows 2/2 dreams and 5/5 board cards from the seeded store",
+    "shots": [
+      "B01-today-101-seeded.png",
+      "B02-stories-101-two-dreams.png",
+      "B03-board-101-seeded.png",
+      "B04-board-101-seeded-end.png"
+    ],
+    "t": 42.7
+  },
+  {
+    "phase": "verify101",
+    "name": "B-PLUS-AFTER-101-RELAUNCH",
+    "status": "INFO",
+    "detail": "vela.plus.v1 after 1.0.1 ran its own launch entitlement refresh on a simulator with no App Store purchase: \"0\"",
+    "shots": [],
+    "t": 48.1
+  }
+]

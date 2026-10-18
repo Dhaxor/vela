@@ -1,0 +1,84 @@
+{
+  "container": "/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD",
+  "name": "Maya",
+  "main": {
+    "id": "mve7tc04-8kywog",
+    "desire": "my own design studio, with clients who trust my eye",
+    "storyId": "mve7u3o9-dxcgnl",
+    "storyTitle": "After the Wanting",
+    "chapter": 2,
+    "proofId": "mve7tc08-4pyzwx",
+    "proofText": "Sent my portfolio to two studios I admire.",
+    "openActionId": "mve7u3oa-tespk",
+    "openActionText": "Protect twenty focused minutes for the skill your future self relies on."
+  },
+  "second": {
+    "id": "mve7ubj2-f3ne9z",
+    "desire": "A home by the sea",
+    "storyId": "mve7ubk6-4e83fu",
+    "proofId": "mve7ubk7-78z3z3",
+    "proofText": "Saved the first two hundred for the deposit."
+  },
+  "journal": [
+    {
+      "id": "mve7ux6n-blisal",
+      "kind": "gratitude",
+      "text": "Something my body did for me today… The coffee was warm\nA door that is open to me right now… My sister called"
+    },
+    {
+      "id": "mve7unrc-9sgltx",
+      "kind": "script",
+      "text": "It is a Tuesday and the studio door is open. Two clients sent thank you notes this week."
+    }
+  ],
+  "sheet": {
+    "dateKey": "2026-10-18",
+    "phrase": "I run a studio clients trust",
+    "morning": [],
+    "afternoon": [],
+    "evening": [
+      "I run a studio clients trust",
+      "I run a studio clients trust"
+    ]
+  },
+  "phrase369": "I run a studio clients trust",
+  "board": [
+    {
+      "id": "mve7w8f3-89iqbb",
+      "kind": "goal",
+      "text": "Three clients who refer friends",
+      "caption": null
+    },
+    {
+      "id": "mve7vzzn-ogtu5",
+      "kind": "goal",
+      "text": "A sign with my name above the door",
+      "caption": null
+    },
+    {
+      "id": "mve7vb2l-4wyxf3",
+      "kind": "goal",
+      "text": "A shelf of my own published work",
+      "caption": null
+    },
+    {
+      "id": "mve7vb2b-1xtn5n",
+      "kind": "goal",
+      "text": "Studio rent paid six months ahead",
+      "caption": null
+    },
+    {
+      "id": "mve7vb21-cx3q68",
+      "kind": "photo",
+      "text": null,
+      "caption": "The corner studio on Elm"
+    }
+  ],
+  "photo": {
+    "id": "mve7vb21-cx3q68",
+    "file": "/Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD/Documents/board-mve7vb21-cx3q68.jpg",
+    "storedUri": "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70/Documents/board-mve7vb21-cx3q68.jpg",
+    "realUri": "file:///Users/runner/Library/Developer/CoreSimulator/Devices/9B54660C-0F6B-4CE3-901E-1F7E522AA07E/data/Containers/Data/Application/F6AFA2AC-E090-432C-923E-C90ECF038FFD/Documents/board-mve7vb21-cx3q68.jpg",
+    "fakeUuid": "42E0CE4A-CBB2-4C6E-8BED-6C331F7BFD70"
+  }
+}

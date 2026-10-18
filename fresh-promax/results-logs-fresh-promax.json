@@ -1,0 +1,17 @@
+[
+  {
+    "name": "fresh-promax-CRASH-REPORTS",
+    "status": "PASS",
+    "detail": "no crash report names the app"
+  },
+  {
+    "name": "fresh-promax-JS-FATAL",
+    "status": "PASS",
+    "detail": "no fatal exception in 13280 app log lines"
+  },
+  {
+    "name": "fresh-promax-JS-ERRORS",
+    "status": "PASS",
+    "detail": "1 console.error line(s) from JS; 1 known (expo-notifications cannot read its keychain item in an unsigned simulator build (errSecMissingEntitlement -34018); signed builds have the entitlement); unknown: none"
+  }
+]
