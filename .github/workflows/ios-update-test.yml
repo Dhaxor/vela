@@ -255,6 +255,9 @@ jobs:
           find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f -exec cp {} shots/crash/ \; 2>/dev/null || true
           grep -l "\"$EXE\"\|app.vela.manifest" shots/crash/* 2>/dev/null | tee shots/crash-reports-vela.txt || true
           node e2e/logcheck.mjs "fresh-$DEVICE" shots/vela-log-show.txt shots/crash-reports-vela.txt || FAILED="$FAILED logs"
+
+          echo "== first-tap probe: does 'Begin' take the first tap after a fresh install? (evidence, never a gate) =="
+          (cd e2e && UDID="$UDID" APP="$GITHUB_WORKSPACE/$APP11" DEVICE="$DEVICE" SHOTS_DIR="$GITHUB_WORKSPACE/shots/probe" TRIALS=6 node first-tap-probe.mjs) || true
           [ -f shots/appium.log ] && gzip -9 shots/appium.log || true
           ls -la shots
           echo "== RESULTS =="
