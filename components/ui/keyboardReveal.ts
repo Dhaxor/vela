@@ -32,7 +32,8 @@ export const REVEAL_MARGIN = 16;
 /**
  * How far to scroll (+ moves the content up) so `field` sits fully inside
  * `band`, keeping `margin` from either edge. 0 when it already does. A field
- * taller than the band shows the end `prefer` names.
+ * that fits the band only with less air is centred in it (all of it seen);
+ * one taller than the band shows the end `prefer` names.
  */
 export function revealDelta(field: Span, band: Band, opts: { margin?: number; prefer?: RevealPrefer } = {}): number {
   const margin = opts.margin ?? REVEAL_MARGIN;
@@ -41,6 +42,11 @@ export function revealDelta(field: Span, band: Band, opts: { margin?: number; pr
   if (!(hi > lo) || !Number.isFinite(field.y) || !(field.height >= 0)) return 0;
   const top = field.y;
   const bottom = field.y + field.height;
+  const room = band.bottom - band.top;
+  if (bottom - top > hi - lo && bottom - top <= room) {
+    if (top >= band.top && bottom <= band.bottom) return 0;
+    return top - (band.top + (room - field.height) / 2);
+  }
   if (bottom - top > hi - lo) return opts.prefer === "end" ? bottom - hi : top - lo;
   if (bottom > hi) return bottom - hi;
   if (top < lo) return top - lo;

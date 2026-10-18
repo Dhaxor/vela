@@ -25,6 +25,17 @@ describe("revealDelta", () => {
     expect(revealDelta({ y: 40, height: 56 }, band)).toBe(40 - (100 + REVEAL_MARGIN));
   });
 
+  test("a field that fits only with less air is centred, all of it seen (run 2, SE: the 240pt Script page in a 254pt band)", () => {
+    const se = { top: 76, bottom: 330 };
+    const page = { y: 92, height: 240 };
+    const d = revealDelta(page, se);
+    expect(d).toBe(92 - (76 + (254 - 240) / 2));
+    expect(page.y - d).toBeGreaterThanOrEqual(se.top);
+    expect(page.y - d + page.height).toBeLessThanOrEqual(se.bottom);
+    // Already all inside: left alone.
+    expect(revealDelta({ y: 80, height: 240 }, se)).toBe(0);
+  });
+
   test("a field taller than the band shows its start on focus and its end while it grows", () => {
     const tall = { y: 500, height: 600 };
     expect(revealDelta(tall, band, { prefer: "start" })).toBe(500 - (100 + REVEAL_MARGIN));

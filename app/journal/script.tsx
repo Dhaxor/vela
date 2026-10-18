@@ -4,7 +4,7 @@
 // was written for, then Vela says so and returns to Rituals.
 import React, { useMemo, useState } from "react";
 import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, useWindowDimensions } from "react-native";
 import { RefreshCw, X } from "@/components/glyphs/icons";
 import { Dock, GhostButton, Header, IconButton, PrimaryButton, Screen, T, useToast } from "@/components/ui";
 import { SealedMoment } from "@/components/feature/rituals/SealedMoment";
@@ -21,6 +21,8 @@ import { STAGES, type StageId } from "@/lib/story/content";
 import { toRoman } from "@/lib/story/text";
 
 const MIN_CHARS = 3;
+/** The empty page's height: 240pt, a little less on SE-sized phones so the whole page fits above the keyboard and Seal. */
+const PAGE = { full: 240, compact: 180, compactBelow: 740 } as const;
 
 export default function ScriptScreen() {
   const back = useBackToRituals();
@@ -32,6 +34,7 @@ export default function ScriptScreen() {
   const [text, setText] = useState("");
   const [busy, setBusy] = useState(false);
   const [sealed, setSealed] = useState(false);
+  const pageHeight = useWindowDimensions().height < PAGE.compactBelow ? PAGE.compact : PAGE.full;
 
   // Today's 'Reflect' card opens this page on the prompt it showed (?promptId=…).
   const { promptId } = useLocalSearchParams<{ promptId?: string }>();
@@ -114,7 +117,7 @@ export default function ScriptScreen() {
         onChangeText={setText}
         placeholder="Begin anywhere. Present tense helps."
         maxLength={ENTRY_TEXT_MAX}
-        minHeight={240}
+        minHeight={pageHeight}
         autoFocus
         accessibilityLabel="Your page"
         testID="script-input"
