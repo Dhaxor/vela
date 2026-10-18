@@ -63,6 +63,18 @@ async function containerFor(selector, field) {
   return pool[0].rect;
 }
 
+/** The rect of the first element an XPath finds (null when none). */
+async function xpathRect(xpath) {
+  try {
+    const el = await h.driver.$(xpath);
+    if (!el?.elementId) return null;
+    const r = await h.rectOfEl(el);
+    return r && r.height > 0 ? r : null;
+  } catch {
+    return null;
+  }
+}
+
 /** The dock riding on the keyboard: a visible screen-dock whose bottom sits on the keyboard's top. */
 async function dockOnKeyboard(kb) {
   const docks = (await h.all("~screen-dock")).filter((d) => d.rect && d.rect.height > 0 && d.visible);
@@ -106,8 +118,12 @@ async function fieldCheck(name, selector, text, { container = "~screen-scroll", 
     const kb = await h.keyboardRect();
     const r = await h.rectOfEl(el);
     const value = String((await h.attr(el, "value")) ?? "");
-    const box = r ? await containerFor(container, r) : null;
-    const dk = dock && kb ? await dockOnKeyboard(kb) : null;
+    // The field's own scroll view (its ancestor in the tree), and that screen's dock (the scroll view's sibling).
+    const fid = selector.slice(1);
+    const cid = container.slice(1);
+    const own = `//*[@name="${fid}"]/ancestor::*[@name="${cid}"][1]`;
+    const box = r ? (await xpathRect(own)) ?? (await containerFor(container, r)) : null;
+    const dk = dock && kb ? (await xpathRect(`${own}/following-sibling::*[@name="screen-dock"][1]`)) ?? (await dockOnKeyboard(kb)) : null;
     await h.shot(`field-${name}`);
     await h.source(`field-${name}`);
     const typed = value.includes(text.slice(0, Math.min(18, text.length)));
