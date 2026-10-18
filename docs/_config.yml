@@ -1,0 +1,7 @@
+# GitHub Pages publishes only the public pages (privacy policy and support).
+# The build notes in this folder stay in the repository but are not served.
+exclude:
+  - CONTRACTS.md
+  - ELEVATE_1.1.md
+  - SHOTS.md
+  - elevate-1.1-research.json
