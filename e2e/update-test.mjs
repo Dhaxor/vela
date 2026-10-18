@@ -616,36 +616,63 @@ function leftSeconds(status) {
 }
 
 /* ------------------------------------------------------------------ system sheets */
-const SHARE_MARKERS = /ActivityListView|UIActivityContentView|ShareSheet|"Copy"|"Save Image"|"Save to Files"|"AirDrop"|"Messages"|"Mail"|"Notes"|"Add Tags"|"Edit Actions/;
-async function waitForShareSheet(tag, timeout = 12000) {
-  const end = Date.now() + timeout;
-  let xml = "";
-  while (Date.now() < end) {
-    xml = await source(`${tag}-probe`);
-    if (SHARE_MARKERS.test(xml)) return { shown: true, marker: SHARE_MARKERS.exec(xml)[0] };
-    await sleep(1200);
-  }
-  return { shown: false, marker: null };
+const SHARE_MARKERS = /ShareSheet\.RemoteContainerView|ActivityListView|UIActivityContentView|"Save Image"|"Save to Files"|"AirDrop"/;
+
+/** Can a tap still reach this element? (null when it is not there at all.) */
+async function hittable(selector) {
+  const el = await find(selector, 1500);
+  if (!el) return null;
+  const h = await attr(el, "hittable");
+  return h === "true" || h === true;
 }
-async function closeShareSheet() {
-  const stillShown = async () => SHARE_MARKERS.test(await source("share-close-probe"));
+
+/**
+ * Wait for a system sheet (share sheet, document picker) over the app. Its own
+ * content is a remote view that XCUITest only sometimes sees, so two signals:
+ * its elements in the tree, or the app element `ref` (tappable before) no
+ * longer taking taps because the sheet's presentation covers it.
+ */
+async function waitForSystemSheet(tag, ref, markers = SHARE_MARKERS, timeout = 14000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    const xml = await source(`${tag}-probe`);
+    const m = markers.exec(xml);
+    if (m) return { shown: true, how: `its elements are in the accessibility tree (${m[0]})` };
+    if (ref && (await hittable(ref)) === false) return { shown: true, how: `the app under it stopped taking taps ('${ref.slice(1)}' covered)` };
+    await sleep(1000);
+  }
+  return { shown: false, how: null };
+}
+
+/** Dismiss a share sheet: its Close button when XCUITest sees it, else swipe it down until `ref` takes taps again. */
+async function closeSystemSheet(ref) {
+  const gone = async () => !SHARE_MARKERS.test(await source("share-close-probe")) && (ref ? (await hittable(ref)) !== false : true);
   for (const sel of [
     '-ios predicate string:type == "XCUIElementTypeButton" AND (label == "Close" OR name == "Close" OR name == "header.closeButton")',
     '-ios predicate string:type == "XCUIElementTypeButton" AND (label == "Cancel" OR name == "Cancel")',
   ]) {
-    if (await tapIfShown(sel, "close the share sheet")) {
+    if (await tapIfShown(sel, "close the system sheet")) {
       await sleep(1500);
-      if (!(await stillShown())) return true;
+      if (await gone()) return true;
     }
   }
-  // Swipe the sheet down, from a few heights (it may be a half sheet).
-  for (const from of [0.5, 0.62, 0.38, 0.75]) {
+  for (const from of [0.66, 0.5, 0.8, 0.4]) {
     await drag(win.height * from, win.height * 0.99);
-    await sleep(1500);
-    if (!(await stillShown())) return true;
+    await sleep(1800);
+    if (await gone()) {
+      log(`system sheet closed by a swipe from ${from}`);
+      return true;
+    }
   }
-  log("the share sheet would not close");
+  log("the system sheet would not close");
   return false;
+}
+
+/** The current page source holds this text (XML-escaped as WDA writes it). */
+async function sourceHas(text, tag) {
+  const esc = String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  const xml = await source(tag);
+  return xml.includes(esc) || xml.includes(String(text));
 }
 
 /* ------------------------------------------------------------------ 1.0.1 tab bar */
@@ -1091,7 +1118,9 @@ async function drive11() {
     let text = null;
     const script = exp.journal.find((e) => e.kind === "script");
     if (script && (await tap(`~page-${script.id}`, "the 1.0.1 script page", 3000))) {
-      text = await textsUnder("~entry-text", 6000);
+      await exists("~entry-text", 6000);
+      await sleep(800);
+      text = (await sourceHas((script?.text ?? "").slice(0, 40), "past-page-script")) ? script.text : await textsUnder("~entry-text", 2000);
       await shot("past-page-script");
       await tap("~entry-back", "page back", 4000, { scroll: false });
       await sleep(1000);
@@ -1144,7 +1173,13 @@ async function drive11() {
       await ensureVisible(el);
       await sleep(1200);
       r = await rectOfEl(el);
-      grid = census(await shot("scenes-photo-card"), r);
+      // The grid's 'Room for more' dock covers the bottom ~130pt: bring the whole card above it.
+      if (r && r.y + r.height > win.height - 130) {
+        await drag(win.height * 0.7, win.height * 0.7 - Math.max(80, r.y + r.height - (win.height - 150)));
+        r = await rectOfEl(el);
+      }
+      const seen = r ? { x: r.x, y: Math.max(r.y, 60), width: r.width, height: Math.max(0, Math.min(r.y + r.height, win.height - 130) - Math.max(r.y, 60)) } : null;
+      grid = census(await shot("scenes-photo-card"), seen);
     }
     // The scene sheet: its StoredPhoto is 'scene-photo', its placeholder 'scene-photo-missing'.
     let sheetPhoto = null;
@@ -1182,8 +1217,11 @@ async function drive11() {
     await tap("~open-settings", "Settings");
     await exists("~settings-screen", 8000);
     const tExport = Date.now() - 2000;
+    const exportRow = await find("~settings-export", 8000);
+    if (exportRow) await ensureVisible(exportRow);
+    const refOk = await hittable("~settings-back");
     await tap("~settings-export", "Export a backup", 8000);
-    const sheet = await waitForShareSheet("export");
+    const sheet = await waitForSystemSheet("export", refOk ? "~settings-back" : null);
     await shot("export-share-sheet");
     const file = newestFile(path.join(c, "Library", "Caches"), (n) => /^vela-backup-.*\.json$/.test(n), tExport);
     let placed = null;
@@ -1202,12 +1240,13 @@ async function drive11() {
         fs.copyFileSync(file, placed);
       }
     }
-    await closeShareSheet();
+    const closed = sheet.shown ? await closeSystemSheet(refOk ? "~settings-back" : null) : false;
     await shot("export-after-sheet");
-    const toast = await textsUnder("~toast", 4000);
+    await sleep(800);
+    const toast = (await sourceHas("Your backup file is ready", "export-toast")) ? "Your backup file is ready…" : await textsUnder("~toast", 2000);
     return {
       status: sheet.shown ? "PASS" : "FAIL",
-      detail: `share sheet ${sheet.shown ? `presented (${sheet.marker})` : "NOT detected"}; file ${file ? path.basename(file) : "not found in Library/Caches"} ${JSON.stringify(summary)}; toast ${JSON.stringify(toast)}; copied into On My iPhone: ${placed ?? "no"}`,
+      detail: `share sheet ${sheet.shown ? `presented: ${sheet.how}` : "NOT detected"}${sheet.shown ? `, ${closed ? "then closed" : "would NOT close"}` : ""}; file ${file ? path.basename(file) : "not found in Library/Caches"} ${JSON.stringify(summary)}; toast ${JSON.stringify(toast)}; copied into On My iPhone: ${placed ?? "no"}`,
       extra: { backupFile: file, placed },
     };
   });
@@ -1255,8 +1294,9 @@ async function drive11() {
     await sleep(1500);
     await shot("share-card-sheet");
     const tShare = Date.now() - 1000;
+    const refShare = await hittable("~evidence-share-card-close");
     await tap("~evidence-share-card-share", "Share image", 5000, { scroll: false });
-    const sys = await waitForShareSheet("star-share", 12000);
+    const sys = await waitForSystemSheet("star-share", refShare ? "~evidence-share-card-close" : null);
     await shot("star-share-sheet");
     const fallback = await exists("~evidence-share-card-note", 1000);
     let pngInfo = null;
@@ -1272,7 +1312,7 @@ async function drive11() {
         pngInfo = { file: path.basename(pngFile), width: img.width, height: img.height, lumaSd: cs?.lumaSd };
       }
     }
-    if (sys.shown) await closeShareSheet();
+    const closed = sys.shown ? await closeSystemSheet(refShare ? "~evidence-share-card-close" : null) : false;
     await tap("~evidence-share-card-close", "Done (share card)", 4000, { scroll: false });
     await sleep(1200);
     record(
@@ -1280,7 +1320,7 @@ async function drive11() {
       pngInfo ? (pngInfo.width === 1080 && pngInfo.height === 1920 && (pngInfo.lumaSd ?? 0) > 8 ? "PASS" : "FAIL") : "NOT-TESTABLE",
       pngInfo ? `captured card ${pngInfo.width}x${pngInfo.height}, luma sd ${pngInfo.lumaSd} (blank ≈ 0)` : "the captured PNG was not found in the app's tmp/Caches"
     );
-    return { status: sys.shown || fallback ? "PASS" : "FAIL", detail: `share card sheet ${sheet ? "shown" : "MISSING"}; system share sheet ${sys.shown ? `presented (${sys.marker})` : "NOT detected"}${fallback ? "; fallback note shown" : ""}` };
+    return { status: sys.shown || fallback ? "PASS" : "FAIL", detail: `share card sheet ${sheet ? "shown" : "MISSING"}; system share sheet ${sys.shown ? `presented: ${sys.how}${closed ? ", then closed" : ", would NOT close"}` : "NOT detected"}${fallback ? "; fallback note shown" : ""}` };
   });
 
   await section("C-WEAVE-AFTER-PROOF", async () => {
@@ -1358,12 +1398,27 @@ async function drive11() {
     await toToday();
     await tap("~open-settings", "Settings");
     await exists("~settings-screen", 8000);
+    const refOk = await hittable("~settings-back");
     await tap("~settings-import", "Import a backup", 8000);
-    await sleep(3000);
+    const picker = await waitForSystemSheet("import-picker", refOk ? "~settings-back" : null, /DOC\.browsingRoot|name="Browse"|name="Recents"/);
+    await sleep(2500);
     await shot("import-picker");
     await source("import-picker");
+    log("document picker", JSON.stringify(picker));
     let picked = false;
+    let usedXY = false;
     for (let i = 0; i < 6 && !picked; i++) {
+      // The picker's own elements are a remote view XCUITest does not always see: its Browse tab sits bottom right.
+      if (i === 2 && !(await shownNow(byLabel("Browse", "XCUIElementTypeButton")))) {
+        usedXY = true;
+        try {
+          await driver.execute("mobile: tap", { x: Math.round(win.width * 0.695), y: Math.round(win.height * 0.946) });
+          log("tapped the Browse tab by position");
+        } catch (e) {
+          log("Browse tap by position failed", msg(e));
+        }
+        await sleep(2500);
+      }
       if (await tapIfShown(byLabelContains("vela-backup"), "the backup file")) {
         picked = true;
         break;
@@ -1382,7 +1437,7 @@ async function drive11() {
     }
     if (!picked) {
       await tapIfShown(byLabel("Cancel", "XCUIElementTypeButton"), "Cancel the picker");
-      return { status: "NOT-TESTABLE", detail: "the document picker did not show the backup in On My iPhone (see the picker shots/sources)" };
+      return { status: "NOT-TESTABLE", detail: `the document picker ${picker.shown ? `opened (${picker.how})` : "was not detected"} but the backup in On My iPhone could not be reached through it${usedXY ? " (Browse also tapped by position)" : ""}; see the picker shots/sources` };
     }
     const sheet = await exists("~settings-import-sheet", 12000);
     await sleep(1200);
@@ -1398,7 +1453,7 @@ async function drive11() {
     if (confirm) {
       await tap("~confirm-sheet-confirm", "Replace (destructive confirm)", 4000, { scroll: false });
       await sleep(2500);
-      applied = await textsUnder("~toast", 4000);
+      applied = (await sourceHas("Replaced.", "import-toast")) ? "Replaced. …" : await textsUnder("~toast", 2000);
       await shot("import-replaced");
     }
     await tap("~settings-back", "Settings back", 4000, { scroll: false });
@@ -1407,7 +1462,7 @@ async function drive11() {
     await shot("today-after-replace");
     return {
       status: sheet && confirm ? "PASS" : "FAIL",
-      detail: `import sheet ${sheet ? "shown" : "MISSING"}; Replace's confirm ${confirm ? `appeared ${JSON.stringify(title)}` : "did NOT appear"}; after Replace: toast ${JSON.stringify(applied)}, Today sky ${JSON.stringify(hero)}`,
+      detail: `picker ${picker.how ?? "?"}; import sheet ${sheet ? "shown" : "MISSING"}; Replace's confirm ${confirm ? `appeared ${JSON.stringify(title)}` : "did NOT appear"}; after Replace: toast ${JSON.stringify(applied)}, Today sky ${JSON.stringify(hero)}`,
     };
   });
 
