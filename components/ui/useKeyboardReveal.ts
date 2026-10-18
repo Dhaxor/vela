@@ -14,10 +14,10 @@
 // scroll a focused field into view themselves.
 import { useEffect, useRef, useState, type RefObject } from "react";
 import { Dimensions, Keyboard, Platform, TextInput, type KeyboardEvent, type ScrollView, type View } from "react-native";
-import { HostStack, bandBottom, clampOffset, revealDelta, type RevealPrefer } from "./keyboardReveal";
+import { HostStack, bandBottom, clampOffset, revealDelta, revealSpan, type RevealPrefer } from "./keyboardReveal";
 
 interface Host {
-  reveal: (prefer: RevealPrefer) => void;
+  reveal: (prefer: RevealPrefer, extent?: number) => void;
 }
 
 const hosts = new HostStack<Host>();
@@ -30,10 +30,15 @@ function onScreen(e: KeyboardEvent): boolean {
   return e.endCoordinates.height > 0 && e.endCoordinates.screenY < Dimensions.get("screen").height - 1;
 }
 
-/** Ask the newest host to bring the focused field into view. TextField and SkyWriting call this on focus and as a multiline field grows. */
-export function revealFocusedInput(prefer: RevealPrefer = "start"): void {
+/**
+ * Ask the newest host to bring the focused field into view. TextField and
+ * SkyWriting call this on focus ('start') and as a multiline field's text
+ * grows ('end', with the text's height as `extent`, so the line being written
+ * is what stays in view, not the empty page under it).
+ */
+export function revealFocusedInput(prefer: RevealPrefer = "start", extent?: number): void {
   if (!ON) return;
-  hosts.top()?.reveal(prefer);
+  hosts.top()?.reveal(prefer, extent);
 }
 
 /** iOS: the software keyboard's height while it is up (it announces itself before it moves), else 0. */
@@ -118,6 +123,8 @@ export interface KeyboardRevealOptions {
   coverRef?: RefObject<View | null>;
   /** The cover is hidden right now (a dock that steps aside while typing). */
   coverHidden?: boolean;
+  /** The cover's height: when it changes with the keyboard up (a dock that grows a line), the last reveal runs again. */
+  coverHeight?: number;
 }
 
 /**
@@ -125,17 +132,21 @@ export interface KeyboardRevealOptions {
  * cover. A host with no scroll view (a short sheet) still registers, so the
  * screen under it never moves for the sheet's fields.
  */
-export function useKeyboardReveal({ scrollRef, active, coverRef, coverHidden = false }: KeyboardRevealOptions): void {
+export function useKeyboardReveal({ scrollRef, active, coverRef, coverHidden = false, coverHeight }: KeyboardRevealOptions): void {
   // Read at measure time: a dock stepping aside as the keyboard rises must not re-subscribe mid-show.
   const coverAside = useRef(coverHidden);
   coverAside.current = coverHidden;
+  const again = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    again.current?.();
+  }, [coverHeight]);
   useEffect(() => {
     if (!ON || !active) return;
     let keyboardTop: number | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
     let seq = 0;
 
-    const run = async (prefer: RevealPrefer) => {
+    const run = async (prefer: RevealPrefer, extent?: number) => {
       const mine = ++seq;
       if (keyboardTop === null || hosts.top() !== host) return;
       const scroll = scrollRef.current as (ScrollView & ScrollInternals) | null;
@@ -153,7 +164,7 @@ export function useKeyboardReveal({ scrollRef, active, coverRef, coverHidden = f
       // Not this host's field, or the page moved on while measuring.
       if (mine !== seq || !inContent || !field || !view || !content || keyboardTop === null) return;
       const coverTop = cover && cover.height > 0 && cover.y < view.y + view.height ? cover.y : null;
-      const delta = revealDelta(field, { top: view.y, bottom: bandBottom(keyboardTop, view.y + view.height, coverTop) }, { prefer });
+      const delta = revealDelta(revealSpan(field, prefer, extent), { top: view.y, bottom: bandBottom(keyboardTop, view.y + view.height, coverTop) }, { prefer });
       if (Math.abs(delta) < 1) return;
       const offset = inContent.y - (field.y - view.y);
       const target = clampOffset(offset + delta, content.height, view.height);
@@ -161,16 +172,21 @@ export function useKeyboardReveal({ scrollRef, active, coverRef, coverHidden = f
       scroll.scrollTo({ y: target, animated: true });
     };
 
+    let last: { prefer: RevealPrefer; extent?: number } = { prefer: "start" };
     const host: Host = {
-      reveal: (prefer) => {
+      reveal: (prefer, extent) => {
+        last = { prefer, extent };
         if (timer) clearTimeout(timer);
         timer = setTimeout(() => {
           timer = null;
-          void run(prefer);
+          void run(prefer, extent);
         }, SETTLE_MS);
       },
     };
     hosts.push(host);
+    again.current = () => {
+      if (keyboardTop !== null) host.reveal(last.prefer, last.extent);
+    };
 
     const shown = (e: KeyboardEvent) => {
       keyboardTop = e.endCoordinates.screenY;
@@ -194,6 +210,7 @@ export function useKeyboardReveal({ scrollRef, active, coverRef, coverHidden = f
     return () => {
       subs.forEach((s) => s.remove());
       hosts.remove(host);
+      again.current = null;
       if (timer) clearTimeout(timer);
       seq++;
     };

@@ -64,7 +64,7 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           }}
           onContentSizeChange={(e) => {
             // A multiline field grows as the user writes: keep its end (the caret) in view.
-            if (focused && multiline) revealFocusedInput("end");
+            if (focused && multiline) revealFocusedInput("end", e.nativeEvent.contentSize.height);
             onContentSizeChange?.(e);
           }}
           {...rest}

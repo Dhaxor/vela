@@ -114,7 +114,7 @@ export function Screen({
     [userScrollRef]
   );
   // The field being typed in stays between the header and the dock (iOS).
-  useKeyboardReveal({ scrollRef, active: focused && scroll, coverRef: dockRef, coverHidden: dockAside });
+  useKeyboardReveal({ scrollRef, active: focused && scroll, coverRef: dockRef, coverHidden: dockAside, coverHeight: dockHeight });
 
   const body = scroll ? (
     <ScrollView

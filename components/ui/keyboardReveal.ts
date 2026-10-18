@@ -47,6 +47,19 @@ export function revealDelta(field: Span, band: Band, opts: { margin?: number; pr
   return 0;
 }
 
+/** Room under the last line of text (its descenders and the input's own padding). */
+export const TEXT_SLACK = 12;
+
+/**
+ * What must be seen of the focused field: all of it on focus; while writing
+ * ('end' with the text's height), the text so far, so a page taller than its
+ * words keeps its empty end out of the way instead of pushing the words up.
+ */
+export function revealSpan(field: Span, prefer: RevealPrefer, extent?: number): Span {
+  if (prefer !== "end" || !extent || !(extent > 0)) return field;
+  return { y: field.y, height: Math.min(field.height, extent + TEXT_SLACK) };
+}
+
 /** A scroll offset the content can reach: 0 … contentHeight − viewportHeight. */
 export function clampOffset(target: number, contentHeight: number, viewportHeight: number): number {
   const max = Math.max(0, contentHeight - viewportHeight);

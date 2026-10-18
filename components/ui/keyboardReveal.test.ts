@@ -2,7 +2,7 @@
 // plus the dock riding on it (results-4 C17/C18: the proof sentence at y 636
 // sat under a dock at ~550 and a keyboard at 655 on a 440x956 iPhone).
 import { describe, expect, test } from "bun:test";
-import { HostStack, REVEAL_MARGIN, bandBottom, clampOffset, revealDelta } from "./keyboardReveal";
+import { HostStack, REVEAL_MARGIN, TEXT_SLACK, bandBottom, clampOffset, revealDelta, revealSpan } from "./keyboardReveal";
 
 describe("revealDelta", () => {
   // The run-4 proof form: scroll view from 100, keyboard top 655, dock top 550.
@@ -44,6 +44,27 @@ describe("revealDelta", () => {
     expect(revealDelta({ y: 500, height: 56 }, { top: 300, bottom: 310 })).toBe(0);
     expect(revealDelta({ y: Number.NaN, height: 56 }, band)).toBe(0);
     expect(revealDelta({ y: 500, height: -1 }, band)).toBe(0);
+  });
+});
+
+describe("revealSpan", () => {
+  const page = { y: 120, height: 240 }; // the Script page's empty minimum height
+  test("on focus: the whole field", () => {
+    expect(revealSpan(page, "start", 56)).toEqual(page);
+    expect(revealSpan(page, "end")).toEqual(page);
+  });
+  test("while writing: the text so far, never more than the field", () => {
+    expect(revealSpan(page, "end", 84)).toEqual({ y: 120, height: 84 + TEXT_SLACK });
+    expect(revealSpan(page, "end", 400)).toEqual(page);
+  });
+  test("three lines on a 240pt page in an SE band stay in view without pushing the words up", () => {
+    const band = { top: 76, bottom: 303 };
+    const page2 = { y: 100, height: 240 };
+    // The text's end is in the band already: no move (the page's empty end may sit under the dock).
+    expect(revealDelta(revealSpan(page2, "end", 84), band, { prefer: "end" })).toBe(0);
+    // Eight lines: scroll just enough to keep the newest line above the band's bottom.
+    const d = revealDelta(revealSpan(page2, "end", 224), band, { prefer: "end" });
+    expect(d).toBe(100 + 224 + TEXT_SLACK - (303 - REVEAL_MARGIN));
   });
 });
 

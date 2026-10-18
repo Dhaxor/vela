@@ -61,7 +61,7 @@ describe("keyboard audit: no field the keyboard can hide", () => {
     for (const rel of INPUT_PRIMITIVES) {
       const src = files.find((f) => f.rel === rel)?.src ?? "";
       expect(src).toContain('revealFocusedInput("start")');
-      expect(src).toContain('revealFocusedInput("end")');
+      expect(src).toContain('revealFocusedInput("end", e.nativeEvent.contentSize.height)');
     }
   });
 

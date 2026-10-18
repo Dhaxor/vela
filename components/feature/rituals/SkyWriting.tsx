@@ -44,7 +44,7 @@ export const SkyWriting = forwardRef<TextInput, SkyWritingProps>(function SkyWri
           onBlur?.(e);
         }}
         onContentSizeChange={(e) => {
-          if (focused && multiline) revealFocusedInput("end");
+          if (focused && multiline) revealFocusedInput("end", e.nativeEvent.contentSize.height);
           onContentSizeChange?.(e);
         }}
         {...rest}

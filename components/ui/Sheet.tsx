@@ -11,7 +11,9 @@
 // The keyboard (iOS): the panel rises with it and is never taller than the
 // room left above it, so its title and fields stay on screen; a scrolling
 // sheet keeps the focused field in view (useKeyboardReveal). A sheet with a
-// text field should pass `scroll`, so its body can give way on a small phone.
+// text field should pass `scroll`, so its body can give way on a small phone;
+// with little room left (an SE-sized phone) the subtitle steps aside while
+// the user types, so the field and its action keep the space.
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -50,6 +52,8 @@ export interface SheetProps {
 }
 
 const EXIT_MS = motion.state;
+/** Below this much room above the keyboard (pt), a sheet goes compact while typing. */
+const COMPACT_ROOM = 480;
 
 /** True inside a sheet's content: a sheet there is a nested presentation. */
 const InSheetCtx = createContext(false);
@@ -132,8 +136,13 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
   useKeyboardReveal({ scrollRef, active: mounted && visible });
 
   // With the keyboard up the panel fits between it and the status bar, and drops the home-indicator inset.
-  const maxHeight = keyboard > 0 ? Math.min(win.height * 0.88, win.height - keyboard - insets.top - space.base) : win.height * 0.88;
-  const padBottom = (keyboard > 0 ? 0 : insets.bottom) + space.lg;
+  const typing = keyboard > 0;
+  const room = win.height - keyboard - insets.top - space.base;
+  const maxHeight = typing ? Math.min(win.height * 0.88, room) : win.height * 0.88;
+  const padBottom = (typing ? 0 : insets.bottom) + space.lg;
+  // Little room (an SE-sized phone with the keyboard up): the field and its action come first, so the
+  // subtitle (read before typing) steps aside and the spacing tightens.
+  const compact = typing && room < COMPACT_ROOM;
 
   const slide = policy.transitions;
   const scrim = useAnimatedStyle(() => ({ opacity: p.value }));
@@ -184,20 +193,20 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
             panel,
           ]}
         >
-          <View style={styles.grabber} />
+          <View style={[styles.grabber, compact && styles.grabberCompact]} />
           {title ? (
             <T variant="title" accessibilityRole="header" style={styles.title}>
               {title}
             </T>
           ) : null}
-          {subtitle ? (
+          {subtitle && !compact ? (
             <T variant="body" tone="muted" style={styles.subtitle}>
               {subtitle}
             </T>
           ) : null}
           <InSheetCtx.Provider value>
             {body}
-            {footer ? <View style={styles.footer}>{footer}</View> : null}
+            {footer ? <View style={[styles.footer, compact && styles.footerCompact]}>{footer}</View> : null}
           </InSheetCtx.Provider>
         </Animated.View>
         <ToastLayer layer={id.current} />
@@ -231,4 +240,6 @@ const styles = StyleSheet.create({
   subtitle: { marginBottom: space.base },
   scroll: { flexGrow: 0 },
   footer: { gap: space.md, marginTop: space.lg },
+  footerCompact: { gap: space.sm, marginTop: space.base },
+  grabberCompact: { marginBottom: space.md },
 });
