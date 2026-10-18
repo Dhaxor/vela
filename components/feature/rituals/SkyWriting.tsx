@@ -1,8 +1,11 @@
 // Writing on the open sky (ELEVATE §2.4a): no box, Newsreader at the reading
 // size, an italic placeholder, and a gold margin rule that lights while the
 // page has focus. The practice pages (Script, 3·6·9, Gratitude) write here.
+// Like TextField, the page being written stays above the keyboard and the
+// dock on iOS (revealFocusedInput), also as it grows line by line.
 import React, { forwardRef, useState } from "react";
 import { Platform, StyleSheet, TextInput, View, type StyleProp, type TextInputProps, type TextStyle, type ViewStyle } from "react-native";
+import { revealFocusedInput } from "@/components/ui";
 import { colors, fonts, space, typeScale } from "@/constants/theme";
 
 export interface SkyWritingProps extends Omit<TextInputProps, "style" | "placeholderTextColor"> {
@@ -15,7 +18,7 @@ export interface SkyWritingProps extends Omit<TextInputProps, "style" | "placeho
 const WEB_NO_OUTLINE = Platform.OS === "web" ? ({ outlineStyle: "none" } as unknown as TextStyle) : null;
 
 export const SkyWriting = forwardRef<TextInput, SkyWritingProps>(function SkyWriting(
-  { minHeight, style, value, multiline = true, onFocus, onBlur, ...rest },
+  { minHeight, style, value, multiline = true, onFocus, onBlur, onContentSizeChange, ...rest },
   ref
 ) {
   const [focused, setFocused] = useState(false);
@@ -33,11 +36,16 @@ export const SkyWriting = forwardRef<TextInput, SkyWritingProps>(function SkyWri
         textAlignVertical="top"
         onFocus={(e) => {
           setFocused(true);
+          revealFocusedInput("start");
           onFocus?.(e);
         }}
         onBlur={(e) => {
           setFocused(false);
           onBlur?.(e);
+        }}
+        onContentSizeChange={(e) => {
+          if (focused && multiline) revealFocusedInput("end");
+          onContentSizeChange?.(e);
         }}
         {...rest}
         style={[

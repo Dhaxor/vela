@@ -615,6 +615,8 @@ function Reader({ chapter, meta, dream, reveal, jumpToBridge, devAsk }: ReaderPr
       focus={dream.focus}
       testID="story-screen"
       scrollProps={scrollProps}
+      // Writing your own bridge or an if-then: the player steps aside, so the words and 'Make it observable' have the room.
+      keyboardDock="hide"
       header={
         <Header
           testID="story"

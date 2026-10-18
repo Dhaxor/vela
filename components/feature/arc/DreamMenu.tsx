@@ -212,6 +212,7 @@ export function DreamMenu({ dream, standing, visible, onClose, isPlus, otherWeav
         onClose={close}
         title="Name this dream"
         subtitle="The name shows here and on Today. Your own words and every chapter stay as written."
+        scroll
         testID="arc-rename"
         footer={
           <>

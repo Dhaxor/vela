@@ -42,6 +42,8 @@ export function ProfileSheet({ visible, name, pronunciation, focus, onSave, onCl
       onClose={onClose}
       title="Your name"
       subtitle="Every chapter is written to you, by name."
+      // Two fields over the keyboard: on a small phone the fields scroll between the title and Save.
+      scroll
       testID="settings-profile-sheet"
       footer={
         <>

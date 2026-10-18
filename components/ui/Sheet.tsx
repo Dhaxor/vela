@@ -7,6 +7,11 @@
 // waits for its turn before it mounts its Modal, and gives the turn back once
 // iOS reports the Modal gone (onDismiss). Sheets inside a sheet are nested
 // presentations and show at once. The open sheet also hosts the toast.
+//
+// The keyboard (iOS): the panel rises with it and is never taller than the
+// room left above it, so its title and fields stay on screen; a scrolling
+// sheet keeps the focused field in view (useKeyboardReveal). A sheet with a
+// text field should pass `scroll`, so its body can give way on a small phone.
 import React, { createContext, useContext, useEffect, useRef, useState } from "react";
 import {
   KeyboardAvoidingView,
@@ -26,6 +31,7 @@ import { T } from "./T";
 import { drift, useMotion } from "./motion";
 import { IOS_DISMISS_FALLBACK_MS, presenter } from "./presentation";
 import { ToastLayer } from "./ToastHost";
+import { useKeyboardHeight, useKeyboardReveal } from "./useKeyboardReveal";
 
 export interface SheetProps {
   visible: boolean;
@@ -61,6 +67,8 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
   const [panelH, setPanelH] = useState(win.height * 0.5);
   const p = useSharedValue(0);
   const exitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const keyboard = useKeyboardHeight();
   /** This root sheet holds the presenter's turn (from the grant until its Modal is gone). */
   const granted = useRef(false);
 
@@ -120,6 +128,13 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
     []
   );
 
+  // The open sheet owns the keyboard: its field stays in view, and the screen under it stays put.
+  useKeyboardReveal({ scrollRef, active: mounted && visible });
+
+  // With the keyboard up the panel fits between it and the status bar, and drops the home-indicator inset.
+  const maxHeight = keyboard > 0 ? Math.min(win.height * 0.88, win.height - keyboard - insets.top - space.base) : win.height * 0.88;
+  const padBottom = (keyboard > 0 ? 0 : insets.bottom) + space.lg;
+
   const slide = policy.transitions;
   const scrim = useAnimatedStyle(() => ({ opacity: p.value }));
   const panel = useAnimatedStyle(() =>
@@ -127,7 +142,13 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
   );
 
   const body = scroll ? (
-    <ScrollView style={styles.scroll} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+    <ScrollView
+      ref={scrollRef}
+      style={styles.scroll}
+      showsVerticalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      testID={testID ? `${testID}-scroll` : undefined}
+    >
       {children}
     </ScrollView>
   ) : (
@@ -159,7 +180,7 @@ export function Sheet({ visible, onClose, title, subtitle, children, footer, dis
           onLayout={(e) => setPanelH(e.nativeEvent.layout.height)}
           style={[
             styles.panel,
-            { maxHeight: win.height * 0.88, paddingHorizontal: gutter, paddingBottom: insets.bottom + space.lg },
+            { maxHeight, paddingHorizontal: gutter, paddingBottom: padBottom },
             panel,
           ]}
         >

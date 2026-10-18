@@ -39,6 +39,7 @@ export {
   type MultiChipGroupProps,
 } from "./Chip";
 export { TextField, type TextFieldProps } from "./TextField";
+export { revealFocusedInput, useKeyboardHeight } from "./useKeyboardReveal";
 export { Sheet, type SheetProps } from "./Sheet";
 export { ConfirmSheet, type ConfirmSheetProps, type ConfirmSpec } from "./ConfirmSheet";
 export { holdForSystemSheet } from "./presentation";
