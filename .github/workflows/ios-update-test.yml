@@ -418,7 +418,8 @@ jobs:
 
   publish:
     needs: [plan, build, fresh-install, update-test]
-    if: always() && needs.plan.result == 'success'
+    # Not for a cancelled run (a newer push replaced it): its empty results would overwrite the last real ones.
+    if: ${{ !cancelled() && needs.plan.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
