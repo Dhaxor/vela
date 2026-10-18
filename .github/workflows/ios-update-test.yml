@@ -32,7 +32,7 @@ permissions:
 
 env:
   BUNDLE_ID: app.vela.manifest
-  REUSE_BUILDS_FROM_RUN: ""
+  REUSE_BUILDS_FROM_RUN: "39117690802"
 
 jobs:
   plan:
@@ -254,11 +254,14 @@ jobs:
           phase dump
 
           echo "== device logs and crash reports =="
-          xcrun simctl spawn "$UDID" log show --last 90m --style compact --predicate "process == \"$EXE\"" > shots/vela-log-show.txt 2>&1 || true
+          # The app's own lines (XCTest's accessibility chatter left out), then the ones worth reading.
+          xcrun simctl spawn "$UDID" log show --last 90m --style compact --predicate "process == \"$EXE\" AND NOT (subsystem BEGINSWITH \"com.apple.dt.xctest\")" > shots/vela-log-show.txt 2>&1 || true
           wc -l shots/vela-log-show.txt || true
-          grep -iE "fault|error|exception|crash|terminat|StoreKit|AsyncStorage|AVSpeech|AVAudioSession|background" shots/vela-log-show.txt | grep -v "^Filtering" | head -400 > shots/vela-log-interesting.txt || true
+          grep -iE "fault|error|exception|crash|terminat|storekit|AsyncStorage|AVSpeech|AVAudioSession|com.facebook.react|\(React\)" shots/vela-log-show.txt | grep -viE "^Filtering|UIKit:BackgroundTask" | head -600 > shots/vela-log-interesting.txt || true
+          mkdir -p shots/crash
           find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f 2>/dev/null | tee shots/crash-reports.txt || true
-          find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f \( -iname "*$EXE*" -o -iname "*vela*" \) -exec cp {} shots/ \; 2>/dev/null || true
+          find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f -exec cp {} shots/crash/ \; 2>/dev/null || true
+          grep -l "\"$EXE\"\|app.vela.manifest" shots/crash/* 2>/dev/null | tee shots/crash-reports-vela.txt || true
           ls -la shots
           echo "== RESULTS =="
           grep -hE "RESULT:|SUMMARY" shots/debug.log || true

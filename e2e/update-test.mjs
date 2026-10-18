@@ -379,6 +379,23 @@ async function labelOf(selector, timeout = 3000) {
   if (!el) return null;
   return (await attr(el, "label")) || (await attr(el, "value")) || (await attr(el, "name")) || "";
 }
+/** The words inside a container view (its label is empty; the Text children carry them). */
+async function textsUnder(selector, timeout = 3000) {
+  const el = await find(selector, timeout);
+  if (!el) return null;
+  try {
+    const out = [];
+    for (const k of await el.$$('-ios predicate string:type == "XCUIElementTypeStaticText"')) {
+      const l = await attr(k, "label");
+      if (l) out.push(l);
+    }
+    if (out.length) return out.join(" | ");
+  } catch {
+    // fall back to the label
+  }
+  const own = await attr(el, "label");
+  return own && own !== selector.slice(1) ? own : "";
+}
 async function rectOf(selector, timeout = 3000) {
   const el = await find(selector, timeout);
   return el ? rectOfEl(el) : null;
@@ -756,16 +773,22 @@ async function drive101() {
 
   await section("A-BOARD-101", async () => {
     await tab101("Board");
+    let extraTaps = 0;
     for (const g of GOALS_101) {
       await tap("~board-add-goal", "add a goal card");
       await typeInto("~goal-input", g, "goal");
-      await tap("~goal-save", "Pin it");
-      await sleep(1200);
+      // 1.0.1's board ScrollView has no keyboardShouldPersistTaps: with the keyboard up, the
+      // first tap on 'Pin it' only dismisses the keyboard (a user taps twice too).
+      for (let i = 0; i < 3 && (await shownNow("~goal-input")); i++) {
+        await tap("~goal-save", "Pin it", 3000);
+        await sleep(1200);
+        if (i > 0) extraTaps++;
+      }
     }
     await shot("board");
     const b = JSON.parse(openStore().get("vela.board.v1") ?? "[]");
     const ok = b.filter((c) => c.kind === "goal").length >= 2;
-    return { status: ok ? "PASS" : "FAIL", detail: `stored board cards: ${b.length}` };
+    return { status: ok ? "PASS" : "FAIL", detail: `stored board cards: ${b.length} (extra 'Pin it' taps needed with the keyboard up: ${extraTaps})` };
   });
 
   await tab101("Stories");
@@ -1068,7 +1091,7 @@ async function drive11() {
     let text = null;
     const script = exp.journal.find((e) => e.kind === "script");
     if (script && (await tap(`~page-${script.id}`, "the 1.0.1 script page", 3000))) {
-      text = await labelOf("~entry-text", 6000);
+      text = await textsUnder("~entry-text", 6000);
       await shot("past-page-script");
       await tap("~entry-back", "page back", 4000, { scroll: false });
       await sleep(1000);
@@ -1154,64 +1177,8 @@ async function drive11() {
     };
   });
 
-  let narrationPlaying = false;
-  await section("C-NARRATION", async () => {
-    await tap("~tab-arc", "Arc tab", 6000, { scroll: false });
-    await tap(`~arc-dream-${exp.main.id}`, "Arc: the first dream", 3000, { scroll: false });
-    await sleep(1000);
-    if (!(await tap(`~arc-chapter-${exp.main.storyId}`, "open the 1.0 chapter", 5000))) return { status: "FAIL", detail: "could not open the chapter from the Arc" };
-    await exists("~story-screen", 8000);
-    await sleep(2500);
-    const idle = await labelOf("~story-listen-status", 4000);
-    await shot("reader");
-    await tap("~story-listen", "Listen", 5000, { scroll: false });
-    const samples = [];
-    for (let i = 0; i < 8; i++) {
-      await sleep(1500);
-      samples.push(await labelOf("~story-listen-status", 1500));
-    }
-    await shot("reader-listening");
-    await source("reader-listening");
-    const secs = samples.map(leftSeconds).filter((x) => x !== null);
-    const distinct = [...new Set(secs)];
-    const advancing = distinct.length >= 2 && secs[secs.length - 1] < secs[0];
-    narrationPlaying = /Listening/.test(samples[samples.length - 1] ?? "");
-    if (samples.some((s) => /isn.t available/.test(s ?? ""))) return { status: "NOT-TESTABLE", detail: `narration unavailable on this simulator: ${JSON.stringify(samples)}` };
-    return { status: advancing ? "PASS" : "FAIL", detail: `idle ${JSON.stringify(idle)}; while listening (every 1.5s) ${JSON.stringify(samples)} — the sentence position ${advancing ? "advances" : "does NOT advance"}` };
-  });
-
-  await section("C-NARRATION-BACKGROUND", async () => {
-    if (!narrationPlaying) return { status: "NOT-TESTABLE", detail: "narration was not playing" };
-    const before = await labelOf("~story-listen-status", 1500);
-    const tHome = Date.now();
-    await driver.execute("mobile: pressButton", { name: "home" });
-    await sleep(3000);
-    const s1 = await appState();
-    await sleep(17000);
-    const s2 = await appState();
-    await driver.execute("mobile: activateApp", { bundleId: BUNDLE });
-    const away = ((Date.now() - tHome) / 1000).toFixed(1);
-    await sleep(700);
-    const after = await labelOf("~story-listen-status", 2000);
-    await shot("reader-back-from-home");
-    const a = leftSeconds(before);
-    const b = leftSeconds(after);
-    // Paused the voice before leaving (the reader keeps playing otherwise).
-    if (/Listening/.test(after ?? "")) await tap("~story-listen", "Pause", 3000, { scroll: false });
-    await sleep(800);
-    const progressed = a !== null && b !== null && a - b >= 10;
-    const finished = /Heard to the end/.test(after ?? "");
-    return {
-      status: progressed || finished ? "PASS" : "FAIL",
-      detail: `before Home ${JSON.stringify(before)}; app state while away ${s1} then ${s2} (3 = running in background, 2 = suspended); after ${away}s away ${JSON.stringify(after)}${a !== null && b !== null ? ` (${a - b}s of chapter spoken while away)` : ""}`,
-    };
-  });
-
   await section("C-EXPORT", async () => {
-    await tap("~story-back", "reader back", 4000, { scroll: false });
-    await sleep(1000);
-    await tap("~tab-today", "Today tab", 6000, { scroll: false });
-    await sleep(1000);
+    await toToday();
     await tap("~open-settings", "Settings");
     await exists("~settings-screen", 8000);
     const tExport = Date.now() - 2000;
@@ -1237,7 +1204,7 @@ async function drive11() {
     }
     await closeShareSheet();
     await shot("export-after-sheet");
-    const toast = await labelOf("~toast", 3000);
+    const toast = await textsUnder("~toast", 4000);
     return {
       status: sheet.shown ? "PASS" : "FAIL",
       detail: `share sheet ${sheet.shown ? `presented (${sheet.marker})` : "NOT detected"}; file ${file ? path.basename(file) : "not found in Library/Caches"} ${JSON.stringify(summary)}; toast ${JSON.stringify(toast)}; copied into On My iPhone: ${placed ?? "no"}`,
@@ -1333,8 +1300,62 @@ async function drive11() {
     return { status: reader ? "PASS" : "FAIL", detail: `the Weave opened ${JSON.stringify(stage)} ${JSON.stringify(title)} (woven paragraph ${woven}); Today sky ${JSON.stringify(hero)}` };
   });
 
+  let narrationPlaying = false;
+  await section("C-NARRATION", async () => {
+    await tap("~tab-arc", "Arc tab", 6000, { scroll: false });
+    await tap(`~arc-dream-${exp.main.id}`, "Arc: the first dream", 3000, { scroll: false });
+    await sleep(1000);
+    if (!(await tap(`~arc-chapter-${exp.main.storyId}`, "open the 1.0 chapter", 5000))) return { status: "FAIL", detail: "could not open the chapter from the Arc" };
+    await exists("~story-screen", 8000);
+    await sleep(2500);
+    const idle = await labelOf("~story-listen-status", 4000);
+    await shot("reader");
+    await tap("~story-listen", "Listen", 5000, { scroll: false });
+    const samples = [];
+    for (let i = 0; i < 8; i++) {
+      await sleep(1500);
+      samples.push(await labelOf("~story-listen-status", 1500));
+    }
+    await shot("reader-listening");
+    await source("reader-listening");
+    const secs = samples.map(leftSeconds).filter((x) => x !== null);
+    const distinct = [...new Set(secs)];
+    const advancing = distinct.length >= 2 && secs[secs.length - 1] < secs[0];
+    narrationPlaying = /Listening/.test(samples[samples.length - 1] ?? "");
+    if (samples.some((s) => /isn.t available/.test(s ?? ""))) return { status: "NOT-TESTABLE", detail: `narration unavailable on this simulator: ${JSON.stringify(samples)}` };
+    return { status: advancing ? "PASS" : "FAIL", detail: `idle ${JSON.stringify(idle)}; while listening (every 1.5s) ${JSON.stringify(samples)} — the sentence position ${advancing ? "advances" : "does NOT advance"}` };
+  });
+
+  await section("C-NARRATION-BACKGROUND", async () => {
+    if (!narrationPlaying) return { status: "NOT-TESTABLE", detail: "narration was not playing" };
+    const before = await labelOf("~story-listen-status", 1500);
+    const tHome = Date.now();
+    await driver.execute("mobile: pressButton", { name: "home" });
+    await sleep(3000);
+    const s1 = await appState();
+    await sleep(17000);
+    const s2 = await appState();
+    await driver.execute("mobile: activateApp", { bundleId: BUNDLE });
+    const away = ((Date.now() - tHome) / 1000).toFixed(1);
+    await sleep(700);
+    const after = await labelOf("~story-listen-status", 2000);
+    await shot("reader-back-from-home");
+    const a = leftSeconds(before);
+    const b = leftSeconds(after);
+    // Paused the voice before leaving (the reader keeps playing otherwise).
+    if (/Listening/.test(after ?? "")) await tap("~story-listen", "Pause", 3000, { scroll: false });
+    await sleep(800);
+    const progressed = a !== null && b !== null && a - b >= 10;
+    const finished = /Heard to the end/.test(after ?? "");
+    return {
+      status: progressed || finished ? "PASS" : "FAIL",
+      detail: `before Home ${JSON.stringify(before)}; app state while away ${s1} then ${s2} (3 = running in background, 2 = suspended); after ${away}s away ${JSON.stringify(after)}${a !== null && b !== null ? ` (${a - b}s of chapter spoken while away)` : ""}`,
+    };
+  });
+
   await section("C-IMPORT-REPLACE", async () => {
     if (!exportResult?.placed) return { status: "NOT-TESTABLE", detail: "no backup file could be put into On My iPhone" };
+    await toToday();
     await tap("~open-settings", "Settings");
     await exists("~settings-screen", 8000);
     await tap("~settings-import", "Import a backup", 8000);
@@ -1377,7 +1398,7 @@ async function drive11() {
     if (confirm) {
       await tap("~confirm-sheet-confirm", "Replace (destructive confirm)", 4000, { scroll: false });
       await sleep(2500);
-      applied = await labelOf("~toast", 4000);
+      applied = await textsUnder("~toast", 4000);
       await shot("import-replaced");
     }
     await tap("~settings-back", "Settings back", 4000, { scroll: false });
@@ -1407,6 +1428,27 @@ async function drive11() {
     `vela.plus.v1 over the run ${JSON.stringify(plusEvents)} (ms since the store watch began); first v2 key written at +${firstV2?.t ?? "?"}ms; session ready at +${tSession}ms`
   );
   await endSession();
+}
+
+/** Back out of stack screens to the Today tab. */
+async function toToday() {
+  for (let i = 0; i < 5; i++) {
+    if (await shownNow("~today-screen")) return true;
+    if (await tapIfShown("~tab-today", "Today tab")) {
+      await sleep(1200);
+      continue;
+    }
+    let backed = false;
+    for (const b of ["~story-back", "~settings-back", "~scenes-back", "~entry-back", "~evidence-back", "~sky-back"]) {
+      if (await tapIfShown(b, b.slice(1))) {
+        backed = true;
+        break;
+      }
+    }
+    if (!backed) break;
+    await sleep(1200);
+  }
+  return shownNow("~today-screen");
 }
 
 async function clearConfirm() {
