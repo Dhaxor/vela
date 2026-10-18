@@ -499,27 +499,30 @@ async function main() {
   await fieldCheck("script", "~script-input", SCRIPT);
   await h.section("F-SCRIPT-SEAL", async () => {
     await h.tap("~script-save", "Seal the page", 4000, { scroll: false });
-    const sealed = await h.exists("~sealed-done", 8000);
-    await sleep(800);
+    // The sealed moment returns to Rituals on its own after 2.8 s; a slow runner can miss it, so the door's 'Sealed today' counts too.
+    const moment = await h.exists("~sealed-done", 8000);
     await h.shot("script-sealed");
-    await h.tap("~sealed-done", "Done (sealed)", 4000, { scroll: false });
+    await h.tapIfShown("~sealed-done", "Done (sealed)");
     await sleep(1300);
+    const door = await h.labelOf("~door-script", 5000);
+    const sealed = moment || /Sealed today/i.test(door ?? "");
     await h.tap("~door-gratitude", "Gratitude");
     const page = await h.exists("~gratitude-0", 8000);
-    return { status: sealed && page ? "PASS" : "FAIL", detail: `script sealed ${sealed}; Gratitude page ${page}` };
+    return { status: sealed && page ? "PASS" : "FAIL", detail: `script sealed ${sealed} (sealed moment ${moment ? "seen" : "already gone"}; door ${JSON.stringify(door)}); Gratitude page ${page}` };
   });
   await fieldCheck("gratitude-1", "~gratitude-0", GRATITUDE[0]);
   await fieldCheck("gratitude-2", "~gratitude-1", GRATITUDE[1]);
   await h.section("F-GRATITUDE-SEAL", async () => {
     await h.tap("~gratitude-save", "Keep these", 4000, { scroll: false });
-    const sealed = await h.exists("~sealed-done", 8000);
-    await sleep(800);
+    const moment = await h.exists("~sealed-done", 8000);
     await h.shot("gratitude-sealed");
-    await h.tap("~sealed-done", "Done (sealed)", 4000, { scroll: false });
+    await h.tapIfShown("~sealed-done", "Done (sealed)");
     await sleep(1300);
+    const door = await h.labelOf("~door-gratitude", 5000);
+    const sealed = moment || /Kept today/i.test(door ?? "");
     await h.tap("~door-369", "3·6·9");
     const phrase = await h.exists("~phrase-input", 8000);
-    return { status: sealed && phrase ? "PASS" : "FAIL", detail: `gratitude sealed ${sealed}; 3·6·9 phrase page ${phrase}` };
+    return { status: sealed && phrase ? "PASS" : "FAIL", detail: `gratitude kept ${sealed} (sealed moment ${moment ? "seen" : "already gone"}; door ${JSON.stringify(door)}); 3·6·9 phrase page ${phrase}` };
   });
   await fieldCheck("369-phrase", "~phrase-input", PHRASE);
   await h.section("F-369-BEGIN", async () => {

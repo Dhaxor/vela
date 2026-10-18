@@ -449,7 +449,9 @@ jobs:
             printf 'jobs: build=%s fresh-install=%s update-test=%s\n' "${{ needs.build.result }}" "${{ needs.fresh-install.result }}" "${{ needs.update-test.result }}"
             for f in /tmp/results/*/BUILT-FROM.txt; do [ -f "$f" ] && printf '%s: %s\n' "$(basename "$(dirname "$f")")" "$(head -2 "$f" | tr '\n' ' ')"; done
             echo "== checks =="
-            grep -hE "RESULT: (FAIL|NOT-TESTABLE)" /tmp/results/*/debug.log 2>/dev/null | sed -E 's/^.*\] \+[0-9.]+s //' | head -80 || true
+            grep -hE "RESULT: (FAIL|NOT-TESTABLE)" /tmp/results/*/debug.log 2>/dev/null | sed -E 's/^.*\] \+[0-9.]+s //' | sort -u | head -80 || true
+            echo "== first-tap probe =="
+            grep -hE "PROBE-SUMMARY RESULT" /tmp/results/*/debug.log 2>/dev/null | sort -u || true
           } > /tmp/results/RUN.txt
           cat /tmp/results/RUN.txt
           git config user.email "ci@vela"; git config user.name "ios-update-test"
