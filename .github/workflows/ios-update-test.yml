@@ -1,0 +1,285 @@
+name: iOS update test (1.0.1 -> 1.1)
+
+# A real App Store-style update on an iOS simulator:
+#   1. build Vela 1.0.1 (15c43a7, what users have) and Vela 1.1 (elevate-1.1)
+#      as simulator Release .apps, in parallel;
+#   2. install 1.0.1, drive it like a long-time user (onboarding, a story, a
+#      proof, chapter 2, script / gratitude / 3-6-9 pages, board goals), then
+#      seed what a LIFETIME owner's device also holds (Plus cached, a second
+#      dream, more board cards, a board photo whose stored URI points at an
+#      older container, as an App Store update leaves it);
+#   3. install 1.1 over it (data container kept) and drive it, asserting that
+#      everything survived and every 1.1 flow works on the migrated data.
+# Screenshots, page sources, store dumps, device logs and crash reports
+# publish to the orphan branch ios-update-results.
+#
+# Iterating on the test only: set REUSE_BUILDS_FROM_RUN to a run id whose
+# vela-app-* artifacts are still alive and the build jobs are skipped.
+
+on:
+  push:
+    branches: [ios-update-test]
+  workflow_dispatch:
+    inputs:
+      reuse_run_id:
+        description: Reuse the .app artifacts of this run id (skip both builds)
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  actions: read
+
+env:
+  BUNDLE_ID: app.vela.manifest
+  REUSE_BUILDS_FROM_RUN: ""
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    outputs:
+      reuse: ${{ steps.p.outputs.reuse }}
+    steps:
+      - id: p
+        run: echo "reuse=${{ inputs.reuse_run_id || env.REUSE_BUILDS_FROM_RUN }}" >> "$GITHUB_OUTPUT"
+
+  build:
+    name: build ${{ matrix.label }}
+    needs: plan
+    if: needs.plan.outputs.reuse == ''
+    runs-on: macos-26
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: v101
+            ref: 15c43a7952208fa8bf2c9e26859bebbe38271251
+          - label: v11
+            ref: elevate-1.1
+    steps:
+      - name: Checkout ${{ matrix.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.ref }}
+          path: src
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: src/package-lock.json
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+          [ "$MAJOR" -ge 26 ] || { echo "::error::Xcode $MAJOR; SDK 57 needs Xcode 26 (Swift 6.2)"; exit 1; }
+          pod --version
+          node --version
+          (cd src && git log -1 --format='%H %s')
+
+      - name: npm ci
+        working-directory: src
+        run: npm ci --include=dev
+
+      - name: expo prebuild
+        working-directory: src
+        run: npx expo prebuild -p ios --no-install
+
+      - name: pod install
+        working-directory: src/ios
+        run: pod install
+
+      - name: xcodebuild (Release, iphonesimulator)
+        working-directory: src
+        run: |
+          set -o pipefail
+          WS=$(ls -d ios/*.xcworkspace | head -1)
+          SCHEME=$(basename "$WS" .xcworkspace)
+          echo "workspace=$WS scheme=$SCHEME"
+          xcodebuild -workspace "$WS" -scheme "$SCHEME" -configuration Release \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build > xcodebuild.log 2>&1 || {
+              grep -E "error:|fatal|\*\* BUILD" xcodebuild.log | head -80
+              tail -n 120 xcodebuild.log
+              exit 1
+            }
+          grep -E "\*\* BUILD" xcodebuild.log || true
+          APP=$(find build/Build/Products/Release-iphonesimulator -maxdepth 1 -name "*.app" -type d | head -1)
+          echo "APP=$APP"
+          test -n "$APP"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Info.plist"
+          /usr/libexec/PlistBuddy -c 'Print :UIBackgroundModes' "$APP/Info.plist" || true
+          ls -la "$APP" | head -40
+          mkdir -p "$RUNNER_TEMP/out"
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "$RUNNER_TEMP/out/vela-${{ matrix.label }}.zip"
+          ls -la "$RUNNER_TEMP/out"
+
+      - name: Upload the .app
+        uses: actions/upload-artifact@v4
+        with:
+          name: vela-app-${{ matrix.label }}
+          path: ${{ runner.temp }}/out/vela-${{ matrix.label }}.zip
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload the build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log-${{ matrix.label }}
+          path: src/xcodebuild.log
+          retention-days: 7
+
+  update-test:
+    needs: [plan, build]
+    if: always() && needs.plan.result == 'success' && (needs.build.result == 'success' || needs.build.result == 'skipped')
+    runs-on: macos-26
+    timeout-minutes: 90
+    steps:
+      - name: Checkout the test
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download the .apps (this run)
+        if: needs.plan.outputs.reuse == ''
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vela-app-*
+          path: apps
+
+      - name: Download the .apps (reused run)
+        if: needs.plan.outputs.reuse != ''
+        uses: actions/download-artifact@v4
+        with:
+          pattern: vela-app-*
+          path: apps
+          run-id: ${{ needs.plan.outputs.reuse }}
+          github-token: ${{ github.token }}
+
+      - name: Update test (fully traced)
+        id: run
+        env:
+          REUSED_FROM: ${{ needs.plan.outputs.reuse }}
+        run: |
+          mkdir -p shots shots/state shots/src
+          exec > >(tee shots/debug.log) 2>&1
+          set -x
+          xcodebuild -version
+          echo "builds from run: ${REUSED_FROM:-$GITHUB_RUN_ID}"
+          find apps -maxdepth 3 | head -20
+          mkdir -p app101 app11
+          ditto -x -k apps/vela-app-v101/vela-v101.zip app101
+          ditto -x -k apps/vela-app-v11/vela-v11.zip app11
+          APP101=$(find app101 -maxdepth 1 -name "*.app" -type d | head -1)
+          APP11=$(find app11 -maxdepth 1 -name "*.app" -type d | head -1)
+          test -n "$APP101" && test -n "$APP11"
+          for A in "$APP101" "$APP11"; do
+            /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$A/Info.plist"
+            /usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$A/Info.plist"
+          done
+          EXE=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP11/Info.plist")
+          echo "EXE=$EXE"
+
+          echo "== simulator =="
+          xcrun simctl list runtimes available
+          RUNTIME=$(xcrun simctl list runtimes available -j | python3 -c "import json,sys; r=[x for x in json.load(sys.stdin)['runtimes'] if x.get('platform')=='iOS' or x.get('name','').startswith('iOS')]; r.sort(key=lambda x: [int(p) for p in x['version'].split('.')]); print(r[-1]['identifier'])")
+          # A 6.7"/6.9" @3x phone (430x932 pt), so the share PNG is captured at @3x like most phones.
+          TYPE_ID=$(xcrun simctl list devicetypes -j | python3 -c "import json,sys; d={x['name']:x['identifier'] for x in json.load(sys.stdin)['devicetypes']}; w=[n for n in ['iPhone 16 Pro Max','iPhone 17 Pro Max','iPhone 16 Plus','iPhone 15 Pro Max'] if n in d] or [n for n in d if 'iPhone' in n]; print(d[w[0]])")
+          UDID=$(xcrun simctl create "Vela update test" "$TYPE_ID" "$RUNTIME")
+          echo "UDID=$UDID RUNTIME=$RUNTIME TYPE=$TYPE_ID"
+          test -n "$UDID"
+          echo "UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+          # Type exactly what the user would (no autocorrect), and no slide-to-type intro over the keyboard.
+          for k in KeyboardAutocorrection KeyboardPrediction KeyboardCheckSpelling KeyboardAutocapitalization; do
+            xcrun simctl spawn "$UDID" defaults write com.apple.Preferences "$k" -bool NO || true
+          done
+          xcrun simctl spawn "$UDID" defaults write com.apple.keyboard.preferences DidShowContinuousPathIntroduction -bool YES || true
+          xcrun simctl status_bar "$UDID" override --time "21:04" \
+            --dataNetwork wifi --wifiMode active --wifiBars 3 \
+            --cellularMode active --cellularBars 4 \
+            --batteryState charged --batteryLevel 100 || true
+          touch /tmp/e2e-start
+          # The Files app creates the 'On My iPhone' storage the import step puts a backup into.
+          xcrun simctl launch "$UDID" com.apple.DocumentsApp || true
+          sleep 8
+          xcrun simctl terminate "$UDID" com.apple.DocumentsApp || true
+
+          echo "== appium =="
+          npm install -g appium@latest
+          appium --version
+          appium driver install xcuitest
+          appium driver list --installed
+          (cd e2e && npm install --no-audit --no-fund && npm install --no-save --no-audit --no-fund pngjs@7.0.0)
+          appium --port 4723 --base-path / --log-timestamp --log-no-colors > shots/appium.log 2>&1 &
+          for i in $(seq 1 30); do curl -s http://127.0.0.1:4723/status && break; sleep 2; done
+
+          export UDID BUNDLE_ID SHOTS_DIR="$PWD/shots" STATE_DIR="$PWD/shots/state"
+          FAILED=""
+          phase() { (cd e2e && node update-test.mjs "$@") || FAILED="$FAILED $1"; }
+
+          echo "== A: Vela 1.0.1, a long-time user =="
+          xcrun simctl install "$UDID" "$APP101"
+          xcrun simctl get_app_container "$UDID" "$BUNDLE_ID" data | tee shots/state/container-101.txt
+          xcrun simctl get_app_container "$UDID" "$BUNDLE_ID" app
+          phase drive101
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
+          sleep 2
+
+          echo "== seed: what a lifetime owner's 1.0.1 device holds =="
+          phase seed
+          phase verify101
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
+          sleep 2
+          phase reseed
+
+          echo "== UPDATE: install 1.1 over 1.0.1 =="
+          xcrun simctl install "$UDID" "$APP11"
+          xcrun simctl get_app_container "$UDID" "$BUNDLE_ID" data | tee shots/state/container-11.txt
+          /usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$(xcrun simctl get_app_container "$UDID" "$BUNDLE_ID" app)/Info.plist"
+          phase drive11
+          xcrun simctl terminate "$UDID" "$BUNDLE_ID" || true
+          sleep 2
+          phase dump
+
+          echo "== device logs and crash reports =="
+          xcrun simctl spawn "$UDID" log show --last 90m --style compact --predicate "process == \"$EXE\"" > shots/vela-log-show.txt 2>&1 || true
+          wc -l shots/vela-log-show.txt || true
+          grep -iE "fault|error|exception|crash|terminat|StoreKit|AsyncStorage|AVSpeech|AVAudioSession|background" shots/vela-log-show.txt | grep -v "^Filtering" | head -400 > shots/vela-log-interesting.txt || true
+          find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f 2>/dev/null | tee shots/crash-reports.txt || true
+          find ~/Library/Logs/DiagnosticReports -newer /tmp/e2e-start -type f \( -iname "*$EXE*" -o -iname "*vela*" \) -exec cp {} shots/ \; 2>/dev/null || true
+          ls -la shots
+          echo "== RESULTS =="
+          grep -hE "RESULT:|SUMMARY" shots/debug.log || true
+          echo "failed phases:${FAILED:- none}"
+          echo "failed=${FAILED}" >> "$GITHUB_OUTPUT"
+          [ -z "$FAILED" ]
+
+      - name: Publish results to ios-update-results
+        if: always()
+        run: |
+          set -x
+          rm -rf /tmp/results && mkdir -p /tmp/results
+          cp -R shots/. /tmp/results/ 2>/dev/null || true
+          [ -f /tmp/results/appium.log ] && gzip -9 /tmp/results/appium.log || true
+          printf 'iOS update test run %s\nrun %s\nhead %s\nbuilds from run %s\nfailed phases:%s\n' "$(date -u)" "$GITHUB_RUN_ID" "$GITHUB_SHA" "${{ needs.plan.outputs.reuse || github.run_id }}" "${{ steps.run.outputs.failed }}" > /tmp/results/RUN.txt
+          git config user.email "ci@vela"; git config user.name "ios-update-test"
+          # Orphan branch, then wipe every working file so only the results are committed.
+          git checkout --orphan ios-update-results
+          git rm -rf --cached . >/dev/null 2>&1 || true
+          git clean -fdx >/dev/null 2>&1 || true
+          cp -R /tmp/results/. .
+          git add -A
+          git commit -m "iOS update test results ${GITHUB_RUN_ID} [skip ci]" || echo "nothing to commit"
+          git push -f origin ios-update-results
