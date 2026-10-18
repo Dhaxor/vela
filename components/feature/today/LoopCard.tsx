@@ -22,6 +22,7 @@ import { DEFAULT_RITUAL_TIMES } from "@/contexts/user.types";
 import { now as clockNow } from "@/lib/clock";
 import { TIER_LABEL } from "@/lib/futureMemory";
 import { localDateKey } from "@/lib/progress";
+import { wakeNeedsConfirm } from "@/lib/purchase";
 import { figureFor } from "@/lib/sky/figures";
 import { toRoman } from "@/lib/sky/numerals";
 import { chapterLabel } from "@/lib/story/seasons";
@@ -167,7 +168,7 @@ export function LoopCard({ loop, now, onNotToday }: LoopCardProps) {
     const lockedByPlan = loop.reason === "plan-locked";
     const otherActive = arc.dreams.find((d) => d.id !== dream.id && d.status === "active");
     const wake = async () => {
-      if (loop.reason === "resting" && !plus.isPlus && otherActive) {
+      if (loop.reason === "resting" && wakeNeedsConfirm(plus.isPlus, otherActive)) {
         const ok = await confirm({
           title: "Wake this dream?",
           message: `On the free plan one dream weaves at a time, so ${dreamShortName(otherActive)} will rest. Every chapter stays readable.`,

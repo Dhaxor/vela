@@ -65,6 +65,7 @@ import {
   type NarrationRate,
 } from "@/lib/audio";
 import { claimAsk, settle } from "@/lib/asks";
+import { softPlusNoteDue, type ReaderEndZone } from "@/lib/purchase";
 import { getPermission, requestPermissionAtCommitment } from "@/lib/notifications";
 import { learnedRetryLine, reshapeStarters } from "@/lib/futureMemory";
 import { stageMeta } from "@/lib/story/seasons";
@@ -134,7 +135,7 @@ export default function StoryReaderScreen() {
 
 /* ========================================================================= */
 
-type Zone = "choose" | "open" | "season-complete" | "crossed" | "resting" | "none";
+type Zone = ReaderEndZone;
 type SheetName = "bed" | "voice" | "sleep" | "more" | null;
 
 const BED_SHORT: Record<BedId, string> = { night: "Night", rain: "Rain", hearth: "Hearth", dawn: "Dawn" };
@@ -514,7 +515,7 @@ function Reader({ chapter, meta, dream, reveal, jumpToBridge, devAsk }: ReaderPr
     if (!chrome.quiet || softPlusDecided.current) return;
     softPlusDecided.current = true;
     // Only on the chapter being lived (not a reread), never on top of the season's peak or a resting dream.
-    if (plus.isPlus || meta.number < 3 || !isLatest || zone === "choose" || zone === "resting" || zone === "season-complete") return;
+    if (!softPlusNoteDue({ isPlus: plus.isPlus, chapterNumber: meta.number, isLatest, zone })) return;
     void claimAsk(["plus-nudge"]).then((kind) => {
       if (kind === "plus-nudge") setSoftPlus(true);
     });

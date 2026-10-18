@@ -14,6 +14,7 @@ import { Linking, Platform, StyleSheet, View, useWindowDimensions } from "react-
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
 import { daypartAt } from "@/contexts/arc.types";
+import { usePlus } from "@/contexts/PlusContext";
 import { useProgress } from "@/contexts/RitualContext";
 import { useUser } from "@/contexts/UserContext";
 import type { HHmm, RitualTime, TextSize } from "@/contexts/user.types";
@@ -24,7 +25,7 @@ import { getPermission, requestPermissionAtCommitment, type PermissionState } fr
 import { RHYTHM_TARGET } from "@/lib/progress";
 import { ChipGroup, Header, ProgressStars, Screen, Segmented, T, useToast, type StarState } from "@/components/ui";
 import { VelaMark } from "@/components/glyphs";
-import { FREE_AREA_LIMIT, LEGAL_URLS, areaAllowance, areaLimitCopy, tapArea, usePlusActions } from "@/components/feature/plus";
+import { FREE_AREA_LIMIT, LEGAL_URLS, areaAllowance, areaLimitCopy, plusStatusCopy, tapArea, usePlusActions } from "@/components/feature/plus";
 import {
   AboutPanel,
   BACKUP_KEEPS_COPY,
@@ -78,6 +79,8 @@ export default function SettingsScreen() {
   const { profile, updateProfile } = useUser();
   const progress = useProgress();
   const plusActions = usePlusActions();
+  const { plan, subscriptionActive } = usePlus();
+  const plusStatus = plusStatusCopy(plan, subscriptionActive);
   const data = useDataActions();
   const [sheet, setSheet] = useState<SheetName>(null);
   const [permission, setPermission] = useState<PermissionState | null>(null);
@@ -341,8 +344,8 @@ export default function SettingsScreen() {
         {plusActions.isPlus ? (
           <SettingsRow
             icon={<VelaMark size={28} color={colors.ink80} />}
-            label="Plus is on"
-            detail="Thank you. Every dream can weave at once."
+            label={plusStatus.label}
+            detail={plusStatus.detail}
             onPress={() => router.push("/paywall")}
             testID="settings-plus-status"
           />
@@ -355,7 +358,7 @@ export default function SettingsScreen() {
             testID="settings-upgrade"
           />
         )}
-        {plusActions.isPlus && Platform.OS === "ios" ? (
+        {plusActions.isPlus && plusStatus.manage && Platform.OS === "ios" ? (
           <SettingsRow label="Manage subscription" onPress={() => void Linking.openURL(LEGAL_URLS.manageSubscriptions)} testID="settings-manage" />
         ) : null}
         <SettingsRow

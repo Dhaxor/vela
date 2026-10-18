@@ -10,6 +10,17 @@
 // - Restore: asks the App Store to sync (restorePurchases, AppStore.sync) before
 //   reading what is owned, and tells 'nothing owned' ('failed') apart from 'the
 //   App Store could not be reached' ('error', entitlement untouched).
+// - How Plus is owned (`plan`: lifetime or subscription, `subscriptionActive`)
+//   comes from StoreKit's answers this session, never from the cache, so
+//   Settings offers 'Manage subscription' only to someone with one to manage.
+// - A launch or foreground read that started before a purchase or restore
+//   granted Plus never takes that grant back: its answer may predate the new
+//   transaction (the next foreground reads again).
+//
+// Lifetime owners from 1.0.x keep Plus across the update: the vela.plus.v1
+// cache shows Plus before StoreKit answers, an offline StoreKit keeps it, and
+// currentEntitlements always lists the non-consumable
+// (contexts/PlusContext.lifetime.test.tsx, lib/purchase.lifetime.test.ts).
 import React, {
   createContext,
   useCallback,
@@ -32,11 +43,16 @@ import {
   numericPrice,
   ownsPlus,
   PlanId,
+  plusKnowledgeFrom,
   PLUS_SKUS,
   PurchaseResult,
   restoreOutcome,
   SUBSCRIPTION_SKUS,
+  UNKNOWN_PLUS,
+  withPurchase,
   type NumericPrice,
+  type PlusKnowledge,
+  type PlusPlan,
 } from "@/lib/purchase";
 import type { BedId } from "@/lib/audio/types";
 import type { FocusId } from "@/lib/focus";
@@ -60,9 +76,13 @@ function iap(): typeof import("expo-iap") | null {
   }
 }
 
-interface PlusValue {
+export interface PlusValue {
   ready: boolean;
   isPlus: boolean;
+  /** How Plus is owned, as StoreKit answered this session: 'lifetime' (wins over a subscription), 'subscription', or null (not known yet, or no Plus). */
+  plan: PlusPlan | null;
+  /** A monthly or yearly is active (true), StoreKit says none (false), or not known yet (null). */
+  subscriptionActive: boolean | null;
   /** May another dream become active? `activeDreams` = dreams with status 'active' (ArcValue.canCreateDream applies this). */
   canAddDream: (activeDreams: number) => boolean;
   /** Soundscape bed gate: Night free, the rest Plus. A locked bed falls back to Night. */
@@ -120,6 +140,10 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     setIsPlus(owned);
     void AsyncStorage.setItem(PLUS_KEY, owned ? "1" : "0").catch(() => {});
   }, []);
+
+  const [knowledge, setKnowledge] = useState<PlusKnowledge>(UNKNOWN_PLUS);
+  /** Bumped by every grant (a purchase update, a restore that found Plus): a read begun before it cannot revoke it. */
+  const grants = useRef(0);
 
   // ------------------------------------------------------------ prices
   const pricesKnown = useRef(false);
@@ -195,21 +219,30 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
 
     const sub = store.purchaseUpdatedListener(async (p) => {
       if (!ownsPlus([p])) return;
+      grants.current += 1;
       try {
         await store.finishTransaction({ purchase: p, isConsumable: false });
       } catch {
         // finishing is best-effort; the entitlement still stands
       }
-      if (!cancelled) setEntitlement(true);
+      if (cancelled) return;
+      setEntitlement(true);
+      setKnowledge((prev) => withPurchase(prev, p));
     });
 
     const refreshEntitlement = async () => {
+      const grantsAtStart = grants.current;
       try {
         await store.initConnection();
         const owned = await store.getAvailablePurchases({
           onlyIncludeActiveItemsIOS: true,
         });
-        if (!cancelled) setEntitlement(ownsPlus(owned as never));
+        if (cancelled) return;
+        const proves = ownsPlus(owned as never);
+        // Plus was granted while this read ran: its answer may predate that transaction.
+        if (!proves && grants.current !== grantsAtStart) return;
+        setEntitlement(proves);
+        setKnowledge(plusKnowledgeFrom(owned as never));
       } catch {
         // Keep the last verified value when the App Store is temporarily offline.
       }
@@ -289,7 +322,11 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
       });
       // 'failed' only when the App Store answered and this Apple Account owns no Plus.
       const outcome = restoreOutcome(owned as never, syncError);
-      if (outcome.entitlement !== null) setEntitlement(outcome.entitlement);
+      if (outcome.entitlement === true) grants.current += 1;
+      if (outcome.entitlement !== null) {
+        setEntitlement(outcome.entitlement);
+        setKnowledge(plusKnowledgeFrom(owned as never));
+      }
       return outcome.result;
     } catch {
       // The App Store could not be reached: nothing was decided, the entitlement stays as it is.
@@ -302,6 +339,8 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ready,
       isPlus,
+      plan: isPlus ? knowledge.plan : null,
+      subscriptionActive: knowledge.subscriptionActive,
       canAddDream: (activeDreams: number) => canAddDream(activeDreams, isPlus),
       canUseBed: (bedId: BedId) => canUseBed(bedId, isPlus),
       canUseArea: (area: FocusId) => canUseArea(area, focusAreas ?? [], isPlus),
@@ -315,7 +354,7 @@ export function PlusProvider({ children }: { children: React.ReactNode }) {
         setEntitlement(v);
       },
     }),
-    [ready, isPlus, focusAreas, prices, reloadPrices, priceAmounts, purchase, restore, setEntitlement]
+    [ready, isPlus, knowledge, focusAreas, prices, reloadPrices, priceAmounts, purchase, restore, setEntitlement]
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

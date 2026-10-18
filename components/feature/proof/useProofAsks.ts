@@ -12,11 +12,12 @@ import type { DreamId } from "@/contexts/arc.types";
 import { useArc } from "@/contexts/ArcContext";
 import { usePlus } from "@/contexts/PlusContext";
 import { claimAsk } from "@/lib/asks";
+import { plusNudgeEligible } from "@/lib/purchase";
 import { REVIEW_PROMPT_DELAY_MS, requestReviewIfDue, requestReviewNow, reviewIsDue } from "@/lib/reviewPrompt";
 import { createStarBirthAsks, type StarBirthAsks } from "./starBirthAsks";
 
 /** The Plus nudge is offered from the 2nd logged proof on, the seed not counted (the arbiter caps and spaces it). */
-export const PLUS_NUDGE_MIN_PROOFS = 2;
+export { PLUS_NUDGE_MIN_PROOFS } from "@/lib/purchase";
 
 export function useProofAsks() {
   const arc = useArc();
@@ -56,7 +57,7 @@ export function useProofAsks() {
       },
       delayMs: REVIEW_PROMPT_DELAY_MS,
     });
-    const ask = await runtime.current.afterStarBirth(!isPlus && logged >= PLUS_NUDGE_MIN_PROOFS);
+    const ask = await runtime.current.afterStarBirth(plusNudgeEligible(isPlus, logged));
     if (ask === "plus-nudge") setNudge(true);
   }, []);
 

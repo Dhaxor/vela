@@ -128,6 +128,57 @@ export function ownsPlus(
   });
 }
 
+/** Which Plus a payload proves. */
+export type PlusPlan = "lifetime" | "subscription";
+
+const proving = (purchases: readonly OwnedPurchase[] | null | undefined, skus: readonly string[]) =>
+  (purchases ?? []).some((p) => {
+    const id = p.productId ?? p.id;
+    return !!id && skus.includes(id) && !revoked(p);
+  });
+
+/**
+ * 'lifetime' when the payload holds the unrevoked non-consumable (whatever
+ * else is there), 'subscription' when only a monthly or yearly proves Plus,
+ * null when nothing does. Expiry is StoreKit's job: currentEntitlements
+ * (onlyIncludeActiveItemsIOS) never lists an expired subscription.
+ */
+export function plusPlanOf(purchases: readonly OwnedPurchase[] | null | undefined): PlusPlan | null {
+  if (proving(purchases, INAPP_SKUS)) return "lifetime";
+  return proving(purchases, SUBSCRIPTION_SKUS) ? "subscription" : null;
+}
+
+/** Does the payload hold an unrevoked monthly or yearly subscription (the one thing 'Manage subscription' manages)? */
+export function hasPlusSubscription(purchases: readonly OwnedPurchase[] | null | undefined): boolean {
+  return proving(purchases, SUBSCRIPTION_SKUS);
+}
+
+/**
+ * What this session knows about HOW Plus is owned. `plan` and
+ * `subscriptionActive` are null until StoreKit has answered (a launch that
+ * has not heard back yet, an offline launch, web): the vela.plus.v1 cache
+ * says only whether Plus is on.
+ */
+export interface PlusKnowledge {
+  readonly plan: PlusPlan | null;
+  readonly subscriptionActive: boolean | null;
+}
+
+export const UNKNOWN_PLUS: PlusKnowledge = { plan: null, subscriptionActive: null };
+
+/** A full StoreKit answer (getAvailablePurchases, currentEntitlements). */
+export function plusKnowledgeFrom(purchases: readonly OwnedPurchase[] | null | undefined): PlusKnowledge {
+  return { plan: plusPlanOf(purchases), subscriptionActive: hasPlusSubscription(purchases) };
+}
+
+/** One purchase (purchaseUpdatedListener) adds to what is known; it never takes Lifetime or a subscription away. */
+export function withPurchase(prev: PlusKnowledge, purchase: OwnedPurchase): PlusKnowledge {
+  const plan = plusPlanOf([purchase]);
+  if (plan === "lifetime") return { plan: "lifetime", subscriptionActive: prev.subscriptionActive };
+  if (plan === "subscription") return { plan: prev.plan === "lifetime" ? "lifetime" : "subscription", subscriptionActive: true };
+  return prev;
+}
+
 /**
  * What a restore decided. `syncError` is what the App Store sync threw (null
  * when it answered). Only an answered sync that finds no Plus is the genuine
@@ -207,4 +258,40 @@ export function canUseBed(bedId: BedId, isPlus: boolean): boolean {
 /** Affirmation areas: the user's own focus areas are free; every area with Plus. */
 export function canUseArea(area: FocusId, ownAreas: readonly FocusId[], isPlus: boolean): boolean {
   return isPlus || ownAreas.includes(area);
+}
+
+// ------------------------------------------------------- where Plus is offered
+//
+// Every place the app may OFFER Plus decides it here (or through the selectors
+// above), so 'never to a Plus member' is one tested rule, not a condition
+// repeated per screen (lib/lifetimeOwner.test.ts).
+
+/** The soft Plus nudge after a Star Birth is offered from the 2nd logged proof on (the onboarding seed not counted). */
+export const PLUS_NUDGE_MIN_PROOFS = 2;
+
+/** May a Star Birth offer the soft Plus nudge (through the asks arbiter)? Never to a Plus member. */
+export function plusNudgeEligible(isPlus: boolean, loggedProofs: number): boolean {
+  return !isPlus && loggedProofs >= PLUS_NUDGE_MIN_PROOFS;
+}
+
+/** The reader's end-of-chapter zone (app/story/[id]). */
+export type ReaderEndZone = "choose" | "open" | "season-complete" | "crossed" | "resting" | "none";
+
+/**
+ * May the reader ask for its one soft Plus note? Never to a Plus member, never
+ * before Chapter III, only on the chapter being lived (not a reread), and
+ * never over the bridge chooser, a resting dream or the season's peak.
+ */
+export function softPlusNoteDue(input: { isPlus: boolean; chapterNumber: number; isLatest: boolean; zone: ReaderEndZone }): boolean {
+  const { isPlus, chapterNumber, isLatest, zone } = input;
+  return !isPlus && chapterNumber >= 3 && isLatest && zone !== "choose" && zone !== "resting" && zone !== "season-complete";
+}
+
+/**
+ * Waking a resting dream asks first ('On the free plan one dream weaves at a
+ * time, so <other> will rest') only without Plus, when another dream is
+ * active. Narrows `otherActive` for the confirm's copy.
+ */
+export function wakeNeedsConfirm<T>(isPlus: boolean, otherActive: T | null | undefined): otherActive is T {
+  return !isPlus && otherActive !== null && otherActive !== undefined;
 }

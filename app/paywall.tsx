@@ -36,6 +36,7 @@ import {
   paywallCopy,
   paywallSource,
   planPrice,
+  plusStatusCopy,
   pricesMissing,
   readPlanAmounts,
   usePlusActions,
@@ -175,7 +176,7 @@ export default function PaywallScreen() {
         <LegalFooter
           onRestore={isPlus ? null : () => void actions.restore()}
           restoring={actions.busy === "restore"}
-          showManage={isPlus && Platform.OS === "ios"}
+          showManage={isPlus && plusStatusCopy(plus.plan, plus.subscriptionActive).manage && Platform.OS === "ios"}
         />
       </View>
     </Screen>

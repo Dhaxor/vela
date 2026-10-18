@@ -277,4 +277,7 @@ that drives a `Device` (`onboard`, `hear`, `choose`, `prove` / `weave`,
   `/favicon.ico` on the app origin, clear localStorage, write those strings
   under `vela.stories.v1` … `vela.board.v1` (plus `vela.plus.v1 = '1'` for a
   Plus user), then load `/?still=1`: the app migrates on load and leaves the
-  v1 keys byte-identical.
+  v1 keys byte-identical. `lifetime-owner.json` is a Plus Lifetime owner
+  (3 dreams, 8 proofs, 6 board cards with 2 iOS photos, 4 pages) produced by
+  1.0.1's own code rather than captured; its photos show 'Photo kept on
+  another phone' on web, since their file:// paths only exist on the iPhone.

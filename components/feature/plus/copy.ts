@@ -146,6 +146,24 @@ export const PLUS_ON_COPY = {
   lead: "Thank you. Every dream can weave at once, and every soundscape, area and Scene is yours.",
 } as const;
 
+/**
+ * Settings > Vela Plus, once Plus is on, and whether to offer Apple's
+ * 'Manage subscription'. `plan` / `subscriptionActive` are what StoreKit
+ * answered this session (usePlus); before it answers (null) the row stays
+ * neutral and keeps the link, so a subscriber never loses it. A Lifetime
+ * owner is never told about renewals or offered a subscription to manage,
+ * unless a monthly or yearly is still running beside Lifetime: then they are
+ * told Lifetime already covers it, and given the link to cancel it.
+ */
+export function plusStatusCopy(plan: "lifetime" | "subscription" | null, subscriptionActive: boolean | null): { label: string; detail: string; manage: boolean } {
+  if (plan === "lifetime") {
+    return subscriptionActive
+      ? { label: "Plus is on · Lifetime", detail: "Yours for good. A monthly or yearly plan is still running too; Lifetime already covers it, so you can cancel it.", manage: true }
+      : { label: "Plus is on · Lifetime", detail: "Yours for good. Thank you. Every dream can weave at once.", manage: false };
+  }
+  return { label: "Plus is on", detail: "Thank you. Every dream can weave at once.", manage: true };
+}
+
 export const RENEWAL_TERMS =
   "Monthly and yearly plans renew automatically unless cancelled at least 24 hours before the current period ends. Payment is charged to your Apple Account. Manage or cancel in your Apple Account settings. Lifetime is a one-time purchase.";
 
