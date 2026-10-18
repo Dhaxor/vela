@@ -70,7 +70,9 @@ export const TextField = forwardRef<TextInput, TextFieldProps>(function TextFiel
           {...rest}
           style={[
             styles.input,
-            { fontFamily: family, fontSize: metrics.fontSize, lineHeight: metrics.lineHeight },
+            // lineHeight only for multiline: on a single-line iOS input it drops the glyphs below
+            // the baseline box, so the words being typed are cut off at the bottom.
+            { fontFamily: family, fontSize: metrics.fontSize, ...(multiline ? { lineHeight: metrics.lineHeight } : null) },
             multiline && styles.inputMultiline,
             WEB_NO_OUTLINE,
             inputStyle,

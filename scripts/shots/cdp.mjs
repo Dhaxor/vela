@@ -8,7 +8,20 @@ import path from 'node:path';
 const CHROME = process.env.CHROME || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+/** Profiles a crashed or killed run could not delete; they pile up in %TEMP% and fill the disk. */
+function sweepStaleProfiles(maxAgeMs = 60 * 60 * 1000) {
+  const tmp = os.tmpdir();
+  for (const name of fs.readdirSync(tmp)) {
+    if (!name.startsWith('ws-shots-')) continue;
+    const dir = path.join(tmp, name);
+    try {
+      if (Date.now() - fs.statSync(dir).mtimeMs > maxAgeMs) fs.rmSync(dir, { recursive: true, force: true });
+    } catch { /* in use by a live run */ }
+  }
+}
+
 export async function launch({ port = 9333 } = {}) {
+  sweepStaleProfiles();
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'ws-shots-'));
   const proc = spawn(CHROME, [
     '--headless=new', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`,
@@ -127,9 +140,11 @@ export async function launch({ port = 9333 } = {}) {
     },
     async close() {
       try { ws.close(); } catch {}
+      const exited = new Promise((r) => proc.once('exit', r));
       proc.kill();
-      for (let i = 0; i < 10; i++) {
-        await sleep(500);
+      await Promise.race([exited, sleep(5000)]);
+      for (let i = 0; i < 20; i++) {
+        await sleep(250);
         try { fs.rmSync(profile, { recursive: true, force: true }); break; } catch { /* Chrome still exiting */ }
       }
     },
