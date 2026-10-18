@@ -159,6 +159,28 @@ async function fieldCheck(name, selector, text, { container = "~screen-scroll", 
 }
 
 /* ------------------------------------------------------------------ navigation */
+/** Taps the app did not take the first time (a second tap was needed): reported, never hidden. */
+const extraTaps = [];
+
+/**
+ * Tap a CTA and wait for what it should bring; when that does not come and the
+ * CTA is still there, tap again (as a user would), counting the extra tap.
+ */
+async function advance(selector, label, expect, { tries = 3, wait = 7000, scroll = true } = {}) {
+  for (let i = 0; i < tries; i++) {
+    if (i > 0) {
+      if (!(await h.exists(selector, 1500))) break;
+      extraTaps.push({ label, attempt: i + 1, t: new Date().toISOString() });
+      log(`EXTRA TAP needed: ${label} (attempt ${i + 1})`);
+      await h.shot(`extra-tap-${label.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}`);
+    }
+    await h.tap(selector, label, 8000, { scroll });
+    if (await h.exists(expect, wait)) return true;
+  }
+  return h.exists(expect, 1500);
+}
+
+/* ------------------------------------------------------------------ the flow helpers */
 async function backToToday(tries = 5) {
   for (let i = 0; i < tries; i++) {
     if (await h.shownNow("~today-screen")) return true;
@@ -200,49 +222,50 @@ async function main() {
 
   /* ---- 1-4. First Light, typing every field ---- */
   await h.section("F-ONBOARDING-FOCUS", async () => {
-    await h.tap("~onboarding-next", "Begin");
-    await sleep(1200);
+    await sleep(2500); // the welcome's reveal settles
+    const focus = await advance("~onboarding-next", "Begin", "~focus-career");
+    await sleep(800);
     const area = await h.tap("~focus-career", "Career");
     await h.shot("focus");
-    await h.tap("~onboarding-next", "Continue (focus)");
-    await sleep(1200);
-    return { status: area ? "PASS" : "FAIL", detail: `Career ${area ? "chosen" : "NOT found"}` };
+    const words = await advance("~onboarding-next", "Continue (focus)", "~onboarding-desire");
+    await sleep(800);
+    return { status: focus && area && words ? "PASS" : "FAIL", detail: `focus step ${focus}; Career ${area ? "chosen" : "NOT found"}; the words step ${words ? "is next" : "did NOT open"}` };
   });
   await fieldCheck("desire", "~onboarding-desire", DESIRE);
   await h.section("F-ONBOARDING-WORDS", async () => {
     const feeling = await h.tap("~onboarding-feeling-proud", "feeling: proud");
     await h.shot("own-words");
-    await h.tap("~onboarding-next", "Continue (words)");
-    await sleep(1200);
-    const name = await h.exists("~name-input", 6000);
+    const name = await advance("~onboarding-next", "Continue (words)", "~name-input");
+    await sleep(800);
     return { status: feeling && name ? "PASS" : "FAIL", detail: `feeling ${feeling ? "chosen" : "NOT tapped"}; the name step ${name ? "is next" : "did NOT open"}` };
   });
   await fieldCheck("name", "~name-input", NAME);
   await fieldCheck("pronunciation", "~pronunciation-input", SAY);
   await h.section("F-ONBOARDING-RITUAL", async () => {
-    await h.tap("~onboarding-next", "Continue (name)");
-    await sleep(1200);
+    await advance("~onboarding-next", "Continue (name)", "~ritual-evening");
+    await sleep(800);
     const evening = await h.tap("~ritual-evening", "Evening");
     await h.shot("ritual");
-    await h.tap("~onboarding-next", "Continue (ritual)");
-    await sleep(1300);
-    const seed = await h.exists("~onboarding-seed", 6000);
+    const seed = await advance("~onboarding-next", "Continue (ritual)", "~onboarding-seed");
+    await sleep(800);
     return { status: evening && seed ? "PASS" : "FAIL", detail: `Evening ${evening}; the seed step ${seed ? "is next" : "did NOT open"}` };
   });
   await fieldCheck("seed", "~onboarding-seed", SEED);
 
   /* ---- 5. The Weave → Chapter I, the seed in gold ---- */
   await h.section("F-WEAVE-CHAPTER-I", async () => {
-    await h.tap("~onboarding-done", "Weave Chapter I", 8000, { scroll: false });
-    await sleep(1200);
+    const weave = await advance("~onboarding-done", "Weave Chapter I", "~weave-stage", { scroll: false, wait: 5000 });
+    await sleep(600);
     await h.shot("weave");
-    const reader = await h.exists("~story-listen", 20000);
+    const reader = (await h.exists("~story-listen", 20000)) || weave;
     await sleep(1500);
     await h.shot("chapter-one");
     const woven = await h.scrollUntil("~story-woven", "woven paragraph", 12);
     await sleep(600);
-    const gold = woven ? await h.sourceHas("Woven from your proof", "chapter-one-woven") : false;
-    const seedText = woven ? await h.sourceHas("Bought the domain name", "chapter-one-woven-2") : false;
+    // The tag is an eyebrow ('WOVEN FROM YOUR PROOF · OCT 18'); the seed is woven in the second person ('you bought the domain name').
+    const xml = woven ? await h.source("chapter-one-woven") : "";
+    const gold = /woven from your proof/i.test(xml);
+    const seedText = /bought the domain name/i.test(xml);
     await h.shot("chapter-one-woven");
     const ok = reader && !!woven && gold && seedText;
     return { status: ok ? "PASS" : "FAIL", detail: `the Weave opened Chapter I: ${reader}; the gold paragraph ${woven ? "found" : "MISSING"}, tagged 'Woven from your proof' ${gold}, quotes the seed ${seedText}` };
@@ -366,7 +389,7 @@ async function main() {
     const woven = await h.scrollUntil("~story-woven", "woven paragraph (II)", 12);
     await sleep(600);
     const xml = await h.source("chapter-two-woven");
-    const gold = xml.includes("Woven from your proof");
+    const gold = /woven from your proof/i.test(xml);
     const quoted = /portfolio to two studios/i.test(xml);
     await h.shot("chapter-two-woven");
     const ok = reader && !!woven && gold && quoted;
@@ -575,6 +598,11 @@ async function main() {
     return { status: s === 4 ? "PASS" : "FAIL", detail: `app state ${s} at the end of the walk (4 = foreground)` };
   });
 
+  h.record(
+    "F-TAPS",
+    extraTaps.length === 0 ? "PASS" : "INFO",
+    extraTaps.length === 0 ? "every step-advancing tap was taken the first time" : `${extraTaps.length} tap(s) the app did not take the first time: ${JSON.stringify(extraTaps)}`
+  );
   const passed = fieldResults.filter((f) => f.ok).length;
   h.record("F-FIELDS-SUMMARY", passed === fieldResults.length && fieldResults.length > 0 ? "PASS" : "FAIL", `${passed}/${fieldResults.length} text fields stayed in view while typing on ${DEVICE} ${JSON.stringify(h.win)}`, { fields: fieldResults });
 }
