@@ -149,19 +149,22 @@ export const PLUS_ON_COPY = {
 /**
  * Settings > Vela Plus, once Plus is on, and whether to offer Apple's
  * 'Manage subscription'. `plan` / `subscriptionActive` are what StoreKit
- * answered this session (usePlus); before it answers (null) the row stays
- * neutral and keeps the link, so a subscriber never loses it. A Lifetime
+ * answered this session (usePlus). The link shows ONLY once StoreKit has
+ * confirmed, this session, a monthly or yearly that is running: before it
+ * answers (null), and for the whole of an offline session, Plus may well be a
+ * Lifetime, so the row stays neutral and offers nothing to manage. A Lifetime
  * owner is never told about renewals or offered a subscription to manage,
  * unless a monthly or yearly is still running beside Lifetime: then they are
  * told Lifetime already covers it, and given the link to cancel it.
  */
 export function plusStatusCopy(plan: "lifetime" | "subscription" | null, subscriptionActive: boolean | null): { label: string; detail: string; manage: boolean } {
+  const manage = subscriptionActive === true;
   if (plan === "lifetime") {
-    return subscriptionActive
-      ? { label: "Plus is on · Lifetime", detail: "Yours for good. A monthly or yearly plan is still running too; Lifetime already covers it, so you can cancel it.", manage: true }
-      : { label: "Plus is on · Lifetime", detail: "Yours for good. Thank you. Every dream can weave at once.", manage: false };
+    return manage
+      ? { label: "Plus is on · Lifetime", detail: "Yours for good. A monthly or yearly plan is still running too; Lifetime already covers it, so you can cancel it.", manage }
+      : { label: "Plus is on · Lifetime", detail: "Yours for good. Thank you. Every dream can weave at once.", manage };
   }
-  return { label: "Plus is on", detail: "Thank you. Every dream can weave at once.", manage: true };
+  return { label: "Plus is on", detail: "Thank you. Every dream can weave at once.", manage };
 }
 
 export const RENEWAL_TERMS =

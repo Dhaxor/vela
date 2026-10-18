@@ -142,9 +142,20 @@ describe("Settings tells Lifetime from a subscription (plusStatusCopy)", () => {
     expect(s.manage).toBe(true);
     expect(s.detail).toMatch(/cancel/);
   });
-  test("a subscriber, and anyone before StoreKit answers, keeps today's row and the link", () => {
+  test("a subscriber StoreKit confirmed this session keeps today's row and the link", () => {
     expect(plusStatusCopy("subscription", true)).toEqual({ label: "Plus is on", detail: "Thank you. Every dream can weave at once.", manage: true });
-    expect(plusStatusCopy(null, null)).toEqual(plusStatusCopy("subscription", true));
+  });
+  test("before StoreKit answers (and all of an offline session): Plus is on, but no 'Manage subscription'", () => {
+    // A Lifetime owner launches with the vela.plus.v1 cache only: they must never see the link, not even for a moment.
+    expect(plusStatusCopy(null, null)).toEqual({ label: "Plus is on", detail: "Thank you. Every dream can weave at once.", manage: false });
+    expect(plusStatusCopy("lifetime", null).manage).toBe(false);
+  });
+  test("the link shows only when StoreKit confirmed a running subscription", () => {
+    for (const plan of ["lifetime", "subscription", null] as const) {
+      for (const sub of [true, false, null]) {
+        expect(plusStatusCopy(plan, sub).manage).toBe(sub === true);
+      }
+    }
   });
   test("house style: no em dash, no 'future self'", () => {
     for (const plan of ["lifetime", "subscription", null] as const) {
